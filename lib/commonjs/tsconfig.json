@@ -1,0 +1,8 @@
+// Run with tsc
+{
+  "extends": "../../config/base",
+  "compilerOptions": {
+    "module": "commonjs",
+    "outDir": "toolbox",
+  }
+}

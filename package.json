@@ -1,0 +1,28 @@
+{
+  "dependencies": {
+    "gulp": "^3.9.1",
+    "tsc": "^1.20150623.0",
+    "tsickle": "^0.27.2"
+  },
+  "name": "toolbox-v2",
+  "version": "1.0.0",
+  "description": "Typescript utilities and components, compile out to CommonJS, ES6 and Closure.",
+  "main": "gulpfile.js",
+  "directories": {
+    "lib": "lib"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/angusm/toolbox-v2.git"
+  },
+  "author": "Angus MacDonald",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/angusm/toolbox-v2/issues"
+  },
+  "homepage": "https://github.com/angusm/toolbox-v2#readme"
+}

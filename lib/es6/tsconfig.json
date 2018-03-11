@@ -1,0 +1,8 @@
+// Run with tsickle
+{
+  "extends": "../../config/base",
+  "compilerOptions": {
+    "module": "es6",
+    "outDir": "toolbox",
+  }
+}
