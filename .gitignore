@@ -2,3 +2,4 @@
 *.min.js
 dist/
 *.js.map
+node_modules
