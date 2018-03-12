@@ -10,6 +10,9 @@
   "include": [
     "../src/**/*.ts"
   ],
+  "exclude": [
+    "../src/**/*.spec.ts"
+  ],
   "files": [
     "../src/toolbox/index.d.ts"
   ]
