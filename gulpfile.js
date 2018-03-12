@@ -1,31 +1,22 @@
 const gulp = require('gulp');
 const exec = require('child_process').exec;
 
-gulp.task('clear-closure', () => {
-  exec('rm -rf ./lib/closure/toolbox');
+const targets = ['closure', 'commonjs', 'es6'];
+
+function getCompileCommand(target) {
+  if (target === 'closure') {
+    return 'cd ./lib/closure; tsickle';
+  } else {
+    return `tsc -p ./lib/${target}`;
+  }
+}
+
+targets.forEach((target) => {
+  gulp.task(`clear-${target}`, () => exec(`rm -rf ./lib/${target}/toolbox`));
+  gulp.task(`compile-${target}`, () => exec(getCompileCommand(target)));
 });
 
-gulp.task('clear-commonjs', () => {
-  exec('rm -rf ./lib/commonjs/toolbox');
-});
-
-gulp.task('clear-es6', () => {
-  exec('rm -rf ./lib/es6/toolbox');
-});
-
-gulp.task('compile-closure', () => {
-  exec('cd ./lib/closure; tsickle');
-});
-
-gulp.task('compile-commonjs', () => {
-  exec('tsc -p ./lib/commonjs');
-});
-
-gulp.task('compile-es6', () => {
-  exec('tsc -p ./lib/es6');
-});
-
-gulp.task('clear', ['clear-closure', 'clear-commonjs', 'clear-es6']);
-gulp.task('compile', ['compile-closure', 'compile-commonjs', 'compile-es6']);
+gulp.task('clear', targets.map((target) => `clear-${target}`));
+gulp.task('compile', targets.map((target) => `compile-${target}`));
 
 gulp.task('default', ['clear', 'compile']);
