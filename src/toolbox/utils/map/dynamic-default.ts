@@ -1,12 +1,12 @@
 import {MapWrapper} from './map-wrapper';
-import {doNothing} from '../do-nothing';
+import {noop} from '../noop';
 
 class DynamicDefaultMap<K, V> extends MapWrapper implements Map {
   private defaultFunction: (K) => V;
 
   constructor(iterable:Array<Iterable<K, V>> = [],
               InnerMapClass: typeof Map = Map,
-              defaultFunction: (K) => V = doNothing) {
+              defaultFunction: (K) => V = noop) {
     super(iterable, InnerMapClass);
     this.defaultFunction = defaultFunction;
   }
