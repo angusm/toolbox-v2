@@ -1,14 +1,12 @@
-import {MapWrapper, MapClass, MapClassParam, KVP} from './map-wrapper';
+import {MapWrapper} from './map-wrapper';
 import {doNothing} from '../do-nothing';
 
-type DefaultFunction = (any) => any;
+class DynamicDefaultMap<K, V> extends MapWrapper implements Map {
+  private defaultFunction: (K) => V;
 
-class DynamicDefaultMap<T extends MapClass> extends MapWrapper {
-  private defaultFunction: DefaultFunction;
-
-  constructor(iterable:Array<Iterable<KVP>> = [],
-              InnerMapClass: MapClassParam = Map,
-              defaultFunction: DefaultFunction = doNothing) {
+  constructor(iterable:Array<Iterable<K, V>> = [],
+              InnerMapClass: typeof Map = Map,
+              defaultFunction: (K) => V = doNothing) {
     super(iterable, InnerMapClass);
     this.defaultFunction = defaultFunction;
   }
@@ -20,8 +18,9 @@ class DynamicDefaultMap<T extends MapClass> extends MapWrapper {
     return super.get(key);
   }
 
-  public static usingFunction<C extends DynamicDefaultMap>(
-      defaultFunction: DefaultFunction): C | DynamicDefaultMap {
+  public static usingFunction<K, V>(
+    defaultFunction: (K) => V
+  ): DynamicDefaultMap<K, V> {
     return new this([], Map, defaultFunction);
   }
 }

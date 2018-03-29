@@ -1,22 +1,19 @@
-import DynamicDefaultMap from './dynamic-default';
-import {MapWrapper, MapClass, MapClassParam, KVP} from './map-wrapper';
+import {DynamicDefaultMap} from './dynamic-default';
+import {MapWrapper} from './map-wrapper';
 
-class ArrayMap extends MapWrapper<DynamicDefaultMap<MapClass>> {
-  constructor(iterable:Array<Iterable<KVP>> = [],
-              InnerMapClass: MapClassParam = Map) {
+class ArrayMap<K, V> extends MapWrapper<K, V> {
+  constructor(iterable:Array<Iterable<K, V>> = [],
+              InnerMapClass: typeof Map = Map) {
     super();
     this.replaceInnerMap(
       new DynamicDefaultMap(iterable, InnerMapClass, () => []));
   }
 
-  public get(key: any): Array<any> {
+  public get(key: K): Array<V> {
     return super.get(key);
   }
 
-  public set(key: any, value: Array<any>): this {
-    if (!(value instanceof Array)) {
-      throw new Error('Values set on to ArrayMap must be arrays');
-    }
+  public set(key: K, value: Array<V>): this {
     return super.set(key, value);
   }
 }

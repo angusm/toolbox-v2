@@ -1,23 +1,21 @@
-import DynamicDefaultMap from './dynamic-default';
-import {MapWrapper, MapClass, MapClassParam, KVP} from './map-wrapper';
+import {DynamicDefaultMap} from './dynamic-default';
+import {MapWrapper} from './map-wrapper';
+import {MappedIterator} from '../iterator/mapped-iterator';
 
-const MapWrapper = require('./map-wrapper');
-const DynamicDefaultMap = require('./dynamic-default');
+class MultiValueMap<K, V> extends MapWrapper<Array<K>, V> {
+  private uids: DynamicDefaultMap<Array<K>, number>;
+  private uidsToValue: Map<number, V>;
 
-class MultiValueMap<T extends MapClass> extends MapWrapper<T> {
-  private uids: DynamicDefaultMap<Map>;
-  private uidsToValue: Map;
-
-  constructor(iterable:Array<Iterable<KVP>> = [],
-              InnerMapClass: MapClassParam = Map) {
+  constructor(iterable:Array<Iterable<K, V>> = [],
+              InnerMapClass: typeof Map = Map) {
     super(iterable, InnerMapClass);
 
-    this.uidsToValue = new Map();
+    this.uidsToValue = new Map<number, V>();
 
     let uid: number = 0;
-    this.uids = DynamicDefaultMap.usingFunction(
-      (value) => {
-        const nextUid = '' + uid++;
+    this.uids = DynamicDefaultMap.usingFunction<Array<K>, number>(
+      (value: Array<K>) => {
+        const nextUid = uid++;
         this.uidsToValue.set(nextUid, value);
         return nextUid;
       });
@@ -29,33 +27,33 @@ class MultiValueMap<T extends MapClass> extends MapWrapper<T> {
     this.uids.clear();
   }
 
-  private convertToKey(keys: Array<any>): any {
+  private convertToKey(keys: Array<K>): string {
     return keys.map((key) => this.uids.get(key)).join('-');
   }
 
-  private convertToValues(key: string): Array<any> {
-    return key.split('-').map((uid) => this.uidsToValue.get(uid));
+  private convertToValues(key: string): Array<K> {
+    return key.split('-').map((uid) => this.uidsToValue.get(parseInt(uid)));
   }
 
-  public get(...keys: Array<any>): any {
+  public get(...keys: Array<K>): V {
     return super.get(this.convertToKey(keys));
   }
 
-  public delete(...keys: Array<any>): boolean {
+  public delete(...keys: Array<K>): boolean {
     return super.delete(this.convertToKey(keys));
   }
 
-  public has(...keys: Array<any>): boolean {
+  public has(...keys: Array<K>): boolean {
     return super.has(this.convertToKey(keys));
   }
 
-  public keys(): Iterator<any> {
-    return super.keys().map((key) => this.convertToValues(key));
+  public keys(): Iterator<Array<K>> {
+    return new MappedIterator(super.keys(), (key) => this.convertToValues(key));
   }
 
-  public set(...keysAndValue: Array<any>): this {
-    const keys: Array<any> = keysAndValue.slice(0, -1);
-    const value: any = keysAndValue.slice(-1)[0];
+  public set(...keysAndValue: Array<K|V>): this {
+    const keys: Array<K> = <K>keysAndValue.slice(0, -1);
+    const value: V = <V>keysAndValue.slice(-1)[0];
     return super.set(this.convertToKey(keys), value);
   }
 }

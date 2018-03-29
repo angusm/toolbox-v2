@@ -1,24 +1,23 @@
 import {isDef} from '../is-def';
 
-type MapClass = Map | MapWrapper;
-type MapClassParam = { new(...args: any[]): MapClass };
-type KVP = [any, any]; // Key Value Pairs
+class MapWrapper<K, V> implements Map<K, V> {
+  readonly [Symbol.toStringTag];
+  private map: Map;
 
-class MapWrapper<T extends MapClass> {
-  private map: MapClass;
-
-  constructor(iterable:Array<Iterable<KVP>> = [],
-              InnerMapClass: MapClassParam = Map) {
+  constructor(iterable:Array<Iterable<K, V>> = [],
+              InnerMapClass: typeof Map = Map) {
     this.map = new InnerMapClass();
     [...iterable].forEach(([key, value]) => this.map.set(key, value));
+
+    /**
+     * TODO(Angus): Figure out why the IDE is demanding this and its proper
+     *   implementation.
+     */
+    this[Symbol.toStringTag] = this.constructor.name;
   }
 
-  protected replaceInnerMap(innerMap:T): void {
+  protected replaceInnerMap(innerMap:Map<K, V>): void {
     this.map = innerMap;
-  }
-
-  public get length(): number {
-    return this.map.length;
   }
 
   public get size(): number {
@@ -29,48 +28,46 @@ class MapWrapper<T extends MapClass> {
     this.map.clear();
   }
 
-  public delete(key: any): boolean {
+  public delete(key: K): boolean {
     return this.map.delete(key);
   }
 
-  public entries(): Iterator<KVP> {
+  public entries(): Iterator<[K, V]> {
     return this.map.entries();
   }
 
-  public forEach(callbackFn: (any, any, this) => void, thisArg: Object = undefined): void {
+  public forEach(
+    callbackFn: (K, V, this) => void,
+    thisArg: Object = undefined
+  ): void {
     const finalThisArg = isDef(thisArg) ? thisArg : this;
     this.map.forEach(callbackFn, <this>finalThisArg);
   }
 
-  public get(key: any): any {
+  public get(key: K): V {
     return this.map.get(key);
   }
 
-  public has(key: any): boolean {
+  public has(key: K): boolean {
     return this.map.has(key);
   }
 
-  public keys(): Iterator<any> {
+  public keys(): Iterator<K> {
     return this.map.keys();
   }
 
-  public set(key: any, value: any): this {
+  public set(key: K, value: V): this {
     this.map.set(key, value);
     return this;
   }
 
-  public values(): Iterator<any> {
+  public values(): Iterator<V> {
     return this.map.values();
   }
 
-  public [Symbol.iterator](): Iterator<KVP> {
+  public [Symbol.iterator](): Iterator<[K, V]> {
     return this.map[Symbol.iterator]();
   }
 }
 
-export {
-  MapWrapper,
-  MapClass,
-  MapClassParam,
-  KVP
-};
+export {MapWrapper};
