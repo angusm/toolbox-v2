@@ -2,7 +2,7 @@ class Range {
   private min: number;
   private max: number;
 
-  constructor(min, max) {
+  constructor(min: number, max: number) {
     this.min = min;
     this.max = max;
   }

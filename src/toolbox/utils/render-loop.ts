@@ -19,14 +19,14 @@ const STEP_ORDER: Array<symbol> = [
 const FPS = Number.MAX_VALUE;
 
 class RenderFunctionID {
-  private step;
+  private step_: symbol;
 
-  constructor(step) {
-    this.step = step;
+  constructor(step: symbol) {
+    this.step_ = step;
   }
 
   get step() {
-    return this.step;
+    return this.step_;
   }
 }
 
@@ -82,7 +82,7 @@ class RenderLoop {
   }
 
   private getTimeUntilNextRun(): number {
-    return this.lastRunTime + 1000 / this.fps - new Date();
+    return this.lastRunTime + 1000 / this.fps - new Date().valueOf();
   }
 
   private runLoop(): void {
@@ -90,7 +90,7 @@ class RenderLoop {
       setTimeout(() => this.runLoop(), this.getTimeUntilNextRun());
     } else {
       this.runFns();
-      this.lastRunTime = +new Date();
+      this.lastRunTime = new Date().valueOf();
       window.requestAnimationFrame(() => this.runLoop());
     }
   }
