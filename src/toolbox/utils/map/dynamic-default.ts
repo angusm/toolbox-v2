@@ -7,8 +7,9 @@ class DynamicDefaultMap<K, V> extends MapWrapper<K, V> {
   constructor(iterable: [K, V][] = [],
               InnerMapClass: typeof Map = Map,
               defaultFunction: (key: K) => V = <(key: K) => V>noop) {
-    super(iterable, InnerMapClass);
+    super([], InnerMapClass); // Defer population
     this.defaultFunction = defaultFunction;
+    this.populateFromIterable(iterable);
   }
 
   public get(key: any): any {

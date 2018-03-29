@@ -12,7 +12,7 @@ const tests = [
   [[testObject, testObject, testObject], true],
   [['ab', 'a' + 'b', 'a' + '' + 'b'], true],
   [[1], true],
-  [[null, false], true],
+  [[null, false], false],
   [[null, null], true],
 ];
 

@@ -13,7 +13,11 @@ class MapWrapper<K, V> implements Map<K, V> {
   constructor(iterable: [K, V][] = [],
               InnerMapClass: typeof Map = Map) {
     this.map = new InnerMapClass<K, V>();
-    iterable.forEach(([key, value]) => this.map.set(key, value));
+    this.populateFromIterable(iterable);
+  }
+
+  protected populateFromIterable(iterable: [K, V][]) {
+    iterable.forEach(([key, value]) => this.set(key, value));
   }
 
   protected replaceInnerMap(innerMap:Map<K, V>): void {
