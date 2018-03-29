@@ -8,3 +8,4 @@ export * from "./default-symbol";
 export * from "./is-def";
 export * from "./noop";
 export * from "./render-loop";
+export * from "./run-map-as-switch";
