@@ -1,3 +1,3 @@
-function noop(): void {}
+function noop(...args: any[]): any {}
 
 export {noop};

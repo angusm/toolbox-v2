@@ -2,11 +2,11 @@ import {MapWrapper} from './map-wrapper';
 import {noop} from '../noop';
 
 class DynamicDefaultMap<K, V> extends MapWrapper<K, V> {
-  private defaultFunction: (K) => V;
+  private defaultFunction: (key: K) => V;
 
-  constructor(iterable:Array<Iterable<K, V>> = [],
+  constructor(iterable: [K, V][] = [],
               InnerMapClass: typeof Map = Map,
-              defaultFunction: (K) => V = noop) {
+              defaultFunction: (key: K) => V = <(key: K) => V>noop) {
     super(iterable, InnerMapClass);
     this.defaultFunction = defaultFunction;
   }
@@ -19,7 +19,7 @@ class DynamicDefaultMap<K, V> extends MapWrapper<K, V> {
   }
 
   public static usingFunction<K, V>(
-    defaultFunction: (K) => V
+    defaultFunction: (key: K) => V
   ): DynamicDefaultMap<K, V> {
     return new this([], Map, defaultFunction);
   }

@@ -1,11 +1,11 @@
 import {ArrayMap} from './array';
 import {MultiValueMap} from './multi-value';
 
-class MultiValueArrayMap<K, V> extends MultiValueMap<K, V> {
-  constructor(iterable:Array<Iterable<K, V>> = [],
+class MultiValueArrayMap<K, V> extends MultiValueMap<K, V[]> {
+  constructor(iterable: [K[], V[]][] = [],
               InnerMapClass: typeof Map = Map) {
     super();
-    this.replaceInnerMap(new ArrayMap<K, V>(iterable, InnerMapClass));
+    this.replaceInnerMap(new ArrayMap<K[], V>(iterable, InnerMapClass));
   }
 }
 

@@ -1,6 +1,6 @@
-export * from "./iterable";
-export * from "./iterator";
-export * from "./map";
+export * from "./iterable/index";
+export * from "./iterable-iterator/index";
+export * from "./map/index";
 
 export * from "./are-equal";
 export * from "./create-named-tuple";

@@ -1,19 +1,19 @@
 import {isDef} from '../is-def';
 
+/**
+ * Generic Types
+ * K: Key type
+ * V: Value type
+ */
+
 class MapWrapper<K, V> implements Map<K, V> {
-  readonly [Symbol.toStringTag];
-  private map: Map;
+  readonly [Symbol.toStringTag]: "Map";
+  private map: Map<K, V>;
 
-  constructor(iterable:Array<Iterable<K, V>> = [],
+  constructor(iterable: [K, V][] = [],
               InnerMapClass: typeof Map = Map) {
-    this.map = new InnerMapClass();
-    [...iterable].forEach(([key, value]) => this.map.set(key, value));
-
-    /**
-     * TODO(Angus): Figure out why the IDE is demanding this and its proper
-     *   implementation.
-     */
-    this[Symbol.toStringTag] = this.constructor.name;
+    this.map = new InnerMapClass<K, V>();
+    iterable.forEach(([key, value]) => this.map.set(key, value));
   }
 
   protected replaceInnerMap(innerMap:Map<K, V>): void {
@@ -32,13 +32,13 @@ class MapWrapper<K, V> implements Map<K, V> {
     return this.map.delete(key);
   }
 
-  public entries(): Iterator<[K, V]> {
+  public entries(): IterableIterator<[K, V]> {
     return this.map.entries();
   }
 
   public forEach(
-    callbackFn: (K, V, this) => void,
-    thisArg: Object = undefined
+    callbackFn: (value: V, index: K, map: Map<K, V>) => void,
+    thisArg?: any
   ): void {
     const finalThisArg = isDef(thisArg) ? thisArg : this;
     this.map.forEach(callbackFn, <this>finalThisArg);
@@ -52,7 +52,7 @@ class MapWrapper<K, V> implements Map<K, V> {
     return this.map.has(key);
   }
 
-  public keys(): Iterator<K> {
+  public keys(): IterableIterator<K> {
     return this.map.keys();
   }
 
@@ -61,11 +61,11 @@ class MapWrapper<K, V> implements Map<K, V> {
     return this;
   }
 
-  public values(): Iterator<V> {
+  public values(): IterableIterator<V> {
     return this.map.values();
   }
 
-  public [Symbol.iterator](): Iterator<[K, V]> {
+  public [Symbol.iterator](): IterableIterator<[K, V]> {
     return this.map[Symbol.iterator]();
   }
 }
