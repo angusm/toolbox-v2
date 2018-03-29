@@ -1,7 +1,7 @@
 import {MapWrapper} from './map-wrapper';
 import {noop} from '../noop';
 
-class DynamicDefaultMap<K, V> extends MapWrapper implements Map {
+class DynamicDefaultMap<K, V> extends MapWrapper<K, V> {
   private defaultFunction: (K) => V;
 
   constructor(iterable:Array<Iterable<K, V>> = [],

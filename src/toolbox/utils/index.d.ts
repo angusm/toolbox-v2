@@ -5,5 +5,6 @@ export * from "./map";
 export * from "./are-equal";
 export * from "./create-named-tuple";
 export * from "./default-symbol";
-export * from "./noop";
 export * from "./is-def";
+export * from "./noop";
+export * from "./render-loop";
