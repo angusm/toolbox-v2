@@ -1,14 +1,14 @@
-import {BaseClass} from '../../hacks/base-class'
+import {BaseClass} from '../../hacks/base-class';
 import {Range} from '../../range';
 import {areArrayValuesEqual} from '../../array/are-array-values-equal';
 import {sum} from '../sum';
 import {zip} from '../../array/zip';
 
-class Vector extends BaseClass {
+class Vector {
+  'constructor': typeof Vector;
   private values: number[];
 
   constructor(...values: number[]) {
-    super();
     this.values = values;
   }
 
@@ -21,15 +21,15 @@ class Vector extends BaseClass {
   }
 
   public add(...vectors: this[]): this {
-    return this[Symbol.species].add(this, ...vectors);
+    return this.constructor.add(...vectors);
   }
 
   public static invert<T extends Vector>(vector: T): T {
-    return <T>new this(...vector.getValues().map((val) => -val));
+    return vector.invert();
   }
 
   public invert(): this {
-    return this[Symbol.species].invert(this);
+    return <this>new this.constructor(...this.getValues().map((val) => -val));
   }
 
   public static clamp<T extends Vector>(vector: T, ...ranges: Range[]): T {
@@ -44,7 +44,7 @@ class Vector extends BaseClass {
   }
 
   public clamp(...ranges: Range[]): this {
-    return this[Symbol.species].clamp(this, ...ranges);
+    return this.constructor.clamp(this, ...ranges);
   }
 
   public static subtract<T extends Vector>(minuend: T, ...subtrahends: T[]): T {
@@ -53,7 +53,7 @@ class Vector extends BaseClass {
   }
 
   public subtract(...subtrahends: this[]): this {
-    return this[Symbol.species].subtract(this, ...subtrahends);
+    return this.constructor.subtract(this, ...subtrahends);
   }
 
   public getValues(): number[] {
@@ -83,7 +83,7 @@ class Vector extends BaseClass {
   }
 
   public scale(amount: number): this {
-    return this[Symbol.species].scale(this, amount);
+    return this.constructor.scale(this, amount);
   }
 
   public static areEqual<T extends Vector>(...vectors: T[]): boolean {
@@ -91,7 +91,7 @@ class Vector extends BaseClass {
   }
 
   public equals(...vectors: this[]): boolean {
-    return this[Symbol.species].areEqual(this, ...vectors);
+    return this.constructor.areEqual(this, ...vectors);
   }
 
   public getLength(): number {

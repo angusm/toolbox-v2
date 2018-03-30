@@ -10,6 +10,15 @@ const ZERO_VECTOR: Vector2d = new Vector2d();
 const GESTURE_LIMIT: number = 30;
 const POSITION_LIMIT: number = GESTURE_LIMIT;
 
+interface ICursorEvent {
+  clientX: number;
+  clientY: number;
+  pageX: number;
+  pageY: number;
+  screenX: number;
+  screenY: number;
+}
+
 class CursorPosition {
   private position: Vector2d;
   private pressed: boolean;
@@ -79,7 +88,7 @@ class CursorData {
       this.getPositionsForFrameDelta_(usePressedPositionsOnly);
     return positions.length === 0 ?
       ZERO_VECTOR :
-      Vector2d.sumDeltas(
+      Vector2d.sumDeltas<Vector2d>(
         ...positions.map((position) => position.getPosition()));
   }
 
@@ -130,12 +139,12 @@ class CursorData {
     ...positions: CursorPosition[]
   ): Vector2d {
     const deltas: Vector2d[] =
-      Vector2d.getDeltas(
+      Vector2d.getDeltas<Vector2d>(
         ...positions.map((position: CursorPosition) => position.getPosition()));
     const scaledDeltas: Vector2d[] =
       deltas.map(
         (delta, index) => delta.scale((deltas.length - index) / deltas.length));
-    return Vector2d.add(...scaledDeltas);
+    return Vector2d.add<Vector2d>(...scaledDeltas);
   }
 }
 
@@ -158,11 +167,14 @@ class Cursor {
 
   private init_() {
     addDomEventListener(
-      window, EventType.CURSOR_DOWN, (event) => this.updatePress_(event, true));
+      window, EventType.CURSOR_DOWN,
+      (event: MouseEvent|TouchEvent) => this.updatePress_(event, true));
     addDomEventListener(
-      window, EventType.CURSOR_UP, (event) => this.updatePress_(event, false));
+      window, EventType.CURSOR_UP,
+      (event: MouseEvent|TouchEvent) => this.updatePress_(event, false));
     addDomEventListener(
-      window, EventType.CURSOR_MOVE, (event) => this.updatePosition_(event));
+      window, EventType.CURSOR_MOVE,
+      (event: MouseEvent|TouchEvent) => this.updatePosition_(event));
   }
 
   public static getSingleton(): Cursor {
@@ -214,7 +226,7 @@ class Cursor {
     });
   }
 
-  private updatePositionFromEvent_(event: MouseEvent|Touch): void {
+  private updatePositionFromEvent_(event: ICursorEvent): void {
     renderLoop.premeasure(() => {
       this.pagePosition =
         this.updatePositionWithXY_(

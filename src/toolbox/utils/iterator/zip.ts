@@ -1,15 +1,18 @@
-function zip<T>(...iterators: Iterator<T>[]): Iterable<Iterable<T>> {
+function zip<T>(...iterators: Iterator<T>[]): IterableIterator<T[]> {
   function* iterator() {
     while (true) {
-      const result =
+      const results: T[] =
         iterators
           .map((list) => list.next())
           .filter((nextValue) => !nextValue.done)
-          .filter((nextValue) => nextValue.value);
-      if (!result.length) {
+          .filter((nextValue) => nextValue.value)
+          .map((nextValue) => nextValue.value);
+
+      if (!results.length) {
         break;
       }
-      yield result;
+
+      yield results;
     }
   }
 

@@ -13,11 +13,11 @@ function frameMemoize(fn: (...args: any[]) => any): (...args: any[]) => any {
   clearCache(cache);
 
   function frameMemoizedFn(...args: any[]): any {
-    if (cache.has(...args)) {
-      return cache.get(...args);
+    if (cache.has(args)) {
+      return cache.get(args);
     } else {
       const result = fn(...args);
-      cache.set(...args, result);
+      cache.set(args, result);
       return result;
     }
   }
