@@ -1,21 +1,8 @@
-function zip(...lists: Array<Iterable<any>>): Iterable<Iterable<any>> {
+import {zip as iteratorZip} from '../iterator/zip';
+
+function zip<T>(...lists: Array<Iterable<T>>): Iterable<Iterable<T>> {
   const listsAsIterators = lists.map((list) => list[Symbol.iterator]());
-
-  function* iterator() {
-    while (true) {
-      const result =
-        listsAsIterators
-          .map((list) => list.next())
-          .filter((nextValue) => !nextValue.done)
-          .filter((nextValue) => nextValue.value);
-      if (!result.length) {
-        break;
-      }
-      yield result;
-    }
-  }
-
-  return iterator();
+  return iteratorZip(...listsAsIterators);
 }
 
 export {zip};
