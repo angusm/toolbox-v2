@@ -17,31 +17,30 @@ class Vector2d extends Vector {
     return this.getValues()[1];
   }
 
-  public static fromElementOffset(element: HTMLElement): this {
+  public static fromElementOffset<T extends Vector2d>(element: HTMLElement): T {
     const offsetParent: HTMLElement = <HTMLElement>element.offsetParent;
     if (
       offsetParent && isTableDisplayed(offsetParent) &&
       browserHasChrome64TableDisplayOffsetIssues()
     ) {
-      return new this[Symbol.species](
+      return <T>new this(
         element.offsetLeft - offsetParent.offsetLeft,
         element.offsetTop - offsetParent.offsetTop);
     } else {
-      return new this[Symbol.species](element.offsetLeft, element.offsetTop);
+      return <T>new this(element.offsetLeft, element.offsetTop);
     }
   }
 
-  public static fromMatrix(matrix: Matrix): this{
-    return new this[Symbol.species](matrix.translateX, matrix.translateY);
+  public static fromMatrix<T extends Vector2d>(matrix: Matrix): T{
+    return <T>new this(matrix.translateX, matrix.translateY);
   }
 
-  public static fromElementScroll(element: Element): this {
-    return new this[Symbol.species](element.scrollLeft, element.scrollTop);
+  public static fromElementScroll<T extends Vector2d>(element: Element): T {
+    return <T>new this(element.scrollLeft, element.scrollTop);
   }
 
-  public static fromElementTransform(element: Element): this {
-    return this[Symbol.species]
-      .fromMatrix(Matrix.fromElementTransform(element));
+  public static fromElementTransform<T extends Vector2d>(element: Element): T {
+    return this.fromMatrix(Matrix.fromElementTransform(element));
   }
 
   public positionElement(element: HTMLElement): void {

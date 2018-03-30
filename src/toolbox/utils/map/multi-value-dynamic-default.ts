@@ -12,7 +12,8 @@ class MultiValueDynamicDefaultMap<K, V> extends MultiValueMap<K, V> {
   }
 
   public static usingFunction<K, V>(
-    defaultFunction: (key: K) => V): MultiValueDynamicDefaultMap<K, V> {
+    defaultFunction: (key: K[]) => V
+  ): MultiValueDynamicDefaultMap<K, V> {
     return new MultiValueDynamicDefaultMap([], Map, defaultFunction);
   }
 }

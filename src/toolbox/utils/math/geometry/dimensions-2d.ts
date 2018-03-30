@@ -18,8 +18,10 @@ class Dimensions2D extends Vector {
     element.style.height = `${this.height}px`;
   }
 
-  public static fromElementOffset(element: HTMLElement): this {
-    return new this[Symbol.species](element.offsetWidth, element.offsetHeight);
+  public static fromElementOffset<T extends Dimensions2D>(
+    element: HTMLElement
+  ): T {
+    return <T>new this(element.offsetWidth, element.offsetHeight);
   }
 
   public getArea(): number{

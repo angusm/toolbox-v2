@@ -1,11 +1,10 @@
-import areEqual from '../are-equal';
+import {areEqual} from '../are-equal';
 
 function areIteratorsEqual<T>(...iterators: Iterator<T>[]): boolean {
-  const iteratorsAsList = [...iterators];
-  let done = false;
+  let done: boolean = false;
 
   while (!done) {
-    const results = iteratorsAsList.map((iterator) => iterator.next());
+    const results = iterators.map((iterator) => iterator.next());
     const doneResults = results.map((result) => result.done);
     if (!areEqual(...doneResults)) {
       return false;
