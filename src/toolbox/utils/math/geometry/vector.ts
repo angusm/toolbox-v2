@@ -62,7 +62,7 @@ class Vector {
     return this;
   }
 
-  public static sumDeltas(...vectors): this[] {
+  public static sumDeltas(...vectors): this {
     return this[Symbol.species].subtract(vectors[0], vectors.slice(-1)[0]);
   }
 
@@ -80,29 +80,29 @@ class Vector {
     return new this[Symbol.species](...vector.getValues());
   }
 
-  static scale(vector: this, amount: number): this {
+  public static scale(vector: this, amount: number): this {
     return new this[Symbol.species](
       ...vector.getValues().map((value) => value * amount));
   }
 
-  scale(amount: number): this {
+  public scale(amount: number): this {
     return this[Symbol.species].scale(this, amount);
   }
 
-  static areEqual(...vectors: this[]): boolean {
+  public static areEqual(...vectors: this[]): boolean {
     return areArrayValuesEqual(...vectors.map((v) => v.getValues()));
   }
 
-  equals(...vectors: this[]): boolean {
+  public equals(...vectors: this[]): boolean {
     return this[Symbol.species].areEqual(this, ...vectors);
   }
 
-  getLength(): number {
+  public getLength(): number {
     return Math.sqrt(
       sum(...this.getValues().map((value) => Math.pow(value, 2))));
   }
 
-  asRanges(): Range[] {
+  public asRanges(): Range[] {
     return this.getValues()
       .map((value) => new Range(Math.min(0, value), Math.max(0, value)));
   }
