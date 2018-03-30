@@ -91,12 +91,14 @@ class CachedElementVector {
     return VALUE_LIMIT;
   }
 
-  public static getForElement(...args: any[]): CachedElementVector {
-    return caches.get(this).get(...args);
+  public static getForElement<T extends CachedElementVector>(
+    ...args: any[]
+  ): T {
+    return <T>caches.get(this).get(...args);
   }
 
-  public static getSingleton(): CachedElementVector {
-    return caches.get(this).get(null);
+  public static getSingleton<T extends CachedElementVector>(): T {
+    return <T>caches.get(this).get(null);
   }
 
   public get [Symbol.species](): typeof CachedElementVector {
