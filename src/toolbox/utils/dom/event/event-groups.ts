@@ -1,6 +1,6 @@
-import EventType from './event-type';
+import {EventType} from './event-type';
 
-const eventGroups: Map = new Map([
+const eventGroups: Map<symbol, symbol[]> = new Map([
   [
     EventType.INTERACT,
     [EventType.CLICK, EventType.ENTER_KEYPRESS, EventType.TOUCH]],

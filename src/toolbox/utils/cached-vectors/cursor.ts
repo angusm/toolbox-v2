@@ -6,8 +6,6 @@ import {filterUntilFirst} from '../array/filter-until-first';
 import {frame} from '../frame';
 import {renderLoop} from '../render-loop';
 
-let singleton;
-
 const ZERO_VECTOR: Vector2d = new Vector2d();
 const GESTURE_LIMIT: number = 30;
 const POSITION_LIMIT: number = GESTURE_LIMIT;
@@ -17,7 +15,7 @@ class CursorPosition {
   private pressed: boolean;
   private frame: number;
 
-  constructor(position, pressed) {
+  constructor(position: Vector2d, pressed: boolean) {
     this.position = position;
     this.pressed = pressed;
     this.frame = frame.getFrame();
@@ -96,12 +94,13 @@ class CursorData {
       return [];
     }
 
-    const isPreviousFrame = (position) => !position.isForFrame(currentFrame);
+    const isPreviousFrame =
+      (position: CursorPosition) => !position.isForFrame(currentFrame);
     const positionsToConsider =
       filterUntilFirst(this.positions, isPreviousFrame);
 
     if (usePressedPositionsOnly) {
-      const isPressed = (position) => position.isPressed();
+      const isPressed = (position: CursorPosition) => position.isPressed();
       return filterUntilFalse(positionsToConsider, isPressed);
     } else {
       return positionsToConsider;
@@ -132,7 +131,7 @@ class CursorData {
   ): Vector2d {
     const deltas: Vector2d[] =
       Vector2d.getDeltas(
-        ...positions.map((position) => position.getPosition()));
+        ...positions.map((position: CursorPosition) => position.getPosition()));
     const scaledDeltas: Vector2d[] =
       deltas.map(
         (delta, index) => delta.scale((deltas.length - index) / deltas.length));
@@ -141,17 +140,18 @@ class CursorData {
 }
 
 class Cursor {
+  public static singleton: Cursor;
   private frame: number;
   private clientPosition: CursorData;
   private pagePosition: CursorData;
   private screenPosition: CursorData;
-  private isPressed: CursorData;
+  private pressed: boolean;
 
   constructor() {
     this.clientPosition = new CursorData();
     this.pagePosition = new CursorData();
     this.screenPosition = new CursorData();
-    this.isPressed = false;
+    this.pressed = false;
     this.frame = 0;
     this.init_();
   }
@@ -165,12 +165,12 @@ class Cursor {
       window, EventType.CURSOR_MOVE, (event) => this.updatePosition_(event));
   }
 
-  public static getSingleton(): this {
-    return singleton = singleton || new this();
+  public static getSingleton(): Cursor {
+    return this.singleton = this.singleton || new this();
   }
 
   public isPressed(): boolean {
-    return this.isPressed;
+    return this.pressed;
   }
 
   public getClient(): CursorData {
@@ -186,7 +186,7 @@ class Cursor {
   }
 
   private updatePress_(event: MouseEvent|TouchEvent, isPressed: boolean): void {
-    this.isPressed = isPressed;
+    this.pressed = isPressed;
     this.updatePosition_(event);
   }
 

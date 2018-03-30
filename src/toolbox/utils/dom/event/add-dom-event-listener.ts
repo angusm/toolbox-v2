@@ -7,9 +7,11 @@ function addDomEventListener(
   callback: EventListenerOrEventListenerObject
 ): [EventType, EventListenerOrEventListenerObject] {
   if (eventGroups.has(eventType)) {
-    return eventGroups.get(eventType).map((subEventType) => {
-      return addDomEventListener(dispatcher, subEventType, callback);
-    });
+    return eventGroups.get(eventType)
+      .map(
+        (subEventType: EventType) => {
+          return addDomEventListener(dispatcher, subEventType, callback);
+        });
   } else {
     const eventString = uids.get(eventType);
     dispatcher.addEventListener(eventString, callback);

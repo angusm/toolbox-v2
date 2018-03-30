@@ -32,21 +32,21 @@ class Matrix {
     return this.ty;
   }
 
-  public translate(vector: {x: number, y: number}): this {
+  public translate(vector: {x: number, y: number}): Matrix {
     const newX = this.tx + vector.x;
     const newY = this.ty + vector.y;
     return new Matrix(this.a, this.b, this.c, this.d, newX, newY);
   }
 
-  public setTranslateX(value: number): this {
+  public setTranslateX(value: number): Matrix {
     return new Matrix(this.a, this.b, this.c, this.d, value, this.ty);
   }
 
-  public setTranslateY(value: number): this {
+  public setTranslateY(value: number): Matrix {
     return new Matrix(this.a, this.b, this.c, this.d, this.tx, value);
   }
 
-  public static parseFromString(str: string): this {
+  public static parseFromString(str: string): Matrix {
     const valuesStr = str.split('matrix(').splice(-1)[0].split(')')[0];
     const values = valuesStr.split(',').map((str) => str.trim());
     if (!values.length || values[0] === 'none') {
@@ -56,7 +56,7 @@ class Matrix {
     }
   }
 
-  public static fromElementTransform(element: Element): this {
+  public static fromElementTransform(element: Element): Matrix {
     return Matrix.parseFromString(
       window.getComputedStyle(element).transform);
   }

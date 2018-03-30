@@ -5,40 +5,37 @@ import {renderLoop} from '../render-loop';
 
 const VALUE_LIMIT: number = 2;
 
-const caches: DynamicDefaultMap<CachedElementVector, MultiValueDynamicDefaultMap> =
+type InnerCache = MultiValueDynamicDefaultMap<any, CachedElementVector>;
+
+const caches: DynamicDefaultMap<CachedElementVector, InnerCache> =
   DynamicDefaultMap.usingFunction<any, any>(
     (Class) => {
       return MultiValueDynamicDefaultMap.usingFunction(
-        (...args) => new Class(...args));
+        (...args: any[]) => new Class(...args));
     });
 
 class CachedElementVector {
   private element: Element;
   private values: Vector[];
 
-  constructor(element = null, ...args: any[]) {
-    if (this[Symbol.species].getInstancesByElement().has([element, ...args])) {
+  constructor(element: any = null, ...args: any[]) {
+    const instanceByElement = caches.get(this.constructor);
+
+    if (instanceByElement.has([element, ...args])) {
       if (element) {
         console.error('Please use getForElement instead of new.');
       } else {
         console.error('Please use getSingleton instead of new.');
       }
     }
+
     this.element = element;
-    this.values = [new (this.getVectorClass())()];
+    this.values = [new (this[Symbol.species].getVectorClass())()];
     this.init();
   }
 
-  private static getInstancesByElement(): MultiValueDynamicDefaultMap<CachedElementVector, CachedElementVector> {
-    return caches.get(this);
-  }
-
-  private static getVectorClass(): typeof Vector {
+  public static getVectorClass(): typeof Vector {
     return Vector;
-  }
-
-  public getVectorClass(): typeof Vector {
-    return this[Symbol.species].getVectorClass();
   }
 
   private init(): void {
@@ -58,7 +55,7 @@ class CachedElementVector {
   }
 
   private getCurrentVector(): Vector {
-    return new (this.getVectorClass())(...this.getValues());
+    return new (this[Symbol.species].getVectorClass())(...this.getValues());
   }
 
   private render(): void {
@@ -80,23 +77,30 @@ class CachedElementVector {
   }
 
   public getDelta(): Vector {
-    return this.getVectorClass().subtract(...this.getCurrentAndLastValue());
+    const values = this.getCurrentAndLastValue();
+    return this[Symbol.species].getVectorClass()
+      .subtract(values[0], values[1]);
   }
 
   public hasChanged(): boolean {
-    return !this.getVectorClass().areEqual(...this.getCurrentAndLastValue());
+    return !this[Symbol.species].getVectorClass()
+      .areEqual(...this.getCurrentAndLastValue());
   }
 
   private static getValueLimit(): number {
     return VALUE_LIMIT;
   }
 
-  public static getForElement(...args): this {
-    return this.getInstancesByElement().get(...args);
+  public static getForElement(...args: any[]): CachedElementVector {
+    return caches.get(this).get(...args);
   }
 
-  public static getSingleton(): this {
-    return this.getInstancesByElement().get(null);
+  public static getSingleton(): CachedElementVector {
+    return caches.get(this).get(null);
+  }
+
+  public get [Symbol.species](): typeof CachedElementVector {
+    return <typeof CachedElementVector>this.constructor;
   }
 }
 

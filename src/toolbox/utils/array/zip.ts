@@ -1,8 +1,8 @@
-function zip<T>(...lists:Array<T>[]): Array<T>[] {
+function zip<T>(...lists:T[][]): T[][] {
   return [...lists].reduce(
-    (result, list) => {
+    (result: T[][], list: T[]) => {
       list.forEach(
-        (listItem, index) => {
+        (listItem: T, index: number) => {
           result[index] = [...(result[index] || []), listItem]});
       return result;
     },
