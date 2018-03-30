@@ -5,7 +5,7 @@ import {sum} from '../sum';
 import {zip} from '../../array/zip';
 
 class Vector {
-  'constructor': typeof Vector;
+  ['constructor']: typeof Vector;
   private values: number[];
 
   constructor(...values: number[]) {
@@ -21,7 +21,7 @@ class Vector {
   }
 
   public add(...vectors: this[]): this {
-    return this.constructor.add(...vectors);
+    return this['constructor'].add(...vectors);
   }
 
   public static invert<T extends Vector>(vector: T): T {
@@ -44,7 +44,7 @@ class Vector {
   }
 
   public clamp(...ranges: Range[]): this {
-    return this.constructor.clamp(this, ...ranges);
+    return this['constructor'].clamp(this, ...ranges);
   }
 
   public static subtract<T extends Vector>(minuend: T, ...subtrahends: T[]): T {
@@ -53,7 +53,7 @@ class Vector {
   }
 
   public subtract(...subtrahends: this[]): this {
-    return this.constructor.subtract(this, ...subtrahends);
+    return this['constructor'].subtract(this, ...subtrahends);
   }
 
   public getValues(): number[] {
@@ -83,7 +83,7 @@ class Vector {
   }
 
   public scale(amount: number): this {
-    return this.constructor.scale(this, amount);
+    return this['constructor'].scale(this, amount);
   }
 
   public static areEqual<T extends Vector>(...vectors: T[]): boolean {
@@ -91,7 +91,7 @@ class Vector {
   }
 
   public equals(...vectors: this[]): boolean {
-    return this.constructor.areEqual(this, ...vectors);
+    return this['constructor'].areEqual(this, ...vectors);
   }
 
   public getLength(): number {

@@ -15,7 +15,7 @@ const caches: DynamicDefaultMap<CachedElementVector, InnerCache> =
     });
 
 class CachedElementVector {
-  private element: Element;
+  protected element: HTMLElement;
   private values: Vector[];
 
   constructor(element: any = null, ...args: any[]) {
@@ -34,7 +34,7 @@ class CachedElementVector {
     this.init();
   }
 
-  public static getVectorClass(): typeof Vector {
+  protected static getVectorClass(): typeof Vector {
     return Vector;
   }
 
@@ -49,13 +49,13 @@ class CachedElementVector {
     return this.values.slice(-1)[0];
   }
 
-  private getValues(): number[] {
+  protected getValues(): number[] {
     console.error('getValues must be overridden by child class');
     return [];
   }
 
-  private getCurrentVector(): Vector {
-    return new (this[Symbol.species].getVectorClass())(...this.getValues());
+  protected getCurrentVector<T extends Vector>(): T {
+    return <T>new (this[Symbol.species].getVectorClass())(...this.getValues());
   }
 
   private render(): void {

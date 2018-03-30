@@ -1,6 +1,6 @@
 import {Vector} from './vector';
 
-class Dimensions2D extends Vector {
+class Dimensions2d extends Vector {
   constructor(width: number = 0, height: number = 0, ...args: number[]) {
     super(width, height, ...args);
   }
@@ -18,7 +18,7 @@ class Dimensions2D extends Vector {
     element.style.height = `${this.height}px`;
   }
 
-  public static fromElementOffset<T extends Dimensions2D>(
+  public static fromElementOffset<T extends Dimensions2d>(
     element: HTMLElement
   ): T {
     return <T>new this(element.offsetWidth, element.offsetHeight);
@@ -29,4 +29,4 @@ class Dimensions2D extends Vector {
   }
 }
 
-export {Dimensions2D};
+export {Dimensions2d};
