@@ -76,9 +76,9 @@ class CachedElementVector {
     return this.values.slice(-2);
   }
 
-  public getDelta(): Vector {
+  public getDelta<T extends Vector>(): T {
     const values = this.getCurrentAndLastValue();
-    return this[Symbol.species].getVectorClass()
+    return <T>this[Symbol.species].getVectorClass()
       .subtract(values[0], values[1]);
   }
 
