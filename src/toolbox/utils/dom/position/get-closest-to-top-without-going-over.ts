@@ -1,5 +1,4 @@
 import {getVisibleDistanceBetweenElements} from './get-visible-distance-between-elements';
-import {getAsList} from "../../object/get-as-list";
 
 type Distance = [HTMLElement, number];
 type AbsDistance = [HTMLElement, number, number];
@@ -19,8 +18,7 @@ function getClosestToTopWithoutGoingOver(
     return [element, distance, Math.abs(distance)];
   }
 
-  const elements: HTMLElement[] = getAsList<HTMLElement>(nodelist);
-  const distances: Distance[] = elements.map(mapElementToDistance);
+  const distances: Distance[] = Array.from(nodelist).map(mapElementToDistance);
   const absDistances: AbsDistance[] = distances.map(mapDistancesToAbs);
 
   const sortedDistances: AbsDistance[] =

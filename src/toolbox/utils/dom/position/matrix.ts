@@ -1,4 +1,4 @@
-import {NumberOrString} from '../../types';
+import {Numeric} from '../../types';
 
 class Matrix {
   private a: number;
@@ -9,12 +9,12 @@ class Matrix {
   private ty: number;
 
   constructor(
-    a: NumberOrString = 1,
-    b: NumberOrString = 0,
-    c: NumberOrString = 0,
-    d: NumberOrString = 1,
-    tx: NumberOrString = 0,
-    ty: NumberOrString = 0
+    a: Numeric = 1,
+    b: Numeric = 0,
+    c: Numeric = 0,
+    d: Numeric = 1,
+    tx: Numeric = 0,
+    ty: Numeric = 0
   ) {
     this.a = parseFloat(<string>a);
     this.b = parseFloat(<string>b);

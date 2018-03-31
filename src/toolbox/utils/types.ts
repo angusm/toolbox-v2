@@ -1,5 +1,7 @@
-type NumberOrString = number|string|symbol;
+type Numeric = number|string;
+type ObjectIndex = number|string;
 
 export {
-  NumberOrString
+  Numeric,
+  ObjectIndex
 };

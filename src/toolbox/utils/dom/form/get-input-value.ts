@@ -20,7 +20,7 @@ function isChecked_(input: HTMLInputElement): boolean {
 
 function getRadioInputValue_(input: HTMLInputElement): string {
   const checkedInput: HTMLInputElement =
-    getAsList<HTMLInputElement>(getMatchingRadioInputs_(input))
+    <HTMLInputElement>Array.from(getMatchingRadioInputs_(input))
       .find(isChecked_);
 
   return checkedInput ? checkedInput.value : null;
