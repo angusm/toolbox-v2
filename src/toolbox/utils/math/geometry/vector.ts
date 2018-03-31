@@ -74,7 +74,7 @@ class Vector {
       });
   }
 
-  public static fromVector<T extends Vector>(vector: T): T {
+  public static fromVector<T extends Vector>(vector: Vector): T {
     return <T>new this(...vector.getValues());
   }
 
