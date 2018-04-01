@@ -4,7 +4,7 @@ import {frameMemoize} from "../../frame-memoize";
 import {getDistanceUntilVisible} from "../position/get-distance-until-visible";
 import {min} from "../../array/min";
 
-function getCurrentAnchorVisibleOrSeen_(
+function getCurrentAnchorByVisibleOrSeen_(
   querySelector: string = CommonSelector.DEEP_LINK_TARGETS
 ): Node {
   const hash = window.location.hash;
@@ -25,7 +25,7 @@ function getCurrentAnchorVisibleOrSeen_(
 
 // Frame memoize as it is likely this will be used by both DeepLinkByScroll and
 // IDMarker
-const getCurrentAnchorVisibleOrSeen =
-  frameMemoize(getCurrentAnchorVisibleOrSeen_);
+const getCurrentAnchorByVisibleOrSeen =
+  frameMemoize(getCurrentAnchorByVisibleOrSeen_);
 
-export {getCurrentAnchorVisibleOrSeen};
+export {getCurrentAnchorByVisibleOrSeen};
