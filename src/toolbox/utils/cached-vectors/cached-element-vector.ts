@@ -11,7 +11,7 @@ const caches: DynamicDefaultMap<CachedElementVector, InnerCache> =
   DynamicDefaultMap.usingFunction<any, any>(
     (Class) => {
       return MultiValueDynamicDefaultMap.usingFunction(
-        (...args: any[]) => new Class(...args));
+        (args: any[]) => new Class(...args));
     });
 
 class CachedElementVector {
