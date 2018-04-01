@@ -21,7 +21,7 @@ class Vector {
   }
 
   public add(...vectors: this[]): this {
-    return this['constructor'].add(...vectors);
+    return this['constructor'].add(this, ...vectors);
   }
 
   public static invert<T extends Vector>(vector: T): T {
