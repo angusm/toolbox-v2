@@ -30,6 +30,9 @@ class DeepLinkByScroll {
         (<HTMLElement>this.getCurrentAnchor_(this.querySelector_)).id;
       const currentScroll = windowScroll.getPosition().y;
 
+      if (window.location.hash === `#${currentAnchorId}`) {
+        return;
+      }
       renderLoop.mutate(() => {
         window.location.hash = currentAnchorId;
         setScrollTop(currentScroll); // Reset the scroll position
