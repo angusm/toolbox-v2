@@ -26,14 +26,17 @@ class SeenIdMarker {
     renderLoop.measure(() => {
       const currentAnchor: HTMLElement =
         <HTMLElement>this.getCurrentAnchor_(this.querySelector_);
+
       const html: Element = <Element>document.querySelector('html');
-      const scrolledPastIds =
+      const scrolledPastIds: string[] =
         Array.from(document.querySelectorAll(this.querySelector_))
           .filter((element: HTMLElement) => isAbove(element, currentAnchor))
           .map((element: Node) => (<HTMLElement>element).id)
           .concat(currentAnchor.id);
+
       renderLoop.mutate(
         () => updateClassModifiers(html, CLASS_NAME, scrolledPastIds));
+
       renderLoop.cleanup(() => this.render_());
     });
   }

@@ -39,7 +39,7 @@ class ActiveOnDeepLink {
       const candidatesToDeactivate: Node[] =
         Array.from(candidates)
           .filter((candidate: Node) => {
-            return getClassModifiers(<HTMLElement>candidate, CLASS_NAME)
+            return getClassModifiers(<HTMLElement>candidate, this.baseClass_)
                 .indexOf(currentAnchorId) === -1;
           });
       const candidatesToActivate: Node[] =
@@ -48,7 +48,7 @@ class ActiveOnDeepLink {
             (candidate) => candidatesToDeactivate.indexOf(candidate) === -1);
       const activeClass = `${this.baseClass_}--active`;
 
-      renderLoop.measure(() => {
+      renderLoop.mutate(() => {
         candidatesToDeactivate
           .forEach(
             (candidate) =>
