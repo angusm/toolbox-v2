@@ -5,7 +5,7 @@
  */
 import {Dimensions} from '../cached-vectors/dimensions';
 import {Dimensions2d} from '../math/geometry/dimensions-2d';
-import {Range} from '../range';
+import {Range} from '../math/range';
 import {Scroll} from '../cached-vectors/scroll';
 import {VisibleDimensions} from '../cached-vectors/visible-dimensions';
 import {VisibleDistance} from '../cached-vectors/visible-distance';

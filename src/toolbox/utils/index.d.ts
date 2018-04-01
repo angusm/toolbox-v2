@@ -8,7 +8,7 @@ export * from "./default-symbol";
 export * from "./is-def";
 export * from "./noop";
 export * from "./query-parameters";
-export * from "./range";
+export * from "./math/range";
 export * from "./render-loop";
 export * from "./run-map-as-switch";
 export * from "./to-bool";

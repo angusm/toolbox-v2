@@ -1,4 +1,4 @@
-import {Range} from '../../range';
+import {Range} from '../../math/range';
 import {getVisibleDistanceBetweenElements} from './get-visible-distance-between-elements';
 import {Vector2d} from "../../math/geometry/vector-2d";
 

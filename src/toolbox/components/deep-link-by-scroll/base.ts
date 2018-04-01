@@ -1,25 +1,14 @@
 import {Scroll} from '../../utils/cached-vectors/scroll';
 import {renderLoop} from '../../utils/render-loop';
 import {setScrollTop} from '../../utils/dom/position/set-scroll-top';
+import {updateClassModifiers} from "../../utils/dom/update-class-modifiers";
 
 const windowScroll: Scroll = Scroll.getSingleton<Scroll>();
 const CLASS_NAME: string = 'deep-link-by-scroll';
 
 function updateClassList(anchorId: string) {
-  const classToAdd: string = `${CLASS_NAME}--${anchorId}`;
   const html: Element = <Element>document.querySelector('html');
-  const classesToRemove: string[] =
-    Array.from(html.classList)
-      .filter(
-        (className) => {
-          return className.indexOf(CLASS_NAME) !== -1 &&
-            className !== CLASS_NAME &&
-            className !== classToAdd;
-        });
-  classesToRemove.forEach((className) => html.classList.remove(className));
-  if (!html.classList.contains(classToAdd)) {
-    html.classList.add(classToAdd);
-  }
+  updateClassModifiers(html, CLASS_NAME, [anchorId]);
 }
 
 class DeepLinkByScroll {

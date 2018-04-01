@@ -24,6 +24,10 @@ class Dimensions2d extends Vector {
     return <T>new this(element.offsetWidth, element.offsetHeight);
   }
 
+  public static fromInnerWindow<T extends Dimensions2d>() {
+      return <T>new this(window.innerWidth, window.innerHeight);
+  }
+
   public getArea(): number{
     return this.width * this.height;
   }

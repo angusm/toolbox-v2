@@ -1,5 +1,4 @@
-import {BaseClass} from '../../hacks/base-class';
-import {Range} from '../../range';
+import {Range} from '../range';
 import {areArrayValuesEqual} from '../../array/are-array-values-equal';
 import {sum} from '../sum';
 import {zip} from '../../array/zip';
