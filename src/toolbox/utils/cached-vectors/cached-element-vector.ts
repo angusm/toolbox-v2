@@ -94,11 +94,11 @@ class CachedElementVector {
   public static getForElement<T extends CachedElementVector>(
     ...args: any[]
   ): T {
-    return <T>caches.get(this).get(...args);
+    return <T>caches.get(this).get(args);
   }
 
   public static getSingleton<T extends CachedElementVector>(): T {
-    return <T>caches.get(this).get(null);
+    return <T>caches.get(this).get([null]);
   }
 
   public get [Symbol.species](): typeof CachedElementVector {
