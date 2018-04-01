@@ -26,10 +26,11 @@ class DeepLinkMarker {
   private render_(): void {
     renderLoop.measure(() => {
       renderLoop.cleanup(() => this.render_());
+
       const currentAnchorId: string =
         (<HTMLElement>this.getCurrentAnchor_(this.querySelector_)).id;
-
       const html: Element = <Element>document.querySelector('html');
+
       renderLoop.measure(() => {
         updateClassModifiers(html, CLASS_NAME, [currentAnchorId]);
       });
