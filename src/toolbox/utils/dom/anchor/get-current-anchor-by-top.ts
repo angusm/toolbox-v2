@@ -1,9 +1,10 @@
-import {getClosestToTopWithoutGoingOver} from '../../utils/dom/position/get-closest-to-top-without-going-over';
-import {isFullyVisible} from '../../utils/dom/position/is-fully-visible';
-import {CommonSelector} from "../../utils/dom/common-selector";
+import {getClosestToTopWithoutGoingOver} from '../position/get-closest-to-top-without-going-over';
+import {isFullyVisible} from '../position/is-fully-visible';
+import {CommonSelector} from "../common-selector";
+import {frameMemoize} from "../../frame-memoize";
 
 
-function getCurrentAnchorByTop(
+function getCurrentAnchorByTop_(
   querySelector: string = CommonSelector.DEEP_LINK_TARGETS
 ): Node {
   const hash: string = window.location.hash;
@@ -16,5 +17,7 @@ function getCurrentAnchorByTop(
   const anchors: NodeList = document.querySelectorAll(querySelector);
   return getClosestToTopWithoutGoingOver(anchors);
 }
+
+const getCurrentAnchorByTop = frameMemoize(getCurrentAnchorByTop_);
 
 export {getCurrentAnchorByTop};
