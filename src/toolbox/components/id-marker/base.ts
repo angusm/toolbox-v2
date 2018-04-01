@@ -5,10 +5,10 @@ import {updateClassModifiers} from "../../utils/dom/update-class-modifiers";
 const CLASS_NAME = 'tb-id-marker';
 
 class IdMarker {
-  private elements_: NodeList;
+  private selector_: string;
 
-  constructor(elements: NodeList) {
-    this.elements_ = elements;
+  constructor(selector: string = '[id]') {
+    this.selector_ = selector;
     this.init_();
   }
 
@@ -16,7 +16,7 @@ class IdMarker {
     renderLoop.measure(() => {
       const html: Element = <Element>document.querySelector('html');
       const scrolledPastIds =
-        Array.from(this.elements_)
+        Array.from(document.querySelectorAll(this.selector_))
           .filter((element: Node) => isScrolledPast(<HTMLElement>element))
           .map((element: Node) => (<HTMLElement>element).id);
       renderLoop.mutate(
