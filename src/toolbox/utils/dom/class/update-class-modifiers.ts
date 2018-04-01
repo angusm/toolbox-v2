@@ -7,11 +7,12 @@ function updateClassModifiers(
   modifiersToKeep: string[],
   keepBase: boolean = true
 ) {
-  const classesToAdd =
+  const classesToAdd: string[] =
     modifiersToKeep.map((modifier: string) => `${baseClass}--${modifier}`);
-  const classesToKeep = keepBase ? [baseClass, ...classesToAdd]: classesToAdd;
+  const classesToKeep: string[] =
+    keepBase ? [baseClass, ...classesToAdd]: classesToAdd;
   removeClassModifiers(element, baseClass, classesToKeep);
-  classesToAdd
+  classesToKeep
     .forEach((classToAdd: string) => addClassIfMissing(element, classToAdd));
 }
 

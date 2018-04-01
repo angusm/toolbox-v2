@@ -33,6 +33,7 @@ class DeepLinkByScroll {
       if (window.location.hash === `#${currentAnchorId}`) {
         return;
       }
+
       renderLoop.mutate(() => {
         window.location.hash = currentAnchorId;
         setScrollTop(currentScroll); // Reset the scroll position
