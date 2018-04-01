@@ -1,11 +1,10 @@
-import {Scroll} from '../../utils/cached-vectors/scroll';
 import {renderLoop} from '../../utils/render-loop';
-import {setScrollTop} from '../../utils/dom/position/set-scroll-top';
+import {updateClassModifiers} from "../../utils/dom/class/update-class-modifiers";
 import {CommonSelector} from "../../utils/dom/common-selector";
 
-const windowScroll: Scroll = Scroll.getSingleton<Scroll>();
+const CLASS_NAME: string = 'tb-deep-link-by-scroll';
 
-class DeepLinkByScroll {
+class DeepLinkMarker {
   private getCurrentAnchor_: (querySelector: string) => Node;
   private querySelector_: string;
 
@@ -19,23 +18,23 @@ class DeepLinkByScroll {
   }
 
   private init_(): void {
+    renderLoop.mutate(
+      () => document.querySelector('html').classList.add(CLASS_NAME));
     this.render_();
   }
 
   private render_(): void {
     renderLoop.measure(() => {
       renderLoop.cleanup(() => this.render_());
-
       const currentAnchorId: string =
         (<HTMLElement>this.getCurrentAnchor_(this.querySelector_)).id;
-      const currentScroll = windowScroll.getPosition().y;
 
-      renderLoop.mutate(() => {
-        window.location.hash = currentAnchorId;
-        setScrollTop(currentScroll); // Reset the scroll position
+      const html: Element = <Element>document.querySelector('html');
+      renderLoop.measure(() => {
+        updateClassModifiers(html, CLASS_NAME, [currentAnchorId]);
       });
     });
   }
 }
 
-export {DeepLinkByScroll};
+export {DeepLinkMarker};

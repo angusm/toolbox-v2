@@ -1,12 +1,11 @@
-import {renderLoop} from "../../utils/render-loop";
-import {isScrolledPast} from "../../utils/dom/position/is-scrolled-past";
-import {updateClassModifiers} from "../../utils/dom/class/update-class-modifiers";
 import {CommonSelector} from "../../utils/dom/common-selector";
 import {isAbove} from "../../utils/dom/position/is-above";
+import {renderLoop} from "../../utils/render-loop";
+import {updateClassModifiers} from "../../utils/dom/class/update-class-modifiers";
 
 const CLASS_NAME = 'tb-id-marker';
 
-class IdMarker {
+class SeenIdMarker {
   private getCurrentAnchor_: (querySelector: string) => Node;
   private querySelector_: string;
 
@@ -27,7 +26,8 @@ class IdMarker {
       const scrolledPastIds =
         Array.from(document.querySelectorAll(this.querySelector_))
           .filter((element: HTMLElement) => isAbove(element, currentAnchor))
-          .map((element: Node) => (<HTMLElement>element).id);
+          .map((element: Node) => (<HTMLElement>element).id)
+          .concat(currentAnchor.id);
       renderLoop.mutate(
         () => updateClassModifiers(html, CLASS_NAME, scrolledPastIds));
       renderLoop.cleanup(() => this.init_());
@@ -35,4 +35,4 @@ class IdMarker {
   }
 }
 
-export {IdMarker};
+export {SeenIdMarker};
