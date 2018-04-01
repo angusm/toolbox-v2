@@ -1,12 +1,12 @@
-const getClosestToCenter = require('../../utils/dom/position/get-closest-to-center');
-const isFullyVisible = require('../../utils/dom/position/is-fully-visible');
+import {getClosestToCenter} from '../../utils/dom/position/get-closest-to-center';
+import {isFullyVisible} from '../../utils/dom/position/is-fully-visible';
 
 
-function getCurrentAnchorByCenter() {
+function getCurrentAnchorByCenter(): Node {
   const hash = window.location.hash;
   if (hash) {
-    const anchorElement = document.querySelector(hash);
-    if (anchorElement && isFullyVisible(anchorElement)) {
+    const anchorElement: Node = document.querySelector(hash);
+    if (anchorElement && isFullyVisible(<HTMLElement>anchorElement)) {
       return anchorElement;
     }
   }
@@ -14,4 +14,4 @@ function getCurrentAnchorByCenter() {
   return getClosestToCenter(anchors);
 }
 
-module.exports = getCurrentAnchorByCenter;
+export {getCurrentAnchorByCenter};

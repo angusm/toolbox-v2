@@ -1,21 +1,33 @@
-const FadeTransition = require('./transitions/fade');
-const getMostVisibleElement = require('../../utils/dom/position/get-most-visible-element');
-const getVisibleArea = require('../../utils/dom/position/get-visible-area');
-const isFullyVisible = require('../../utils/dom/position/is-fully-visible');
-const isVisible = require('../../utils/dom/position/is-visible');
-const removeFirstInstance = require('../../utils/iterable/remove-first-instance');
-const renderLoop = require('../../utils/render-loop');
+import {Fade as FadeTransition} from './transitions/fade';
+import {ICarousel, ITransition} from './interfaces';
+import {getMostVisibleElement} from '../../utils/dom/position/get-most-visible-element';
+import {getVisibleArea} from '../../utils/dom/position/get-visible-area';
+import {isFullyVisible} from '../../utils/dom/position/is-fully-visible';
+import {isVisible} from '../../utils/dom/position/is-visible';
+import {removeFirstInstance} from '../../utils/array/remove-first-instance';
+import {renderLoop} from '../../utils/render-loop';
+import {toBool} from "../../utils/to-bool";
 
-const defaultTransition = new FadeTransition();
-const INTERACTION = Symbol('interaction');
+const defaultTransition: ITransition = new FadeTransition();
+const INTERACTION: symbol = Symbol('interaction');
 
-class Carousel {
+class Carousel implements ICarousel {
+  private container_: HTMLElement;
+  private factorInOpacity_: boolean;
+  private slides_: HTMLElement[];
+  private transition_: ITransition;
+  private transitionTargets_: HTMLElement[];
+  private interactions_: symbol[];
+
   constructor(
-    container,
-    slides,
+    container: HTMLElement,
+    slides: HTMLElement[],
     {
       transition = defaultTransition,
       factorInOpacity = true,
+    }: {
+      transition?: ITransition,
+      factorInOpacity?: boolean,
     } = {}
   ) {
     this.container_ = container;
@@ -28,41 +40,41 @@ class Carousel {
     this.init_();
   }
 
-  clearTransitionTargets_() {
+  private clearTransitionTargets_(): void {
     this.transitionTargets_ = [];
   }
 
-  transitionToSlide(targetSlide) {
+  public transitionToSlide(targetSlide: HTMLElement): void {
     if (this.isBeingInteractedWith()) {
       return;
     }
     this.transitionTargets_ = [...this.transitionTargets_, targetSlide];
   }
 
-  transitionToSlideImmediately(targetSlide) {
+  public transitionToSlideImmediately(targetSlide: HTMLElement): void {
     this.clearTransitionTargets_();
     this.transitionToSlide(targetSlide);
   }
 
-  init_() {
+  private init_(): void {
     this.transition_.init(this.getSlides()[0], this);
     this.render_();
   }
 
-  isTransitioning() {
+  public isTransitioning(): boolean {
     return this.transitionTargets_.length > 0;
   }
 
-  isBeingInteractedWith(interaction = null) {
+  public isBeingInteractedWith(interaction: symbol = null): boolean {
     return this.interactions_.length > 0 &&
-      (!interaction || this.interactions_.indexOf(interaction) !== -1);
+      (!toBool(interaction) || this.interactions_.indexOf(interaction) !== -1);
   }
 
-  isIdle() {
+  public isIdle(): boolean {
     return !this.isTransitioning() && !this.isBeingInteractedWith();
   }
 
-  render_() {
+  private render_(): void {
     renderLoop.measure(() => {
       this.removeCurrentlyActiveTransitionTargets_();
       if (this.getNextTransitionTarget_()) {
@@ -72,25 +84,25 @@ class Carousel {
     });
   }
 
-  getActiveSlide() {
+  public getActiveSlide(): HTMLElement {
     return getMostVisibleElement(
       this.slides_, this.container_, this.factorInOpacity_);
   }
 
-  getActiveSlideIndex() {
+  public getActiveSlideIndex(): number {
     return this.getSlideIndex(this.getActiveSlide());
   }
 
-  getSlideIndex(slide) {
+  public getSlideIndex(slide: HTMLElement): number {
     return this.getSlides().indexOf(slide);
   }
 
-  getSlidesBetween(a, b) {
+  public getSlidesBetween(a: HTMLElement, b: HTMLElement): HTMLElement[] {
     return this.getSlides()
       .slice(this.getSlideIndex(a) + 1, this.getSlideIndex(b));
   }
 
-  isSlideFullyVisible_(slide) {
+  public isSlideFullyVisible_(slide: HTMLElement): boolean {
     const otherSlides =
       this.getSlides().filter((otherSlide) => otherSlide !== slide);
     return isFullyVisible(slide, this.container_, this.factorInOpacity_) &&
@@ -101,32 +113,32 @@ class Carousel {
         });
   }
 
-  getContainer() {
+  public getContainer(): HTMLElement {
     return this.container_;
   }
 
-  getSlides() {
+  public getSlides(): HTMLElement[] {
     return [...this.slides_];
   }
 
-  getVisibleSlides() {
+  public getVisibleSlides(): HTMLElement[] {
     return this.getSlides()
       .filter((slide) => isVisible(slide, this.getContainer()));
   }
 
-  getSlidesBefore(slide) {
+  public getSlidesBefore(slide: HTMLElement): HTMLElement[] {
     return this.getSlides().slice(0, this.getSlides().indexOf(slide));
   }
 
-  getSlidesAfter(slide) {
+  public getSlidesAfter(slide: HTMLElement): HTMLElement[] {
     return this.getSlides().slice(this.getSlides().indexOf(slide) + 1);
   }
 
-  getNextTransitionTarget_() {
+  private getNextTransitionTarget_(): HTMLElement {
     return this.transitionTargets_[0];
   }
 
-  removeCurrentlyActiveTransitionTargets_() {
+  private removeCurrentlyActiveTransitionTargets_(): void {
     while (
       this.getNextTransitionTarget_() &&
       this.isSlideFullyVisible_(this.getNextTransitionTarget_())
@@ -135,32 +147,32 @@ class Carousel {
     }
   }
 
-  next() {
+  public next(): void {
     this.transitionSlidesBy(1);
   }
 
-  previous() {
+  public previous(): void {
     this.transitionSlidesBy(-1);
   }
 
-  startInteraction(interaction = INTERACTION) {
+  public startInteraction(interaction: symbol = INTERACTION): void {
     this.clearTransitionTargets_();
     this.interactions_.push(interaction);
   }
 
-  endInteraction(interaction = INTERACTION) {
+  public endInteraction(interaction: symbol = INTERACTION): void {
     this.interactions_ = removeFirstInstance(this.interactions_, interaction);
   }
 
-  transitionSlidesBy(value) {
+  public transitionSlidesBy(value: number): void {
     const nextIndex = this.getSlides().indexOf(this.getActiveSlide()) + value;
     this.transitionToIndex_(nextIndex);
   }
 
-  transitionToIndex_(index) {
+  private transitionToIndex_(index: number): void {
     const clampedIndex = index % this.getSlides().length;
     this.transitionToSlide(this.getSlides()[clampedIndex]);
   }
 }
 
-module.exports = Carousel;
+export {Carousel};

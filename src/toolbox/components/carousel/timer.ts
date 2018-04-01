@@ -1,30 +1,35 @@
-const renderLoop = require('../../utils/render-loop');
+import {renderLoop} from '../../utils/render-loop';
+import {Carousel} from "./base";
 
-const DEFAULT_INTERVAL = 5000;
+const DEFAULT_INTERVAL: number = 5000;
 
 class CarouselTimer {
-  constructor(carousel, interval = DEFAULT_INTERVAL) {
+  private carousel_: Carousel;
+  private interval_: number;
+  private lastActionTime_: number;
+
+  constructor(carousel: Carousel, interval: number = DEFAULT_INTERVAL) {
     this.carousel_ = carousel;
     this.interval_ = interval;
-    this.lastActionTime_ = new Date();
+    this.lastActionTime_ = new Date().valueOf();
     this.init_();
   }
 
-  init_() {
+  private init_(): void {
     this.startTimeout_();
   }
 
-  startTimeout_() {
+  private startTimeout_(): void {
     renderLoop.measure(() => {
-      if (+new Date() > +this.lastActionTime_ + this.interval_) {
+      if (new Date().valueOf() > +this.lastActionTime_ + this.interval_) {
         this.carousel_.next();
       }
       if (!this.carousel_.isIdle()) {
-        this.lastActionTime_ = new Date();
+        this.lastActionTime_ = new Date().valueOf();
       }
       renderLoop.mutate(() => this.startTimeout_());
     });
   }
 }
 
-module.exports = CarouselTimer;
+export {CarouselTimer};

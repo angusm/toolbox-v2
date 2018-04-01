@@ -1,17 +1,17 @@
-const getClosestToTopWithoutGoingOver = require('../../utils/dom/position/get-closest-to-top-without-going-over');
-const isFullyVisible = require('../../utils/dom/position/is-fully-visible');
+import {getClosestToTopWithoutGoingOver} from '../../utils/dom/position/get-closest-to-top-without-going-over';
+import {isFullyVisible} from '../../utils/dom/position/is-fully-visible';
 
 
 function getCurrentAnchorByTop() {
-  const hash = window.location.hash;
+  const hash: string = window.location.hash;
   if (hash) {
-    const anchorElement = document.querySelector(hash);
-    if (anchorElement && isFullyVisible(anchorElement)) {
+    const anchorElement: Node = document.querySelector(hash);
+    if (anchorElement && isFullyVisible(<HTMLElement>anchorElement)) {
       return anchorElement;
     }
   }
-  const anchors = document.querySelectorAll('[id]');
+  const anchors: NodeList = document.querySelectorAll('[id]');
   return getClosestToTopWithoutGoingOver(anchors);
 }
 
-module.exports = getCurrentAnchorByTop();
+export {getCurrentAnchorByTop};

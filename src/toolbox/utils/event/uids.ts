@@ -1,7 +1,9 @@
-const DynamicDefaultMap = require('../../map/dynamic-default');
+import {DynamicDefaultMap} from '../map/dynamic-default';
+import {TbEvent} from "./tb-event";
 
-let uid_ = 0;
-const uids =
-  DynamicDefaultMap.usingFunction((eventType) => `CustomEvent_${uid_++}`);
+let uid_: number = 0;
+const uids: DynamicDefaultMap<typeof TbEvent, string> =
+  DynamicDefaultMap.usingFunction<typeof TbEvent, string>(
+    (eventType: typeof TbEvent) => `CustomEvent_${uid_++}`);
 
-module.exports = uids;
+export {uids};

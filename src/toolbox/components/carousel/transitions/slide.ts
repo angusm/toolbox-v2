@@ -1,56 +1,63 @@
-const Drag = require('../../draggable/events/drag');
-const DragEnd = require('../../draggable/events/drag-end');
-const DragStart = require('../../draggable/events/drag-start');
-const Draggable = require('../../draggable/base');
-const FixedYConstraint = require('../../draggable/constraints/fixed-y');
-const Transition = require('./base');
-const Vector2d = require('../../../utils/math/geometry/vector-2d');
-const cursor = require('../../../utils/cached-vectors/cursor');
-const eventHandler = require('../../../utils/event/event-handler');
-const getSign = require('../../../utils/math/get-sign');
-const getVisibleDistanceBetweenElements = require('../../../utils/dom/position/get-visible-distance-between-elements');
-const max = require('../../../utils/iterable/max');
-const min = require('../../../utils/iterable/min');
-const renderLoop = require('../../../utils/render-loop');
-const sum = require('../../../utils/math/sum');
-const translate2d = require('../../../utils/dom/position/translate-2d');
+import {Drag}  from '../../draggable/events/drag';
+import {DragEnd}  from '../../draggable/events/drag-end';
+import {DragStart}  from '../../draggable/events/drag-start';
+import {Draggable}  from '../../draggable/base';
+import {FixedYConstraint}  from '../../draggable/constraints/fixed-y';
+import {Transition}  from './base';
+import {Vector2d}  from '../../../utils/math/geometry/vector-2d';
+import {cursor}  from '../../../utils/cached-vectors/cursor';
+import {eventHandler}  from '../../../utils/event/event-handler';
+import {getSign}  from '../../../utils/math/get-sign';
+import {getVisibleDistanceBetweenElements}  from '../../../utils/dom/position/get-visible-distance-between-elements';
+import {max}  from '../../../utils/iterable/max';
+import {min}  from '../../../utils/iterable/min';
+import {renderLoop}  from '../../../utils/render-loop';
+import {sum}  from '../../../utils/math/sum';
+import {translate2d}  from '../../../utils/dom/position/translate-2d';
+import {ICarousel} from "../interfaces";
 
 const SLIDE_INTERACTION = Symbol('Slide Interaction');
 const GESTURE_MOVEMENT_THRESHOLD = 20;
 
 class Slide extends Transition {
-  constructor(step = 50) {
+  private step_: number;
+
+  constructor(step: number = 50) {
     super();
     this.step_ = step;
   }
 
-  init(target, carousel) {
+  public init(target: HTMLElement, carousel: ICarousel): void {
     Slide.initPosition_(target, carousel);
     Slide.initDraggableSlides_(carousel);
   }
 
-  static initDraggableSlides_(carousel) {
+  private static initDraggableSlides_(carousel: ICarousel): void {
     carousel.getSlides()
       .forEach(
         (slide) => {
           const draggable =
             new Draggable(slide, {constraints: [new FixedYConstraint()]});
           eventHandler.addListener(
-            draggable, DragStart, (event) => Slide.startInteraction_(carousel));
+            draggable,
+            DragStart,
+            (event: DragStart) => Slide.startInteraction_(carousel));
           eventHandler.addListener(
             draggable,
             Drag,
-            (event) => Slide.handleDrag_(event, carousel));
+            (event: Drag) => Slide.handleDrag_(event, carousel));
           eventHandler.addListener(
-            draggable, DragEnd, (event) => Slide.endInteraction_(carousel));
+            draggable,
+            DragEnd,
+            (event: DragEnd) => Slide.endInteraction_(carousel));
         });
   }
 
-  static startInteraction_(carousel) {
+  private static startInteraction_(carousel: ICarousel): void {
     carousel.startInteraction(SLIDE_INTERACTION);
   }
 
-  static endInteraction_(carousel) {
+  private static endInteraction_(carousel: ICarousel): void {
     carousel.endInteraction(SLIDE_INTERACTION);
     const gestureDistance = cursor.getClient().getPressedGestureDelta().x;
     if (Math.abs(gestureDistance) < GESTURE_MOVEMENT_THRESHOLD) {
@@ -58,21 +65,21 @@ class Slide extends Transition {
     } else {
       const filterFn = gestureDistance > 0 ? min : max;
       const slideDistance =
-        (slide) =>
+        (slide: HTMLElement) =>
           getVisibleDistanceBetweenElements(slide, carousel.getContainer()).x;
       carousel.transitionToSlide(
         filterFn(carousel.getVisibleSlides(), slideDistance));
     }
   }
 
-  static handleDrag_(dragEvent, carousel) {
+  private static handleDrag_(dragEvent: Drag, carousel: ICarousel): void {
     Slide.transitionBeforeSlides_(
       dragEvent.getElement(), carousel, dragEvent.getDelta());
     Slide.transitionAfterSlides_(
       dragEvent.getElement(), carousel, dragEvent.getDelta());
   }
 
-  static initPosition_(target, carousel) {
+  private static initPosition_(target: HTMLElement, carousel: ICarousel): void {
     renderLoop.measure(() => {
       const translation =
         Slide.getTransitionTranslation_(target, carousel, Number.MAX_VALUE);
@@ -80,26 +87,32 @@ class Slide extends Transition {
     });
   }
 
-  static getTransitionTranslation_(target, carousel, step) {
+  private static getTransitionTranslation_(
+    target: HTMLElement, carousel: ICarousel, step: number
+  ): Vector2d {
     const xDistance =
       -getVisibleDistanceBetweenElements(target, carousel.getContainer()).x;
     const translateX = Math.min(step, Math.abs(xDistance)) * getSign(xDistance);
     return new Vector2d(translateX, 0);
   }
 
-  transition(target, carousel) {
+  public transition(target: HTMLElement, carousel: ICarousel): void {
     const translation =
       Slide.getTransitionTranslation_(target, carousel, this.step_);
     Slide.transition_(carousel.getActiveSlide(), carousel, translation);
   }
 
-  static transition_(activeSlide, carousel, translation) {
+  private static transition_(
+    activeSlide: HTMLElement, carousel: ICarousel, translation: Vector2d
+  ): void {
     Slide.transitionActiveSlide_(activeSlide, translation);
     Slide.transitionBeforeSlides_(activeSlide, carousel, translation);
     Slide.transitionAfterSlides_(activeSlide, carousel, translation);
   }
 
-  static transitionBeforeSlides_(activeSlide, carousel, translation) {
+  private static transitionBeforeSlides_(
+    activeSlide: HTMLElement, carousel: ICarousel, translation: Vector2d
+  ): void {
     this.getHalfBeforeActiveSlide_(carousel, activeSlide)
       .reduce(
         (previousSlides, slide) => {
@@ -109,7 +122,9 @@ class Slide extends Transition {
         }, []);
   }
 
-  static transitionAfterSlides_(activeSlide, carousel, translation) {
+  private static transitionAfterSlides_(
+    activeSlide: HTMLElement, carousel: ICarousel, translation: Vector2d
+  ): void {
     this.getHalfAfterActiveSlide_(carousel, activeSlide)
       .reduce(
         (previousSlides, slide) => {
@@ -119,16 +134,18 @@ class Slide extends Transition {
         }, []);
   }
 
-  static transitionActiveSlide_(slide, translation) {
+  private static transitionActiveSlide_(
+    slide: HTMLElement, translation: Vector2d
+  ): void {
     translate2d(slide, translation);
   }
 
-  static transitionBeforeSlide_(
-    slideToTransition,
-    activeSlide,
-    previousSlides,
-    translation
-  ) {
+  private static transitionBeforeSlide_(
+    slideToTransition: HTMLElement,
+    activeSlide: HTMLElement,
+    previousSlides: HTMLElement[],
+    translation: Vector2d
+  ): void {
     const currentOffset =
       getVisibleDistanceBetweenElements(slideToTransition, activeSlide);
     const desiredDistance =
@@ -139,12 +156,12 @@ class Slide extends Transition {
       desiredOffset.subtract(currentOffset).add(translation));
   }
 
-  static transitionAfterSlide_(
-    slideToTransition,
-    activeSlide,
-    previousSlides,
-    translation
-  ) {
+  private static transitionAfterSlide_(
+    slideToTransition: HTMLElement,
+    activeSlide: HTMLElement,
+    previousSlides: HTMLElement[],
+    translation: Vector2d
+  ): void {
     const currentOffset =
       getVisibleDistanceBetweenElements(slideToTransition, activeSlide);
     const desiredDistance =
@@ -155,23 +172,29 @@ class Slide extends Transition {
       desiredOffset.subtract(currentOffset).add(translation));
   }
 
-  static sumSlideWidths(...slides) {
+  public static sumSlideWidths(...slides: HTMLElement[]): number {
     return sum(...slides.map((slide) => slide.offsetWidth));
   }
 
-  static getHalfBeforeActiveSlide_(carousel, activeSlide) {
+  private static getHalfBeforeActiveSlide_(
+    carousel: ICarousel, activeSlide: HTMLElement
+  ): HTMLElement[] {
     return Slide.getHalfOfCarouselFromActive_(carousel, activeSlide, -1);
   }
 
-  static getHalfAfterActiveSlide_(carousel, activeSlide) {
+  static getHalfAfterActiveSlide_(
+    carousel: ICarousel, activeSlide: HTMLElement
+  ): HTMLElement[] {
     return Slide.getHalfOfCarouselFromActive_(carousel, activeSlide, 1);
   }
 
-  static getHalfOfCarouselFromActive_(carousel, activeSlide, direction) {
-    const slides = carousel.getSlides();
-    const length = Slide.getLengthOfHalfOfCarousel_(carousel, direction);
-    let indexToAdd = carousel.getSlideIndex(activeSlide);
-    const result = [];
+  static getHalfOfCarouselFromActive_(
+    carousel: ICarousel, activeSlide: HTMLElement, direction: number
+  ): HTMLElement[] {
+    const slides: HTMLElement[] = carousel.getSlides();
+    const length: number = Slide.getLengthOfHalfOfCarousel_(carousel, direction);
+    let indexToAdd: number = carousel.getSlideIndex(activeSlide);
+    const result: HTMLElement[] = [];
     while (result.length < length) {
       indexToAdd = (indexToAdd + direction + slides.length) % slides.length;
       result.push(slides[indexToAdd]);
@@ -179,7 +202,9 @@ class Slide extends Transition {
     return result;
   }
 
-  static getLengthOfHalfOfCarousel_(carousel, direction) {
+  static getLengthOfHalfOfCarousel_(
+    carousel: ICarousel, direction: number
+  ): number {
     // Adding half of the direction ensures that if there is an uneven number
     // to split along the carousel, it will always be on the right, the typical
     // direction of travel.
@@ -187,4 +212,4 @@ class Slide extends Transition {
   }
 }
 
-module.exports = Slide;
+export {Slide};

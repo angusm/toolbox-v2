@@ -1,8 +1,7 @@
-function removeFirstInstance(iterable, value) {
-    const values = [...iterable];
+function removeFirstInstance<T>(values: T[], value: T): T[] {
     return [
         ...values.slice(0, values.indexOf(value)),
         ...values.slice(values.indexOf(value) + 1)];
 }
 
-module.exports = removeFirstInstance;
+export {removeFirstInstance};

@@ -1,9 +1,9 @@
-const Draggable = require('../draggable/base');
-const FixedYConstraint = require('../draggable/constraints/fixed-y');
-const ContainerConstraint = require('../draggable/constraints/container');
+import {Draggable} from '../draggable/base';
+import {FixedYConstraint} from '../draggable/constraints/fixed-y';
+import {ContainerConstraint} from '../draggable/constraints/container';
 
 class HorizontalScroll {
-  constructor(element, container) {
+  constructor(element: HTMLElement, container: HTMLElement) {
     new Draggable(
       element,
       {
@@ -13,4 +13,4 @@ class HorizontalScroll {
   }
 }
 
-module.exports = HorizontalScroll;
+export {HorizontalScroll};

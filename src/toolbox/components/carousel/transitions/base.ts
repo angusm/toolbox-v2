@@ -1,14 +1,17 @@
-class Transition {
-    constructor() {}
+import {ICarousel, ITransition} from '../interfaces';
 
-    transition(targetSlide, carousel) {
-        console.error('Child class should override');
-    }
+abstract class Transition implements ITransition {
+  constructor() {
+  }
 
-    init(initialSlide, carousel) {
-        console.error('Child class should override, defaulting to transition');
-        this.transition(initialSlide, carousel);
-    }
+  public transition(targetSlide: Element, carousel: ICarousel): void {
+    console.error('Child class should override');
+  }
+
+  public init(initialSlide: Element, carousel: ICarousel): void {
+    console.error('Child class should override, defaulting to transition');
+    this.transition(initialSlide, carousel);
+  }
 }
 
-module.exports = Transition;
+export {Transition};

@@ -1,41 +1,55 @@
-const MultiValueArrayMap = require('../map/multi-value-array');
-const getAncestorClasses = require('../inheritance/get-ancestor-classes');
+import {MultiValueArrayMap} from '../map/multi-value-array';
+import {TbEvent, ITbEventConstructor} from './tb-event';
+import {getAncestorClasses} from '../inheritance/get-ancestor-classes';
 
-let uid = 0;
+type Callback = (e: TbEvent) => void;
+type CallbackSet = [any, ITbEventConstructor, Callback];
+type ListenerKey = any | ITbEventConstructor;
+
+let uid: number = 0;
 
 class EventHandler {
+  private listeners_: MultiValueArrayMap<ListenerKey, Callback>;
+  private callbacks_: Map<number, CallbackSet>;
+
   constructor() {
-    this.listeners_ = new MultiValueArrayMap();
-    this.callbacks_ = new Map();
+    this.listeners_ = new MultiValueArrayMap<ListenerKey, Callback>();
+    this.callbacks_ = new Map<number, CallbackSet>();
   }
 
-  addListener(target, EventClass, callback) {
-    this.listeners_.get(target, EventClass).push(callback);
-    const listenerId = uid++;
+  public addListener(
+    target: any, EventClass: ITbEventConstructor, callback: Callback
+  ): number {
+    const listenerId: number = uid++;
+    this.listeners_.get([target, EventClass]).push(callback);
     this.callbacks_.set(listenerId, [target, EventClass, callback]);
     return listenerId;
   }
 
-  removeListener(listenerId) {
-    if (this.callbacks_.has(listenerId)) {
-      const [target, EventClass, callback] = this.callbacks_.get(listenerId);
-      const callbacks = this.listeners_.get(target, EventClass);
-      callbacks.splice(callbacks.indexOf(callback));
-      this.callbacks_.delete(listenerId);
+  public removeListener(listenerId: number): void {
+    if (!this.callbacks_.has(listenerId)) {
+      return;
     }
+    const [target, EventClass, callback]: CallbackSet =
+      this.callbacks_.get(listenerId);
+    const callbacks: Callback[] = this.listeners_.get([target, EventClass]);
+    callbacks.splice(callbacks.indexOf(callback));
+    this.callbacks_.delete(listenerId);
   }
 
-  dispatchEvent(event) {
-    const LeafClass = event.constructor;
+  public dispatchEvent(event: TbEvent): void {
+    const LeafClass: ITbEventConstructor = <typeof TbEvent>event.constructor;
     const AncestorClasses = [LeafClass, ...getAncestorClasses(LeafClass)];
     [LeafClass, ...AncestorClasses]
       .forEach(
         (EventClass) => {
           this.listeners_
-            .get(event.getTarget(), EventClass)
+            .get([event.getTarget(), EventClass])
             .forEach((callback) => callback(event));
         });
   }
 }
 
-module.exports = new EventHandler();
+const eventHandler: EventHandler = new EventHandler();
+
+export {eventHandler};
