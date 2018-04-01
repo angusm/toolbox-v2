@@ -1,13 +1,14 @@
 import {renderLoop} from "../../utils/render-loop";
 import {isScrolledPast} from "../../utils/dom/position/is-scrolled-past";
 import {updateClassModifiers} from "../../utils/dom/update-class-modifiers";
+import {CommonSelector} from "../../utils/dom/common-selector";
 
 const CLASS_NAME = 'tb-id-marker';
 
 class IdMarker {
   private selector_: string;
 
-  constructor(selector: string = '[id]') {
+  constructor(selector: string = CommonSelector.DEEP_LINK_TARGETS) {
     this.selector_ = selector;
     this.init_();
   }
