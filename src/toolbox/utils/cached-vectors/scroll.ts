@@ -1,5 +1,6 @@
 import {CachedElementVector} from './cached-element-vector';
 import {Vector2d} from '../math/geometry/vector-2d';
+import {getScrollElement} from "../dom/position/get-scroll-element";
 
 class Scroll extends CachedElementVector {
   constructor(element: HTMLElement = null) {
@@ -22,9 +23,7 @@ class Scroll extends CachedElementVector {
     if (this.element) {
       return this.element.scrollLeft;
     } else {
-      return window.pageXOffset ||
-        document.body.scrollLeft ||
-        document.documentElement.scrollLeft;
+      return window.pageXOffset || getScrollElement().scrollLeft;
     }
   }
 
@@ -32,9 +31,7 @@ class Scroll extends CachedElementVector {
     if (this.element) {
       return this.element.scrollTop;
     } else {
-      return window.pageYOffset ||
-        document.body.scrollTop ||
-        document.documentElement.scrollTop;
+      return window.pageYOffset || getScrollElement().scrollTop;
     }
   }
 

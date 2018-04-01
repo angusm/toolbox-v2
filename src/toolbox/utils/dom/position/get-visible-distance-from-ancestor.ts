@@ -3,8 +3,6 @@ import {Vector2d} from '../../math/geometry/vector-2d';
 import {frameMemoize} from '../../frame-memoize';
 
 const scroll: Scroll = Scroll.getSingleton<Scroll>();
-const memoized = frameMemoize(getVisibleDistanceFromAncestor_);
-const memoized_ = frameMemoize(getVisibleDistanceFromAncestor__);
 const ZERO_VECTOR: Vector2d = new Vector2d();
 
 function getVisibleDistanceFromAncestor__(
@@ -31,5 +29,8 @@ function getVisibleDistanceFromAncestor_(
     Vector2d.fromElementScroll(element),
     memoized_(element, ancestor));
 }
+
+const memoized = frameMemoize(getVisibleDistanceFromAncestor_);
+const memoized_ = frameMemoize(getVisibleDistanceFromAncestor__);
 
 export {memoized as getVisibleDistanceFromAncestor};

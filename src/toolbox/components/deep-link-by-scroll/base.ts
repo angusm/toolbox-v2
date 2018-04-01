@@ -24,13 +24,11 @@ function updateClassList(anchorId: string) {
 
 class DeepLinkByScroll {
   private alterHash_: boolean;
-  private lastHash_: string;
   private getCurrentAnchor_: () => Node;
 
   constructor(getCurrentAnchorFn: () => Node, alterHash: boolean = true) {
     this.alterHash_ = alterHash;
     this.getCurrentAnchor_ = getCurrentAnchorFn;
-    this.lastHash_ = null;
     this.init_();
   }
 
@@ -42,10 +40,11 @@ class DeepLinkByScroll {
 
   render_(): void {
     renderLoop.measure(() => {
+      renderLoop.cleanup(() => this.render_());
       const currentAnchor: HTMLElement = <HTMLElement>this.getCurrentAnchor_();
 
       // Do nothing if the hash hasn't changed.
-      if (window.location.hash === currentAnchor.id) {
+      if (window.location.hash === '#' + currentAnchor.id) {
         return;
       }
 
@@ -58,7 +57,6 @@ class DeepLinkByScroll {
         window.location.hash = currentAnchor.id;
         setScrollTop(currentScroll); // Reset the scroll position
       });
-      renderLoop.cleanup(() => this.render_());
     });
   }
 }
