@@ -1,5 +1,6 @@
 import {CachedElementVector} from './cached-element-vector';
 import {Dimensions2d} from '../math/geometry/dimensions-2d';
+import {getAncestorDimensions} from "../dom/position/get-ancestor-dimensions";
 
 class Dimensions extends CachedElementVector {
   constructor(element: HTMLElement = null) {
@@ -15,10 +16,7 @@ class Dimensions extends CachedElementVector {
   }
 
   protected getValues(): number[] {
-    return [
-      this.element ? this.element.offsetWidth : window.innerWidth,
-      this.element ? this.element.offsetHeight : window.innerHeight
-    ];
+    return getAncestorDimensions(this.element).getValues();
   }
 }
 
