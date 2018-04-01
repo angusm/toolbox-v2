@@ -2,7 +2,7 @@ import {isFullyVisible} from '../position/is-fully-visible';
 import {CommonSelector} from "../common-selector";
 import {frameMemoize} from "../../frame-memoize";
 import {getDistanceUntilVisible} from "../position/get-distance-until-visible";
-import {getClosestToCenter} from "../position/get-closest-to-center";
+import {min} from "../../array/min";
 
 function getCurrentAnchorByVisibleOrSeen_(
   querySelector: string = CommonSelector.DEEP_LINK_TARGETS
@@ -19,7 +19,8 @@ function getCurrentAnchorByVisibleOrSeen_(
   const eligibleAnchors: HTMLElement[] =
     anchors.filter((anchor) => getDistanceUntilVisible(anchor).y <= 0);
 
-  return getClosestToCenter(eligibleAnchors);
+  //noinspection JSSuspiciousNameCombination
+  return min(eligibleAnchors, (a) => Math.abs(getDistanceUntilVisible(a).y));
 }
 
 // Frame memoize as it is likely this will be used by both DeepLinkByScroll and
