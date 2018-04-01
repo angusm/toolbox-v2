@@ -43,11 +43,6 @@ class DeepLinkByScroll {
       renderLoop.cleanup(() => this.render_());
       const currentAnchor: HTMLElement = <HTMLElement>this.getCurrentAnchor_();
 
-      // Do nothing if the hash hasn't changed.
-      if (window.location.hash === '#' + currentAnchor.id) {
-        return;
-      }
-
       renderLoop.mutate(() => {
         updateClassList(currentAnchor.id);
         if (!this.alterHash_) {
