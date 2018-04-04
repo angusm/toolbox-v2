@@ -2,6 +2,7 @@ import {Scroll} from '../../utils/cached-vectors/scroll';
 import {renderLoop} from '../../utils/render-loop';
 import {setScrollTop} from '../../utils/dom/position/set-scroll-top';
 import {CommonSelector} from "../../utils/dom/common-selector";
+import {Vector2d} from "../../utils/math/geometry/vector-2d";
 
 const windowScroll: Scroll = Scroll.getSingleton<Scroll>();
 
@@ -26,13 +27,22 @@ class DeepLinkByScroll {
     renderLoop.measure(() => {
       renderLoop.cleanup(() => this.render_());
 
+      // Do nothing if there's been no scrolling
+      if (windowScroll.getDelta<Vector2d>().getLength() === 0) {
+        return;
+      }
+
       const currentAnchorId: string =
         (<HTMLElement>this.getCurrentAnchor_(this.querySelector_)).id;
-      const currentScroll = windowScroll.getPosition().y;
 
+      // Do nothing if the hash hasn't changed
       if (window.location.hash === `#${currentAnchorId}`) {
         return;
       }
+
+      // Store the current scroll position so we can reset it after changing
+      // the hash.
+      const currentScroll = windowScroll.getPosition().y;
 
       renderLoop.mutate(() => {
         window.location.hash = currentAnchorId;
