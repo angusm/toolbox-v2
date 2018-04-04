@@ -7,12 +7,12 @@ import {addClassIfMissing} from "../../utils/dom/class/add-class-if-missing";
 const CLASS_NAME = 'tb-id-marker';
 
 class ActiveOnDeepLink {
-  private getCurrentAnchor_: (querySelector: string) => Node;
+  private getCurrentAnchor_: (querySelector: string) => HTMLElement;
   private baseClass_: string;
   private anchorTargetsQuerySelector_: string;
 
   constructor(
-    getCurrentAnchorFn: (querySelector: string) => Node,
+    getCurrentAnchorFn: (querySelector: string) => HTMLElement,
     baseClass: string = CLASS_NAME,
     querySelector: string = CommonSelector.DEEP_LINK_TARGETS,
   ) {

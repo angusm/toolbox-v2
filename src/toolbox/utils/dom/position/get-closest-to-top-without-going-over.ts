@@ -4,8 +4,8 @@ type Distance = [HTMLElement, number];
 type AbsDistance = [HTMLElement, number, number];
 
 function getClosestToTopWithoutGoingOver(
-  nodelist: NodeList, container: HTMLElement = null
-): Node {
+  elements: HTMLElement[], container: HTMLElement = null
+): HTMLElement {
   function getDistanceFromTop(element: HTMLElement): number {
     return getVisibleDistanceBetweenElements(element, container).y;
   }
@@ -18,7 +18,7 @@ function getClosestToTopWithoutGoingOver(
     return [element, distance, Math.abs(distance)];
   }
 
-  const distances: Distance[] = Array.from(nodelist).map(mapElementToDistance);
+  const distances: Distance[] = elements.map(mapElementToDistance);
   const absDistances: AbsDistance[] = distances.map(mapDistancesToAbs);
 
   const sortedDistances: AbsDistance[] =

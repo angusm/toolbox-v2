@@ -3,7 +3,7 @@ import {isAbove} from "../position/is-above";
 
 function hasAnchorBeenSeen(
   id: string,
-  getCurrentAnchorFn: (querySelector: string) => Node,
+  getCurrentAnchorFn: (querySelector: string) => HTMLElement,
   anchorsQuerySelector: string = CommonSelector.DEEP_LINK_TARGETS
 ): boolean {
   const currentAnchor: HTMLElement =

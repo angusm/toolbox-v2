@@ -3,6 +3,7 @@ import {CommonSelector} from "../common-selector";
 import {frameMemoize} from "../../frame-memoize";
 import {getDistanceUntilVisible} from "../position/get-distance-until-visible";
 import {min} from "../../array/min";
+import {getDisplayedAnchors} from "./get-displayed-anchors";
 
 function getCurrentAnchorBySeen_(
   querySelector: string = CommonSelector.DEEP_LINK_TARGETS
@@ -14,8 +15,7 @@ function getCurrentAnchorBySeen_(
       return anchorElement;
     }
   }
-  const anchors: HTMLElement[] =
-    <HTMLElement[]>Array.from(document.querySelectorAll(querySelector));
+  const anchors: HTMLElement[] = getDisplayedAnchors(querySelector);
   const eligibleAnchors: HTMLElement[] =
     anchors.filter((anchor) => getDistanceUntilVisible(anchor).y < 0);
 

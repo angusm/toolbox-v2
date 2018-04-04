@@ -5,11 +5,11 @@ import {CommonSelector} from "../../utils/dom/common-selector";
 const CLASS_NAME: string = 'tb-deep-link-by-scroll';
 
 class DeepLinkMarker {
-  private getCurrentAnchor_: (querySelector: string) => Node;
+  private getCurrentAnchor_: (querySelector: string) => HTMLElement;
   private querySelector_: string;
 
   constructor(
-    getCurrentAnchorFn: (querySelector: string) => Node,
+    getCurrentAnchorFn: (querySelector: string) => HTMLElement,
     querySelector: string = CommonSelector.DEEP_LINK_TARGETS
   ) {
     this.getCurrentAnchor_ = getCurrentAnchorFn;

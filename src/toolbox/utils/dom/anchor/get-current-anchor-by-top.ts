@@ -2,20 +2,21 @@ import {getClosestToTopWithoutGoingOver} from '../position/get-closest-to-top-wi
 import {isFullyVisible} from '../position/is-fully-visible';
 import {CommonSelector} from "../common-selector";
 import {frameMemoize} from "../../frame-memoize";
+import {getDisplayedAnchors} from "./get-displayed-anchors";
 
 
 function getCurrentAnchorByTop_(
   querySelector: string = CommonSelector.DEEP_LINK_TARGETS
-): Node {
+): HTMLElement {
   const hash: string = window.location.hash;
   if (hash) {
-    const anchorElement: Node = document.querySelector(hash);
-    if (anchorElement && isFullyVisible(<HTMLElement>anchorElement)) {
+    const anchorElement: HTMLElement = <HTMLElement>document.querySelector(hash);
+    if (anchorElement && isFullyVisible(anchorElement)) {
       return anchorElement;
     }
   }
-  const anchors: NodeList = document.querySelectorAll(querySelector);
-  return getClosestToTopWithoutGoingOver(anchors);
+
+  return getClosestToTopWithoutGoingOver(getDisplayedAnchors(querySelector));
 }
 
 const getCurrentAnchorByTop = frameMemoize(getCurrentAnchorByTop_);

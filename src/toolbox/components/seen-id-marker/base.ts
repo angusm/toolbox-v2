@@ -6,11 +6,11 @@ import {updateClassModifiers} from "../../utils/dom/class/update-class-modifiers
 const CLASS_NAME = 'tb-id-marker';
 
 class SeenIdMarker {
-  private getCurrentAnchor_: (querySelector: string) => Node;
+  private getCurrentAnchor_: (querySelector: string) => HTMLElement;
   private querySelector_: string;
 
   constructor(
-    getCurrentAnchorFn: (querySelector: string) => Node,
+    getCurrentAnchorFn: (querySelector: string) => HTMLElement,
     querySelector: string = CommonSelector.DEEP_LINK_TARGETS,
   ) {
     this.getCurrentAnchor_ = getCurrentAnchorFn;

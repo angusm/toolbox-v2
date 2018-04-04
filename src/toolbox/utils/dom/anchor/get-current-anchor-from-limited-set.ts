@@ -1,8 +1,9 @@
 import {getClosestToCenter} from '../position/get-closest-to-center';
 import {frameMemoize} from "../../frame-memoize";
 import {isAbove} from "../position/is-above";
+import {getDisplayedAnchors} from "./get-displayed-anchors";
 
-type getAnchorFn = (querySelector: string) => Node;
+type getAnchorFn = (querySelector: string) => HTMLElement;
 
 function getCurrentAnchorFromLimitedSet_(
   limitedQuerySelector: string, getCurrentAnchor: getAnchorFn
@@ -10,9 +11,9 @@ function getCurrentAnchorFromLimitedSet_(
   return frameMemoize(function(querySelector: string) {
     const baseResult: HTMLElement =
       <HTMLElement>getCurrentAnchor(querySelector);
+
     const limitedCandidates: HTMLElement[] =
-      <HTMLElement[]>
-        Array.from(document.querySelectorAll(limitedQuerySelector));
+      getDisplayedAnchors(limitedQuerySelector);
 
     if (limitedCandidates.indexOf(baseResult) !== -1) {
       return baseResult;
