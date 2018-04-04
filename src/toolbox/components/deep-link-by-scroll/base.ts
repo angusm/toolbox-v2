@@ -33,10 +33,10 @@ class DeepLinkByScroll {
       }
 
       const currentAnchorId: string =
-        (<HTMLElement>this.getCurrentAnchor_(this.querySelector_)).id;
+        `#${(<HTMLElement>this.getCurrentAnchor_(this.querySelector_)).id}`;
 
       // Do nothing if the hash hasn't changed
-      if (window.location.hash === `#${currentAnchorId}`) {
+      if (window.location.hash === currentAnchorId) {
         return;
       }
 
@@ -45,7 +45,7 @@ class DeepLinkByScroll {
       const currentScroll = windowScroll.getPosition().y;
 
       renderLoop.mutate(() => {
-        window.location.hash = currentAnchorId;
+        history.replaceState(undefined, undefined, currentAnchorId);
         setScrollTop(currentScroll); // Reset the scroll position
       });
     });
