@@ -9,7 +9,7 @@ import {getDisplayedAnchors} from "../../utils/dom/anchor/get-displayed-anchors"
 
 const CLASS_NAME = 'tb-active-on-seen';
 
-class ActiveOnSeen {
+class ActiveOnSeenId {
   private getCurrentAnchor_: (querySelector: string) => HTMLElement;
   private baseClass_: string;
   private anchorTargetsQuerySelector_: string;
@@ -69,4 +69,4 @@ class ActiveOnSeen {
   }
 }
 
-export {ActiveOnSeen};
+export {ActiveOnSeenId};
