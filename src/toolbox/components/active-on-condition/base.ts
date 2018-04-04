@@ -2,7 +2,7 @@ import {renderLoop} from "../../utils/render-loop";
 import {removeClassModifiers} from "../../utils/dom/class/remove-class-modifiers";
 import {addClassIfMissing} from "../../utils/dom/class/add-class-if-missing";
 import {subtract} from "../../utils/array/subtract";
-import {isPastBottomQuarter} from "../../utils/dom/position/is-past-bottom-quarter";
+import {isPastBottomQuarter} from "../../utils/dom/position/is-past-bottom-fraction/quarter";
 
 const MODIFIER = 'active';
 
