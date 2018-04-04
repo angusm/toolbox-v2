@@ -2,7 +2,7 @@ import {UserAgent} from "../../utils/user-agent/user-agent";
 import {renderLoop} from "../../utils/render-loop";
 import {updateClassModifiers} from "../../utils/dom/class/update-class-modifiers";
 
-const CLASS_NAME = 'os-marker';
+const CLASS_NAME = 'tb-os-marker';
 
 class OSMarker {
   constructor() {
