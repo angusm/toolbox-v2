@@ -19,9 +19,13 @@ class Dimensions2d extends Vector {
   }
 
   public static fromElementOffset<T extends Dimensions2d>(
-    element: HTMLElement
+    element: HTMLElement = null
   ): T {
-    return <T>new this(element.offsetWidth, element.offsetHeight);
+    if (element) {
+      return <T>new this(element.offsetWidth, element.offsetHeight);
+    } else {
+      return this.fromInnerWindow();
+    }
   }
 
   public static fromInnerWindow<T extends Dimensions2d>() {

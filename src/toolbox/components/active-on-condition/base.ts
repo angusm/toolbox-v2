@@ -1,21 +1,23 @@
 import {renderLoop} from "../../utils/render-loop";
 import {removeClassModifiers} from "../../utils/dom/class/remove-class-modifiers";
 import {addClassIfMissing} from "../../utils/dom/class/add-class-if-missing";
-import {isVisible} from "../../utils/dom/position/is-visible";
 import {subtract} from "../../utils/array/subtract";
+import {isPastBottomQuarter} from "../../utils/dom/position/is-past-bottom-quarter";
 
-const CLASS_NAME = 'tb-active-on-visible';
 const MODIFIER = 'active';
 
-class ActiveOnVisible {
+class ActiveOnCondition {
   private baseClass_: string;
+  private conditionFn_: (element: HTMLElement) => boolean;
   private modifier_: string;
 
   constructor(
-    baseClass: string = CLASS_NAME,
+    baseClass: string,
+    conditionFn: (element: HTMLElement) => boolean,
     modifier: string = MODIFIER,
   ) {
     this.baseClass_ = baseClass;
+    this.conditionFn_ = conditionFn,
     this.modifier_ = modifier;
     this.init_();
   }
@@ -33,7 +35,8 @@ class ActiveOnVisible {
           document.querySelectorAll(`.${this.baseClass_}`));
 
       const candidatesToDeactivate: HTMLElement[] =
-        candidates.filter((candidate: HTMLElement) => !isVisible(candidate));
+        candidates.filter(
+          (candidate: HTMLElement) => !this.conditionFn_(candidate));
       const candidatesToActivate: HTMLElement[] =
         subtract(candidates, candidatesToDeactivate);
 
@@ -52,4 +55,4 @@ class ActiveOnVisible {
   }
 }
 
-export {ActiveOnVisible};
+export {ActiveOnCondition};
