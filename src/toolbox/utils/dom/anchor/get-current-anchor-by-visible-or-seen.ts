@@ -1,24 +1,21 @@
-import {isFullyVisible} from '../position/is-fully-visible';
 import {CommonSelector} from "../common-selector";
 import {frameMemoize} from "../../frame-memoize";
 import {getDistanceUntilVisible} from "../position/get-distance-until-visible";
 import {min} from "../../array/min";
 import {getDisplayedAnchors} from "./get-displayed-anchors";
+import {getAnchorElementFromHash} from "./get-anchor-element-from-hash";
+import {isAnchorElementFromHashFullyVisible} from "./is-anchor-element-from-hash-fully-visible";
 
 function getCurrentAnchorByVisibleOrSeen_(
   querySelector: string = CommonSelector.DEEP_LINK_TARGETS
 ): HTMLElement {
-  const hash = window.location.hash;
-  if (hash) {
-    const anchorElement: HTMLElement =
-      <HTMLElement>document.querySelector(hash);
-    if (anchorElement && isFullyVisible(anchorElement)) {
-      return anchorElement;
-    }
+  if (isAnchorElementFromHashFullyVisible()) {
+    return getAnchorElementFromHash();
   }
-  const anchors: HTMLElement[] = getDisplayedAnchors(querySelector);
+
   const eligibleAnchors: HTMLElement[] =
-    anchors.filter((anchor) => getDistanceUntilVisible(anchor).y <= 0);
+    getDisplayedAnchors(querySelector)
+      .filter((anchor) => getDistanceUntilVisible(anchor).y <= 0);
 
   //noinspection JSSuspiciousNameCombination
   return min(eligibleAnchors, (a) => Math.abs(getDistanceUntilVisible(a).y));
