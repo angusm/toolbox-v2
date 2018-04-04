@@ -31,8 +31,7 @@ class ActiveOnDeepLink {
       renderLoop.cleanup(() => this.render_());
 
       const currentAnchorId: string =
-        (<HTMLElement>this.getCurrentAnchor_(this.anchorTargetsQuerySelector_))
-          .id;
+        this.getCurrentAnchor_(this.anchorTargetsQuerySelector_).id;
       const candidates: NodeList =
         document.querySelectorAll(`.${this.baseClass_}`);
 
