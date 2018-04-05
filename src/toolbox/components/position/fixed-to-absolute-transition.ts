@@ -3,8 +3,7 @@ import {setStyle} from "../../utils/dom/style/set-style";
 import {FixedPosition} from "../../utils/dom/style/fixed-position";
 import {AbsolutePosition} from "../../utils/dom/style/absolute-position";
 
-const initialPosition =
-  new FixedPosition('initial', 'initial', 'initial', 'initial');
+const initialPosition = new FixedPosition('', '', '', '');
 
 /**
  * Used to push fixed position elements up and out of the way as a footer comes
