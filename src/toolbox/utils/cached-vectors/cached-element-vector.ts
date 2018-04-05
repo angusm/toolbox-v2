@@ -5,18 +5,21 @@ import {renderLoop} from '../render-loop';
 
 const VALUE_LIMIT: number = 2;
 
-type InnerCache = MultiValueDynamicDefaultMap<any, CachedElementVector>;
+type InnerCache = MultiValueDynamicDefaultMap<any, CachedElementVector<Vector>>;
 
-const caches: DynamicDefaultMap<CachedElementVector, InnerCache> =
+const caches: DynamicDefaultMap<CachedElementVector<Vector>, InnerCache> =
   DynamicDefaultMap.usingFunction<any, any>(
     (Class) => {
       return MultiValueDynamicDefaultMap.usingFunction(
         (args: any[]) => new Class(...args));
     });
 
-class CachedElementVector {
+class CachedElementVector<T extends Vector> {
+  protected static VectorClass: typeof Vector = Vector;
+  protected static VALUE_LIMIT: number = VALUE_LIMIT;
+
   protected element: HTMLElement;
-  private values: Vector[];
+  private values: T[];
 
   constructor(element: any = null, ...args: any[]) {
     const instanceByElement = caches.get(this.constructor);
@@ -30,12 +33,12 @@ class CachedElementVector {
     }
 
     this.element = element;
-    this.values = [new (this[Symbol.species].getVectorClass())()];
+    this.values = <T[]>[new (<typeof CachedElementVector>this.constructor).VectorClass()];
     this.init();
   }
 
-  protected static getVectorClass(): typeof Vector {
-    return Vector;
+  private getVectorClass(): typeof Vector {
+    return (<typeof CachedElementVector>this.constructor).VectorClass;
   }
 
   private init(): void {
@@ -45,7 +48,7 @@ class CachedElementVector {
     this.render();
   }
 
-  private getLastValue(): Vector {
+  public getLastValue(): T {
     return this.values.slice(-1)[0];
   }
 
@@ -54,8 +57,12 @@ class CachedElementVector {
     return [];
   }
 
-  protected getCurrentVector<T extends Vector>(): T {
-    return <T>new (this[Symbol.species].getVectorClass())(...this.getValues());
+  private getCurrentVector_(): T {
+    return <T>new (this.getVectorClass())(...this.getValues());
+  }
+
+  private getValueLimit_(): number {
+    return (<typeof CachedElementVector>this.constructor).VALUE_LIMIT;
   }
 
   private render(): void {
@@ -68,41 +75,29 @@ class CachedElementVector {
   private measureValues(): void {
     this.values =
       this.values
-        .slice(-(this[Symbol.species].getValueLimit() - 1))
-        .concat([this.getCurrentVector()]);
+        .slice(-(this.getValueLimit_() - 1))
+        .concat([this.getCurrentVector_()]);
   }
 
   private getCurrentAndLastValue(): Vector[] {
     return this.values.slice(-2);
   }
 
-  public getDelta<T extends Vector>(): T {
+  public getDelta(): T {
     const values = this.getCurrentAndLastValue();
-    return <T>this[Symbol.species].getVectorClass()
-      .subtract(values[0], values[1]);
+    return <T>this.getVectorClass().subtract(values[0], values[1]);
   }
 
   public hasChanged(): boolean {
-    return !this[Symbol.species].getVectorClass()
-      .areEqual(...this.getCurrentAndLastValue());
+    return !this.getVectorClass().areEqual(...this.getCurrentAndLastValue());
   }
 
-  private static getValueLimit(): number {
-    return VALUE_LIMIT;
+  public static getForElement(...args: any[]): any {
+    return caches.get(this).get(args);
   }
 
-  public static getForElement<T extends CachedElementVector>(
-    ...args: any[]
-  ): T {
-    return <T>caches.get(this).get(args);
-  }
-
-  public static getSingleton<T extends CachedElementVector>(): T {
-    return <T>caches.get(this).get([null]);
-  }
-
-  public get [Symbol.species](): typeof CachedElementVector {
-    return <typeof CachedElementVector>this.constructor;
+  public static getSingleton(): any {
+    return caches.get(this).get([null]);
   }
 }
 

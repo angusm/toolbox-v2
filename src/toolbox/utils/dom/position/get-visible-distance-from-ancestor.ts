@@ -2,7 +2,7 @@ import {Scroll} from '../../cached-vectors/scroll';
 import {Vector2d} from '../../math/geometry/vector-2d';
 import {frameMemoize} from '../../frame-memoize';
 
-const scroll: Scroll = Scroll.getSingleton<Scroll>();
+const scroll: Scroll = Scroll.getSingleton();
 const ZERO_VECTOR: Vector2d = new Vector2d();
 
 function getVisibleDistanceFromAncestor__(

@@ -11,8 +11,8 @@ import {VisibleDimensions} from '../cached-vectors/visible-dimensions';
 import {VisibleDistance} from '../cached-vectors/visible-distance';
 import {renderLoop} from '../render-loop';
 
-const windowDimensions: Dimensions = Dimensions.getSingleton<Dimensions>();
-const windowScroll: Scroll = Scroll.getSingleton<Scroll>();
+const windowDimensions: Dimensions = Dimensions.getSingleton();
+const windowScroll: Scroll = Scroll.getSingleton();
 
 class ElementMask{
   private fixedEl_: HTMLElement;
@@ -26,11 +26,9 @@ class ElementMask{
     fixedElement: HTMLElement, maskElement: HTMLElement, buffer: number = 0
   ) {
     this.fixedEl_ = fixedElement;
-    this.maskDimensions_ = Dimensions.getForElement<Dimensions>(maskElement);
-    this.maskVisibleDimensions_ =
-      VisibleDimensions.getForElement<VisibleDimensions>(maskElement);
-    this.maskPosition_ =
-      VisibleDistance.getForElement<VisibleDistance>(maskElement);
+    this.maskDimensions_ = Dimensions.getForElement(maskElement);
+    this.maskVisibleDimensions_ = VisibleDimensions.getForElement(maskElement);
+    this.maskPosition_ = VisibleDistance.getForElement(maskElement);
     this.stopped_ = false;
     this.buffer_ = buffer;
     this.init_();

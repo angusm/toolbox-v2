@@ -12,6 +12,14 @@ class VisibleDimensions extends Dimensions {
   protected getValues(): number[] {
     return getVisibleDimensions(this.element, this.container_).getValues();
   }
+
+  public static getForElement(...args: any[]): VisibleDimensions {
+    return <VisibleDimensions>Dimensions.getForElement(...args);
+  }
+
+  public static getSingleton(): VisibleDimensions {
+    return <VisibleDimensions>Dimensions.getSingleton();
+  }
 }
 
 export {VisibleDimensions};

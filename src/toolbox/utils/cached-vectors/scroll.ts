@@ -1,18 +1,19 @@
 import {CachedElementVector} from './cached-element-vector';
 import {Vector2d} from '../math/geometry/vector-2d';
 import {getScrollElement} from "../dom/position/get-scroll-element";
+import {Dimensions} from "./dimensions";
+import {Dimensions2d} from "../math/geometry/dimensions-2d";
+import {zip} from "../array/zip";
 
-class Scroll extends CachedElementVector {
+class Scroll extends CachedElementVector<Vector2d> {
+  protected static VectorClass: typeof Vector2d = Vector2d;
+
   constructor(element: HTMLElement = null) {
     super(element);
   }
 
-  protected static getVectorClass(): typeof Vector2d {
-    return Vector2d;
-  }
-
   public getPosition(): Vector2d {
-    return this.getCurrentVector<Vector2d>();
+    return this.getLastValue();
   }
 
   protected getValues(): number[] {
@@ -35,20 +36,40 @@ class Scroll extends CachedElementVector {
     }
   }
 
+  public getScrollPercent(): Vector2d {
+    const scrollableDimensions: number[] =
+      Dimensions.getForElement(getScrollElement())
+        .getLastValue()
+        .subtract(Dimensions.getForElement().getLastValue())
+        .getValues();
+    const scrollPositions: number[] = this.getValues();
+    const zippedValues: number[][] = zip(scrollPositions, scrollableDimensions);
+    return new Vector2d(
+      ...zippedValues.map(([pos, len]: [number, number]) => pos / len));
+  }
+
   public isScrollingDown(): boolean {
-    return this.getDelta<Vector2d>().y > 0;
+    return this.getDelta().y > 0;
   }
 
   public isScrollingUp(): boolean {
-    return this.getDelta<Vector2d>().y < 0;
+    return this.getDelta().y < 0;
   }
 
   public isScrollingRight(): boolean {
-    return this.getDelta<Vector2d>().x > 0;
+    return this.getDelta().x > 0;
   }
 
   public isScrollingLeft(): boolean {
-    return this.getDelta<Vector2d>().x < 0;
+    return this.getDelta().x < 0;
+  }
+
+  public static getForElement(...args: any[]): Scroll {
+    return <Scroll>CachedElementVector.getForElement(...args);
+  }
+
+  public static getSingleton(): Scroll {
+    return <Scroll>CachedElementVector.getSingleton();
   }
 }
 

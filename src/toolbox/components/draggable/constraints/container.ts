@@ -11,15 +11,13 @@ class ContainerConstraint extends Constraint {
 
   constructor(container: HTMLElement) {
     super();
-    this.constrainingDimensions_ =
-      CachedDimensions.getForElement<CachedDimensions>(container);
+    this.constrainingDimensions_ = CachedDimensions.getForElement(container);
     this.container_ = container;
   }
 
   constrainDelta(draggable: IDraggable, delta: Vector2d) {
     const draggableDimensions: Dimensions2d =
-      CachedDimensions.getForElement<CachedDimensions>(draggable.getElement())
-        .getDimensions();
+      CachedDimensions.getForElement(draggable.getElement()).getDimensions();
     const containerDimensions: Dimensions2d =
       this.constrainingDimensions_.getDimensions();
 
@@ -32,8 +30,7 @@ class ContainerConstraint extends Constraint {
 
     const currentDistance: Vector2d =
       CachedVisibleDistance
-        .getForElement<CachedVisibleDistance>(
-          draggable.getElement(), this.container_)
+        .getForElement(draggable.getElement(), this.container_)
         .getDistance();
 
     const clampedDistance: Vector2d =

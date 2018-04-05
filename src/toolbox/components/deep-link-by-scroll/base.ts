@@ -2,9 +2,8 @@ import {Scroll} from '../../utils/cached-vectors/scroll';
 import {renderLoop} from '../../utils/render-loop';
 import {setScrollTop} from '../../utils/dom/position/set-scroll-top';
 import {CommonSelector} from "../../utils/dom/common-selector";
-import {Vector2d} from "../../utils/math/geometry/vector-2d";
 
-const windowScroll: Scroll = Scroll.getSingleton<Scroll>();
+const windowScroll: Scroll = Scroll.getSingleton();
 
 class DeepLinkByScroll {
   private getCurrentAnchor_: (querySelector: string) => HTMLElement;
@@ -28,7 +27,7 @@ class DeepLinkByScroll {
       renderLoop.cleanup(() => this.render_());
 
       // Do nothing if there's been no scrolling
-      if (windowScroll.getDelta<Vector2d>().getLength() === 0) {
+      if (windowScroll.getDelta().getLength() === 0) {
         return;
       }
 

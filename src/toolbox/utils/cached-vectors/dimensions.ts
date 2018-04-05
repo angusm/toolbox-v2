@@ -2,21 +2,27 @@ import {CachedElementVector} from './cached-element-vector';
 import {Dimensions2d} from '../math/geometry/dimensions-2d';
 import {getAncestorDimensions} from "../dom/position/get-ancestor-dimensions";
 
-class Dimensions extends CachedElementVector {
+class Dimensions extends CachedElementVector<Dimensions2d> {
+  protected static VectorClass: typeof Dimensions2d = Dimensions2d;
+
   constructor(element: HTMLElement = null) {
     super(element);
   }
 
-  protected static getVectorClass(): typeof Dimensions2d {
-    return Dimensions2d;
-  }
-
   public getDimensions(): Dimensions2d {
-    return this.getCurrentVector<Dimensions2d>();
+    return this.getLastValue();
   }
 
   protected getValues(): number[] {
     return getAncestorDimensions(this.element).getValues();
+  }
+
+  public static getForElement(...args: any[]): Dimensions {
+    return <Dimensions>CachedElementVector.getForElement(...args);
+  }
+
+  public static getSingleton(): Dimensions {
+    return <Dimensions>CachedElementVector.getSingleton();
   }
 }
 
