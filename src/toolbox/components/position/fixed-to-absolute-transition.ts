@@ -42,13 +42,18 @@ class FixedToAbsoluteTransition {
   }
 
   private absolutePosition_(): void {
-    setStyle(this.targetElement_, 'position', 'absolute');
-    this.getAbsolutePositionFn_().positionElement(this.targetElement_);
+    const position = this.getAbsolutePositionFn_();
+    renderLoop.mutate(() => {
+      setStyle(this.targetElement_, 'position', 'absolute');
+      position.positionElement(this.targetElement_);
+    });
   }
 
   private fixPosition_(): void {
-    setStyle(this.targetElement_, 'position', 'fixed');
-    initialPosition.positionElement(this.targetElement_);
+    renderLoop.mutate(() => {
+      setStyle(this.targetElement_, 'position', 'fixed');
+      initialPosition.positionElement(this.targetElement_);
+    });
   }
 }
 
