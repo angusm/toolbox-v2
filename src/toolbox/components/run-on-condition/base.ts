@@ -4,6 +4,7 @@ class RunOnCondition {
   private actionFn_: () => void;
   private conditionFn_: () => boolean;
   private alternateFn_: () => void;
+  private lastValue_: boolean;
 
   constructor(
     actionFn: () => void,
@@ -16,6 +17,10 @@ class RunOnCondition {
     this.init_();
   }
 
+  protected shouldRun_(newValue: boolean): boolean {
+    return this.lastValue_ !== newValue;
+  }
+
   private init_(): void {
     this.render_();
   }
@@ -24,12 +29,16 @@ class RunOnCondition {
     renderLoop.measure(() => {
       renderLoop.cleanup(() => this.render_());
 
-      if (this.conditionFn_()) {
-        this.actionFn_();
-      } else if (this.alternateFn_) {
-        this.alternateFn_();
+      const conditionResult = this.conditionFn_();
+      if (this.shouldRun_(conditionResult)) {
+        if (conditionResult) {
+          this.actionFn_();
+        } else if (this.alternateFn_) {
+          this.alternateFn_();
+        }
       }
 
+      this.lastValue_ = conditionResult;
     });
   }
 }
