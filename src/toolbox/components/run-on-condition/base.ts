@@ -1,6 +1,6 @@
 import {renderLoop} from "../../utils/render-loop";
 
-class ActiveOnCondition {
+class RunOnCondtion {
   private actionFn_: () => void;
   private conditionFn_: () => boolean;
 
@@ -30,4 +30,4 @@ class ActiveOnCondition {
   }
 }
 
-export {ActiveOnCondition};
+export {RunOnCondtion};
