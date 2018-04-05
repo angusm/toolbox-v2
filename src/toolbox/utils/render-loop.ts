@@ -34,18 +34,19 @@ type RenderFunction = () => void;
 type RenderFunctionMap = Map<RenderFunctionID, RenderFunction>;
 
 class RenderLoop {
-  private static singleton: RenderLoop = null;
+  private static singleton_: RenderLoop = null;
 
-  private scheduledFns:
-    DynamicDefaultMap<symbol, RenderFunctionMap>;
-  private fps: number;
+  private fps_: number;
+  private lastRun_: number;
+  private scheduledFns_: DynamicDefaultMap<symbol, RenderFunctionMap>;
 
   constructor() {
-    this.scheduledFns =
+    this.scheduledFns_ =
       DynamicDefaultMap
         .usingFunction<symbol, RenderFunctionMap>(
           (unused: symbol) => new Map<RenderFunctionID, RenderFunction>());
-    this.fps = FPS;
+    this.fps_ = FPS;
+    this.lastRun_ = null;
     this.runLoop();
   }
 
@@ -70,25 +71,31 @@ class RenderLoop {
   }
 
   public setFps(fps: number): void {
-    this.fps = fps;
+    this.fps_ = fps;
   }
 
   private addFnToStep(fn: RenderFunction, step: symbol): RenderFunctionID {
     const renderFn = new RenderFunctionID(step);
-    this.scheduledFns.get(step).set(renderFn, fn);
+    this.scheduledFns_.get(step).set(renderFn, fn);
     return renderFn;
   }
 
   private getTimeUntilNextRun(): number {
-    return 1000 / this.fps;
+    return new Date().valueOf() - (this.lastRun_ + (1000 / this.fps_));
   }
 
   private runLoop(): void {
+    this.lastRun_ = new Date().valueOf();
+
     this.runFns();
     const timeUntilNextRun = this.getTimeUntilNextRun();
-    setTimeout(
-      () => window.requestAnimationFrame(() => this.runLoop()),
-      timeUntilNextRun);
+    if (timeUntilNextRun > 2) {
+      setTimeout(
+        () => window.requestAnimationFrame(() => this.runLoop()),
+        timeUntilNextRun);
+    } else {
+      window.requestAnimationFrame(() => this.runLoop())
+    }
   }
 
   private runFns(): void {
@@ -96,20 +103,20 @@ class RenderLoop {
   }
 
   private runFnsForStep(step: symbol): void {
-    const fns = this.scheduledFns.get(step).values();
+    const fns = this.scheduledFns_.get(step).values();
     let nextFn;
     while (nextFn = fns.next().value) {
       nextFn();
     }
-    this.scheduledFns.set(step, new Map());
+    this.scheduledFns_.set(step, new Map());
   }
 
   public clear(renderFn: RenderFunctionID): void {
-    this.scheduledFns.get(renderFn.step).delete(renderFn);
+    this.scheduledFns_.get(renderFn.step).delete(renderFn);
   }
 
   public static getSingleton(): RenderLoop {
-    return RenderLoop.singleton = RenderLoop.singleton || new this();
+    return RenderLoop.singleton_ = RenderLoop.singleton_ || new this();
   }
 }
 
