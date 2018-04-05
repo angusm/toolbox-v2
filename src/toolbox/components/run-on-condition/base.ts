@@ -25,9 +25,9 @@ class RunOnCondition {
       renderLoop.cleanup(() => this.render_());
 
       if (this.conditionFn_()) {
-        renderLoop.mutate(() => this.actionFn_());
+        this.actionFn_();
       } else if (this.alternateFn_) {
-        renderLoop.mutate(() => this.alternateFn_());
+        this.alternateFn_();
       }
 
     });
