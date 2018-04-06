@@ -85,7 +85,6 @@ class RenderLoop {
   }
 
   private runLoop(): void {
-    console.log(1000 / (new Date().valueOf() - this.lastRun_));
     this.lastRun_ = new Date().valueOf();
 
     this.runFns();
