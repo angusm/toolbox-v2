@@ -39,14 +39,8 @@ class DeepLinkByScroll {
         return;
       }
 
-      // Store the current scroll position so we can reset it after changing
-      // the hash.
-      const currentScroll = windowScroll.getPosition().y;
-
-      renderLoop.mutate(() => {
-        history.replaceState(undefined, undefined, currentAnchorId);
-        setScrollTop(currentScroll); // Reset the scroll position
-      });
+      renderLoop.mutate(
+        () => history.replaceState(undefined, undefined, currentAnchorId));
     });
   }
 }
