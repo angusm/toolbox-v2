@@ -26,14 +26,15 @@ class CachedElementVector<T extends Vector> {
 
     if (instanceByElement.has([element, ...args])) {
       if (element) {
-        console.error('Please use getForElement instead of new.');
+        throw new Error('Please use getForElement instead of new.');
       } else {
-        console.error('Please use getSingleton instead of new.');
+        throw new Error('Please use getSingleton instead of new.');
       }
     }
 
     this.element = element;
-    this.values = <T[]>[new (<typeof CachedElementVector>this.constructor).VectorClass()];
+    this.values =
+      <T[]>[new (<typeof CachedElementVector>this.constructor).VectorClass()];
     this.init();
   }
 
@@ -53,8 +54,7 @@ class CachedElementVector<T extends Vector> {
   }
 
   protected getValues(): number[] {
-    console.error('getValues must be overridden by child class');
-    return [];
+    throw new Error('getValues must be overridden by child class');
   }
 
   private getCurrentVector_(): T {
@@ -67,8 +67,8 @@ class CachedElementVector<T extends Vector> {
 
   private render(): void {
     renderLoop.premeasure(() => {
-      this.measureValues();
       renderLoop.cleanup(() => this.render());
+      this.measureValues();
     });
   }
 
