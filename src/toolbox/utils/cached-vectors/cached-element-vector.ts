@@ -14,7 +14,7 @@ const caches: DynamicDefaultMap<CachedElementVector<Vector>, InnerCache> =
         (args: any[]) => new Class(...args));
     });
 
-class CachedElementVector<T extends Vector> {
+abstract class CachedElementVector<T extends Vector> {
   protected static VectorClass: typeof Vector = Vector;
   protected static VALUE_LIMIT: number = VALUE_LIMIT;
 
