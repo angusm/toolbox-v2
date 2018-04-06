@@ -5,9 +5,8 @@ import {renderLoop} from '../render-loop';
 
 const VALUE_LIMIT: number = 2;
 
-type InnerCache = MultiValueDynamicDefaultMap<any, CachedElementVector<Vector>>;
-
-const caches: DynamicDefaultMap<CachedElementVector<Vector>, InnerCache> =
+type InnerCache = MultiValueDynamicDefaultMap<any, any>;
+const caches: DynamicDefaultMap<any, InnerCache> =
   DynamicDefaultMap.usingFunction<any, any>(
     (Class) => {
       return MultiValueDynamicDefaultMap.usingFunction(
