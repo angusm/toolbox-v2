@@ -21,11 +21,11 @@ class VisibleDistance extends CachedElementVector<Vector2d> {
   }
 
   public static getForElement(...args: any[]): VisibleDistance {
-    return <VisibleDistance>CachedElementVector.getForElement(...args);
+    return <VisibleDistance>CachedElementVector.getForElement.bind(this)(...args);
   }
 
   public static getSingleton(): VisibleDistance {
-    return <VisibleDistance>CachedElementVector.getSingleton();
+    return <VisibleDistance>CachedElementVector.getSingleton.bind(this)();
   }
 }
 

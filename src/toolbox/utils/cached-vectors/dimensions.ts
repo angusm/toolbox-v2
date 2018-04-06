@@ -18,11 +18,11 @@ class Dimensions extends CachedElementVector<Dimensions2d> {
   }
 
   public static getForElement(...args: any[]): Dimensions {
-    return <Dimensions>CachedElementVector.getForElement(...args);
+    return <Dimensions>CachedElementVector.getForElement.bind(this)(...args);
   }
 
   public static getSingleton(): Dimensions {
-    return <Dimensions>CachedElementVector.getSingleton();
+    return <Dimensions>CachedElementVector.getSingleton.bind(this)();
   }
 }
 
