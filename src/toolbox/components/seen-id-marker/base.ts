@@ -24,6 +24,8 @@ class SeenIdMarker {
 
   private render_(): void {
     renderLoop.measure(() => {
+      renderLoop.cleanup(() => this.render_());
+
       const currentAnchor: HTMLElement =
         <HTMLElement>this.getCurrentAnchor_(this.querySelector_);
 
@@ -36,8 +38,6 @@ class SeenIdMarker {
 
       renderLoop.mutate(
         () => updateClassModifiers(html, CLASS_NAME, scrolledPastIds));
-
-      renderLoop.cleanup(() => this.render_());
     });
   }
 }

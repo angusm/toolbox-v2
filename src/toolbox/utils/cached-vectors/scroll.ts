@@ -2,7 +2,6 @@ import {CachedElementVector} from './cached-element-vector';
 import {Vector2d} from '../math/geometry/vector-2d';
 import {getScrollElement} from "../dom/position/get-scroll-element";
 import {Dimensions} from "./dimensions";
-import {Dimensions2d} from "../math/geometry/dimensions-2d";
 import {zip} from "../array/zip";
 
 class Scroll extends CachedElementVector<Vector2d> {
