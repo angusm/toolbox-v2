@@ -1,6 +1,6 @@
 import {DynamicDefaultMap} from './map/dynamic-default';
 
-class Step {
+class RenderStep {
   public static readonly CLEANUP = Symbol('Cleanup');
   public static readonly FRAME_COUNT = Symbol('Frame Count');
   public static readonly MEASURE = Symbol('Measure');
@@ -9,11 +9,11 @@ class Step {
 }
 
 const STEP_ORDER: Array<symbol> = [
-  Step.FRAME_COUNT,
-  Step.PRE_MEASURE,
-  Step.MEASURE,
-  Step.MUTATE,
-  Step.CLEANUP,
+  RenderStep.FRAME_COUNT,
+  RenderStep.PRE_MEASURE,
+  RenderStep.MEASURE,
+  RenderStep.MUTATE,
+  RenderStep.CLEANUP,
 ];
 
 const FPS = Number.MAX_VALUE;
@@ -51,23 +51,23 @@ class RenderLoop {
   }
 
   public framecount(fn: RenderFunction): RenderFunctionID {
-    return this.addFnToStep(fn, Step.FRAME_COUNT);
+    return this.addFnToStep(fn, RenderStep.FRAME_COUNT);
   }
 
   public premeasure(fn: RenderFunction): RenderFunctionID {
-    return this.addFnToStep(fn, Step.PRE_MEASURE)
+    return this.addFnToStep(fn, RenderStep.PRE_MEASURE)
   }
 
   public measure(fn: RenderFunction): RenderFunctionID {
-    return this.addFnToStep(fn, Step.MEASURE);
+    return this.addFnToStep(fn, RenderStep.MEASURE);
   }
 
   public mutate(fn: RenderFunction): RenderFunctionID {
-    return this.addFnToStep(fn, Step.MUTATE);
+    return this.addFnToStep(fn, RenderStep.MUTATE);
   }
 
   public cleanup(fn: RenderFunction): RenderFunctionID {
-    return this.addFnToStep(fn, Step.CLEANUP);
+    return this.addFnToStep(fn, RenderStep.CLEANUP);
   }
 
   public setFps(fps: number): void {

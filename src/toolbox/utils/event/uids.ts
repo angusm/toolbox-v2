@@ -1,5 +1,5 @@
 import {DynamicDefaultMap} from '../map/dynamic-default';
-import {TbEvent} from "./tb-event";
+import {TbEvent} from "./events/tb-event";
 
 let uid_: number = 0;
 const uids: DynamicDefaultMap<typeof TbEvent, string> =

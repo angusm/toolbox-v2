@@ -1,51 +1,97 @@
 import {MultiValueArrayMap} from '../map/multi-value-array';
-import {TbEvent, ITbEventConstructor} from './tb-event';
+import {TbEvent, ITbEventConstructor} from './events/tb-event';
 import {getAncestorClasses} from '../inheritance/get-ancestor-classes';
+import {UidIterator} from "../uid-iterator";
 
 type Callback = (e: TbEvent) => void;
-type CallbackSet = [any, ITbEventConstructor, Callback];
 type ListenerKey = any | ITbEventConstructor;
 
-let uid: number = 0;
+class CallbackGroup {
+  private target_: any;
+  private EventClass_: ITbEventConstructor;
+  private callback_: Callback;
+  private destroy_: () => void;
+
+  constructor(
+    target: any,
+    EventClass: ITbEventConstructor,
+    callback: Callback,
+    destroy: () => void
+  ) {
+    this.target_ = target;
+    this.EventClass_ = EventClass;
+    this.callback_ = callback;
+    this.destroy_ = destroy;
+  }
+
+  public get target(): any {
+    return this.target_;
+  }
+
+  public get EventClass(): ITbEventConstructor {
+    return this.EventClass_;
+  }
+
+  public get callback(): Callback {
+    return this.callback_;
+  }
+
+  public get destroy(): () => void {
+    return this.destroy_;
+  }
+}
+
+function getParentEvents(event: TbEvent): ITbEventConstructor[] {
+  const LeafClass: ITbEventConstructor = <typeof TbEvent>event.constructor;
+  return <ITbEventConstructor[]>[LeafClass, ...getAncestorClasses(LeafClass)];
+}
+
+const uids = new UidIterator();
 
 class EventHandler {
-  private listeners_: MultiValueArrayMap<ListenerKey, Callback>;
-  private callbacks_: Map<number, CallbackSet>;
+  private listeners_: MultiValueArrayMap<ListenerKey, CallbackGroup>;
+  private uidsToCallbackGroups_: Map<number, CallbackGroup>;
 
   constructor() {
-    this.listeners_ = new MultiValueArrayMap<ListenerKey, Callback>();
-    this.callbacks_ = new Map<number, CallbackSet>();
+    this.listeners_ = new MultiValueArrayMap<ListenerKey, CallbackGroup>();
+    this.uidsToCallbackGroups_ = new Map<number, CallbackGroup>();
   }
 
   public addListener(
     target: any, EventClass: ITbEventConstructor, callback: Callback
   ): number {
-    const listenerId: number = uid++;
-    this.listeners_.get([target, EventClass]).push(callback);
-    this.callbacks_.set(listenerId, [target, EventClass, callback]);
-    return listenerId;
+    const destroyFn: () => void = EventClass.createWatcher(target);
+    const cbGroup = new CallbackGroup(target, EventClass, callback, destroyFn);
+
+    this.listeners_.get([target, EventClass]).push(cbGroup);
+
+    const uid = uids.next().value;
+    this.uidsToCallbackGroups_.set(uid, cbGroup);
+
+    return uid;
   }
 
-  public removeListener(listenerId: number): void {
-    if (!this.callbacks_.has(listenerId)) {
-      return;
-    }
-    const [target, EventClass, callback]: CallbackSet =
-      this.callbacks_.get(listenerId);
-    const callbacks: Callback[] = this.listeners_.get([target, EventClass]);
-    callbacks.splice(callbacks.indexOf(callback));
-    this.callbacks_.delete(listenerId);
+  public removeListener(uid: number): void {
+    const cbGroup = this.uidsToCallbackGroups_.get(uid);
+    this.uidsToCallbackGroups_.delete(uid);
+
+    cbGroup.destroy();
+    const callbacks: CallbackGroup[] =
+      this.listeners_.get([cbGroup.target, cbGroup.EventClass]);
+    callbacks.splice(callbacks.indexOf(cbGroup));
+  }
+
+  private getCallbacks(target: any, EventClass: ITbEventConstructor) {
+    return this.listeners_.get([target, EventClass]);
   }
 
   public dispatchEvent(event: TbEvent): void {
-    const LeafClass: ITbEventConstructor = <typeof TbEvent>event.constructor;
-    const AncestorClasses = [LeafClass, ...getAncestorClasses(LeafClass)];
-    [LeafClass, ...AncestorClasses]
+    getParentEvents(event)
       .forEach(
         (EventClass) => {
-          this.listeners_
-            .get([event.getTarget(), EventClass])
-            .forEach((callback) => callback(event));
+          this.getCallbacks(event.getTarget(), EventClass)
+            .forEach(
+              (callbackGroup: CallbackGroup) => callbackGroup.callback(event));
         });
   }
 }
