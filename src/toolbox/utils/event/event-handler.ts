@@ -1,7 +1,8 @@
 import {MultiValueArrayMap} from '../map/multi-value-array';
-import {TbEvent, ITbEventConstructor} from './events/tb-event';
+import {TbEvent} from './events/tb-event';
 import {getAncestorClasses} from '../inheritance/get-ancestor-classes';
 import {UidIterator} from "../uid-iterator";
+import {ITbEventConstructor} from "./interfaces/tb-event";
 
 type Callback = (e: TbEvent) => void;
 type ListenerKey = any | ITbEventConstructor;

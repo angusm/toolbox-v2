@@ -1,20 +1,16 @@
-
 import {UidIterator} from "../../uid-iterator";
 import {renderLoop} from "../../render-loop";
-import {isVisible} from "../../dom/position/is-visible";
 import {eventHandler} from "../event-handler";
-import {IsVisible} from "../events/is-visible";
-import {ITbEventConstructor, TbEvent} from "../events/tb-event";
+import {TbEvent} from "../events/tb-event";
 import {DynamicDefaultMap} from "../../map/dynamic-default";
-
-/**
- * Dispatches events for an element when it meets a condition
- */
 
 const uidMap =
   DynamicDefaultMap
     .usingFunction<Function, UidIterator>(() => new UidIterator());
 
+/**
+ * Dispatches events for an element when it meets a condition
+ */
 abstract class ElementMeetsConditionTracker {
   private trackedElements_: Map<number, HTMLElement>;
 

@@ -1,13 +1,5 @@
 import {noop} from "../../noop";
-
-interface ITbEvent {
-  getTarget(): any;
-}
-
-interface ITbEventConstructor {
-  new (...args: any[]): ITbEvent;
-  createWatcher(target: any): () => void;
-}
+import {ITbEvent} from "../interfaces/tb-event";
 
 class TbEvent implements ITbEvent{
   private target_: any;
@@ -31,8 +23,4 @@ class TbEvent implements ITbEvent{
   }
 }
 
-export {
-  ITbEvent,
-  ITbEventConstructor,
-  TbEvent,
-};
+export {TbEvent};
