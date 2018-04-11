@@ -4,6 +4,7 @@ import {addClassIfMissing} from "../../utils/dom/class/add-class-if-missing";
 import {SeenBottomForDuration} from "../../utils/event/events/seen-bottom-for-duration";
 import {removeClassModifiers} from "../../utils/dom/class/remove-class-modifiers";
 import {removeClassIfPresent} from "../../utils/dom/class/remove-class-if-present";
+import {IsBottomVisible} from "../../utils/event/events/is-bottom-visible";
 
 interface ICSSClassOptions {
   base?: string;
@@ -59,18 +60,32 @@ class MeteredProgressiveDisclosure {
       zip<HTMLElement>(shiftedTargets, this.targets_)
         .slice(1, this.targets_.length);
 
-    targetsWithNext.forEach(
-      ([target, next]: [HTMLElement, HTMLElement]) => {
+    this.setupSequence_(targetsWithNext);
+  }
+
+  private setupSequence_(targetsWithNext: HTMLElement[][]): void {
+    if (targetsWithNext.length === 0) {
+      return;
+    }
+
+    const [target, next]: HTMLElement[] = targetsWithNext[0];
+    const remaining = targetsWithNext.slice(1);
+
+    eventHandler.addListener(
+      target,
+      this.getSeenForDurationClass_(),
+      () => {
         eventHandler.addListener(
           target,
-          this.getSeenForDurationClass_(),
+          IsBottomVisible,
           () => {
             addClassIfMissing(next, this.getActiveCSSClass_());
             removeClassIfPresent(next, this.getInactiveCSSClass_());
+            this.setupSequence_(remaining);
           }
         );
       }
-    )
+    );
   }
 
   private getActiveCSSClass_() {
