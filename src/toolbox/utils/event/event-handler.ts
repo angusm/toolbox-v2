@@ -74,6 +74,12 @@ class EventHandler {
 
   public removeListener(uid: number): void {
     const cbGroup = this.uidsToCallbackGroups_.get(uid);
+
+    // Handle listeners being removed from multiple places
+    if (typeof cbGroup === 'undefined') {
+      return;
+    }
+
     this.uidsToCallbackGroups_.delete(uid);
 
     cbGroup.destroy();

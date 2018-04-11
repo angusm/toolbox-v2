@@ -34,19 +34,23 @@ class SeenBottomForDuration extends TbEvent {
   }
 
   public static createWatcher(target: Element): () => void {
+    let timeoutUid: number = -1;
     const uid: number =
       eventHandler.addListener(
         target,
         IsBottomVisible,
         () => {
           eventHandler.removeListener(uid);
-          setTimeout(
+          timeoutUid = setTimeout(
             () => {
               eventHandler.dispatchEvent(new this(target));
             }, this.getThreshold())
         }
       );
-    return () => eventHandler.removeListener(uid);
+    return () => {
+      eventHandler.removeListener(uid);
+      clearTimeout(timeoutUid);
+    };
   }
 }
 
