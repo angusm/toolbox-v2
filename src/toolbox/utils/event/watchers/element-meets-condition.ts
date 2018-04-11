@@ -20,7 +20,7 @@ abstract class ElementMeetsConditionTracker {
   }
 
   private init_(): void {
-    renderLoop.measure(() => this.render_);
+    renderLoop.measure(() => this.render_());
   }
 
   private render_(): void {
