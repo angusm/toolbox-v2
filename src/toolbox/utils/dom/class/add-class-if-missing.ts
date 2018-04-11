@@ -1,7 +1,11 @@
+import {renderLoop} from "../../render-loop";
+
 function addClassIfMissing(element: Element, classToAdd: string): void {
-  if (!element.classList.contains(classToAdd)) {
-    element.classList.add(classToAdd);
-  }
+  renderLoop.measure(() => {
+    if (!element.classList.contains(classToAdd)) {
+      renderLoop.mutate(() => element.classList.add(classToAdd));
+    }
+  });
 }
 
 export {addClassIfMissing};
