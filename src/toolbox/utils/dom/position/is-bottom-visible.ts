@@ -9,7 +9,7 @@ function isBottomVisible(
   factorInOpacity: boolean = false
 ): boolean {
   const acceptableRange: Range =
-    new Range(0, -Dimensions2d.fromElementOffset(container).height);
+    new Range(-Dimensions2d.fromElementOffset(container).height, 0);
   return isVisible(target, container, factorInOpacity) &&
     acceptableRange
       .contains(getVisibleDistanceBetweenElementBottoms(target, container));
