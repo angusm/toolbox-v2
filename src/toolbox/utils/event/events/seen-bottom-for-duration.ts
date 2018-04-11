@@ -1,29 +1,31 @@
 import {TbEvent} from "./tb-event";
 import {DynamicDefaultMap} from "../../map/dynamic-default";
 import {eventHandler} from "../event-handler";
-import {IsVisible} from "./is-visible";
+import {IsBottomVisible} from "./is-bottom-visible";
 
-class SeenForXMs extends TbEvent {
+// TODO(Angus): Consolidate this and SeenForDuration
+
+class SeenBottomForDuration extends TbEvent {
   private static classesByThreshold_:
-    DynamicDefaultMap<number, typeof SeenForXMs> =
-      DynamicDefaultMap.usingFunction<number, typeof SeenForXMs>(
+    DynamicDefaultMap<number, typeof SeenBottomForDuration> =
+      DynamicDefaultMap.usingFunction<number, typeof SeenBottomForDuration>(
         (threshold: number) => {
 
-          class SeenForXMsChild extends SeenForXMs {
+          class SeenBottomForDurationChild extends SeenBottomForDuration {
             public static setThreshold(threshold: number): void {
               if (this.msThreshold_ === 0) { // Set only once
                 this.msThreshold_ = threshold;
               }
             }
           }
-          SeenForXMsChild.setThreshold(threshold);
+          SeenBottomForDurationChild.setThreshold(threshold);
 
-          return SeenForXMsChild;
+          return SeenBottomForDurationChild;
         });
 
   protected static msThreshold_: number = 0;
 
-  public static getClassForXMs(threshold: number): typeof SeenForXMs {
+  public static getClassforDuration(threshold: number): typeof SeenBottomForDuration {
     return this.classesByThreshold_.get(threshold);
   }
 
@@ -32,10 +34,10 @@ class SeenForXMs extends TbEvent {
   }
 
   public static createWatcher(target: Element): () => void {
-    const uid =
+    const uid: number =
       eventHandler.addListener(
         target,
-        IsVisible,
+        IsBottomVisible,
         () => {
           eventHandler.removeListener(uid);
           setTimeout(
@@ -48,4 +50,4 @@ class SeenForXMs extends TbEvent {
   }
 }
 
-export {SeenForXMs};
+export {SeenBottomForDuration};

@@ -1,7 +1,7 @@
 import {zip} from "../../utils/array/zip";
 import {eventHandler} from "../../utils/event/event-handler";
-import {SeenForXMs} from "../../utils/event/events/seen-for-x-ms";
 import {addClassIfMissing} from "../../utils/dom/class/add-class-if-missing";
+import {SeenBottomForDuration} from "../../utils/event/events/seen-bottom-for-duration";
 
 interface ICSSClassOptions {
   base?: string;
@@ -47,7 +47,7 @@ class MeteredProgressiveDisclosure {
       ([target, next]: [HTMLElement, HTMLElement]) => {
         eventHandler.addListener(
           target,
-          this.getSeenForXMsClass_(),
+          this.getSeenForDurationClass_(),
           () => addClassIfMissing(next, this.getActiveCSSClass_())
         );
       }
@@ -58,8 +58,8 @@ class MeteredProgressiveDisclosure {
     return `${this.baseClass_}--${this.modifier_}`;
   }
 
-  private getSeenForXMsClass_() {
-    return SeenForXMs.getClassForXMs(this.threshold_);
+  private getSeenForDurationClass_() {
+    return SeenBottomForDuration.getClassforDuration(this.threshold_);
   }
 }
 
