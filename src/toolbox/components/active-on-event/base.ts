@@ -1,7 +1,5 @@
 import {renderLoop} from "../../utils/render-loop";
-import {removeClassModifiers} from "../../utils/dom/class/remove-class-modifiers";
 import {addClassIfMissing} from "../../utils/dom/class/add-class-if-missing";
-import {subtract} from "../../utils/array/subtract";
 import {TbEvent} from "../../utils/event/events/tb-event";
 import {eventHandler} from "../../utils/event/event-handler";
 
