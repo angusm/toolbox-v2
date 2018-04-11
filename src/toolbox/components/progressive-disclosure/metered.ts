@@ -38,7 +38,7 @@ class MeteredProgressiveDisclosure {
     const shiftedTargets: HTMLElement[] = [null, ...this.targets_];
     const targetsWithNext: HTMLElement[][] =
       zip<HTMLElement>(shiftedTargets, this.targets_)
-        .slice(0, this.targets_.length);
+        .slice(1, this.targets_.length);
 
     targetsWithNext.forEach(
       ([target, next]: [HTMLElement, HTMLElement]) => {
