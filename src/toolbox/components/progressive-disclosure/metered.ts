@@ -35,6 +35,9 @@ class MeteredProgressiveDisclosure {
   }
 
   private init_(): void {
+    this.targets_
+      .forEach((target) => addClassIfMissing(target, this.baseClass_));
+
     const shiftedTargets: HTMLElement[] = [null, ...this.targets_];
     const targetsWithNext: HTMLElement[][] =
       zip<HTMLElement>(shiftedTargets, this.targets_)
