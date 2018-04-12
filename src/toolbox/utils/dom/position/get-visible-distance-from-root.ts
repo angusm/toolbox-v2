@@ -7,10 +7,10 @@ const scroll: Scroll = Scroll.getSingleton();
 const ZERO_VECTOR: Vector2d = new Vector2d();
 
 function getVisibleDistanceFromRoot__(element: HTMLElement): Vector2d {
-  if (getStyle(element, 'position') === 'fixed') {
-    return Vector2d.fromElementOffset(element);
-  } else if (!element || element === document.body) {
+  if (!element || element === document.body) {
     return ZERO_VECTOR;
+  } else if (getStyle(element, 'position') === 'fixed') {
+    return Vector2d.fromElementOffset(element);
   } else {
     return Vector2d.add<Vector2d>(
       Vector2d.fromElementOffset(element),
