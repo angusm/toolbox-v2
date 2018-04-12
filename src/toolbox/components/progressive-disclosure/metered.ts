@@ -10,6 +10,7 @@ interface ICSSClassOptions {
   activeModifier?: string;
   inactiveModifier?: string;
   timerStartedModifier?: string;
+  timerEndedModifier?: string;
   transitionTime?: number;
 }
 
@@ -18,6 +19,7 @@ const DefaultClassOptions = Object.freeze({
   activeModifier: 'active',
   inactiveModifier: 'inactive',
   timerStartedModifier: 'timer-started',
+  timerEndedModifier: 'timer-ended',
 });
 
 class MeteredProgressiveDisclosure {
@@ -27,6 +29,7 @@ class MeteredProgressiveDisclosure {
   private activeModifier_: string;
   private inactiveModifier_: string;
   private timerStartedModifier_: string;
+  private timerEndedModifier_: string;
   private transitionTime_: number;
 
   constructor(
@@ -37,6 +40,7 @@ class MeteredProgressiveDisclosure {
       activeModifier = DefaultClassOptions.activeModifier,
       inactiveModifier = DefaultClassOptions.inactiveModifier,
       timerStartedModifier = DefaultClassOptions.timerStartedModifier,
+      timerEndedModifier = DefaultClassOptions.timerEndedModifier,
       transitionTime = 0,
     }: ICSSClassOptions,
   ) {
@@ -46,6 +50,7 @@ class MeteredProgressiveDisclosure {
     this.activeModifier_ = activeModifier;
     this.inactiveModifier_ = inactiveModifier;
     this.timerStartedModifier_ = timerStartedModifier;
+    this.timerEndedModifier_ = timerEndedModifier;
     this.transitionTime_ = transitionTime;
     this.init_();
   }
@@ -94,6 +99,8 @@ class MeteredProgressiveDisclosure {
           this.getSeenForDurationClass_(),
           () => {
             eventHandler.removeListener(seenForDurationListener);
+            addClassIfMissing(target, this.getTimerEndedCSSClass_());
+            removeClassIfPresent(target, this.getTimerStartedCSSClass_());
             addClassIfMissing(next, this.getActiveCSSClass_());
             removeClassIfPresent(next, this.getInactiveCSSClass_());
             this.setupSequence_(remaining, this.transitionTime_);
@@ -111,6 +118,10 @@ class MeteredProgressiveDisclosure {
 
   private getTimerStartedCSSClass_() {
     return `${this.baseClass_}--${this.timerStartedModifier_}`;
+  }
+
+  private getTimerEndedCSSClass_() {
+    return `${this.baseClass_}--${this.timerEndedModifier_}`;
   }
 
   private getSeenForDurationClass_() {
