@@ -27,7 +27,7 @@ abstract class ElementMeetsConditionTracker {
     renderLoop.measure(() => {
       renderLoop.cleanup(() => this.render_());
 
-      Array.from(this.trackedElements_.values())
+      Array.from(new Set(this.trackedElements_.values()))
         .filter((el: HTMLElement) => this.doesElementMeetCondition(el))
         .forEach(
           (el: HTMLElement) => {
