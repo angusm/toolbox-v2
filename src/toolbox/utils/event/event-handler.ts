@@ -85,7 +85,7 @@ class EventHandler {
     cbGroup.destroy();
     const callbacks: CallbackGroup[] =
       this.listeners_.get([cbGroup.target, cbGroup.EventClass]);
-    callbacks.splice(callbacks.indexOf(cbGroup));
+    callbacks.splice(callbacks.indexOf(cbGroup), 1);
   }
 
   private getCallbacks(target: any, EventClass: ITbEventConstructor) {
