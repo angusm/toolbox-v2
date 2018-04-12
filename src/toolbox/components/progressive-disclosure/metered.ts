@@ -83,16 +83,9 @@ class MeteredProgressiveDisclosure {
           this.getSeenForDurationClass_(),
           () => {
             eventHandler.removeListener(seenForDurationListener);
-            const isBottomVisibleListener: number =
-              eventHandler.addListener(
-                target,
-                IsBottomVisible,
-                () => {
-                  eventHandler.removeListener(isBottomVisibleListener);
-                  addClassIfMissing(next, this.getActiveCSSClass_());
-                  removeClassIfPresent(next, this.getInactiveCSSClass_());
-                  this.setupSequence_(remaining, this.transitionTime_);
-                });
+            addClassIfMissing(next, this.getActiveCSSClass_());
+            removeClassIfPresent(next, this.getInactiveCSSClass_());
+            this.setupSequence_(remaining, this.transitionTime_);
           });
     }, transitionTime);
   }
