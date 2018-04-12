@@ -91,7 +91,10 @@ class MeteredProgressiveDisclosure {
         eventHandler.addListener(
           target,
           IsBottomVisible,
-          () => addClassIfMissing(target, this.getTimerStartedCSSClass_())
+          () => {
+            eventHandler.removeListener(seenBottomListener);
+            addClassIfMissing(target, this.getTimerStartedCSSClass_())
+          }
         );
       const seenForDurationListener: number =
         eventHandler.addListener(
