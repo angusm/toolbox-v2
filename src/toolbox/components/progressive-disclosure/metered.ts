@@ -9,6 +9,7 @@ interface ICSSClassOptions {
   base?: string;
   activeModifier?: string;
   inactiveModifier?: string;
+  timerStartedModifier?: string;
   transitionTime?: number;
 }
 
@@ -16,6 +17,7 @@ const DefaultClassOptions = Object.freeze({
   base: 'tb-metered-progressive-disclosure',
   activeModifier: 'active',
   inactiveModifier: 'inactive',
+  timerStartedModifier: 'timer-started',
 });
 
 class MeteredProgressiveDisclosure {
@@ -24,6 +26,7 @@ class MeteredProgressiveDisclosure {
   private baseClass_: string;
   private activeModifier_: string;
   private inactiveModifier_: string;
+  private timerStartedModifier_: string;
   private transitionTime_: number;
 
   constructor(
@@ -33,6 +36,7 @@ class MeteredProgressiveDisclosure {
       base = DefaultClassOptions.base,
       activeModifier = DefaultClassOptions.activeModifier,
       inactiveModifier = DefaultClassOptions.inactiveModifier,
+      timerStartedModifier = DefaultClassOptions.timerStartedModifier,
       transitionTime = 0,
     }: ICSSClassOptions,
   ) {
@@ -41,6 +45,7 @@ class MeteredProgressiveDisclosure {
     this.baseClass_ = base;
     this.activeModifier_ = activeModifier;
     this.inactiveModifier_ = inactiveModifier;
+    this.timerStartedModifier_ = timerStartedModifier;
     this.transitionTime_ = transitionTime;
     this.init_();
   }
@@ -77,6 +82,12 @@ class MeteredProgressiveDisclosure {
     const remaining = targetsWithNext.slice(1);
 
     setTimeout(() => {
+      const seenBottomListener: number =
+        eventHandler.addListener(
+          target,
+          IsBottomVisible,
+          () => addClassIfMissing(target, this.getTimerStartedCSSClass_())
+        );
       const seenForDurationListener: number =
         eventHandler.addListener(
           target,
@@ -96,6 +107,10 @@ class MeteredProgressiveDisclosure {
 
   private getInactiveCSSClass_() {
     return `${this.baseClass_}--${this.inactiveModifier_}`;
+  }
+
+  private getTimerStartedCSSClass_() {
+    return `${this.baseClass_}--${this.timerStartedModifier_}`;
   }
 
   private getSeenForDurationClass_() {
