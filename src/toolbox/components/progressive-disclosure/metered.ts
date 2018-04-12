@@ -2,7 +2,6 @@ import {zip} from "../../utils/array/zip";
 import {eventHandler} from "../../utils/event/event-handler";
 import {addClassIfMissing} from "../../utils/dom/class/add-class-if-missing";
 import {SeenBottomForDuration} from "../../utils/event/events/seen-bottom-for-duration";
-import {removeClassModifiers} from "../../utils/dom/class/remove-class-modifiers";
 import {removeClassIfPresent} from "../../utils/dom/class/remove-class-if-present";
 import {IsBottomVisible} from "../../utils/event/events/is-bottom-visible";
 
@@ -10,6 +9,7 @@ interface ICSSClassOptions {
   base?: string;
   activeModifier?: string;
   inactiveModifier?: string;
+  transitionTime?: number;
 }
 
 const DefaultClassOptions = Object.freeze({
@@ -24,6 +24,7 @@ class MeteredProgressiveDisclosure {
   private baseClass_: string;
   private activeModifier_: string;
   private inactiveModifier_: string;
+  private transitionTime_: number;
 
   constructor(
     targets: HTMLElement[],
@@ -32,6 +33,7 @@ class MeteredProgressiveDisclosure {
       base = DefaultClassOptions.base,
       activeModifier = DefaultClassOptions.activeModifier,
       inactiveModifier = DefaultClassOptions.inactiveModifier,
+      transitionTime = 0,
     }: ICSSClassOptions,
   ) {
     this.targets_ = targets;
@@ -39,6 +41,7 @@ class MeteredProgressiveDisclosure {
     this.baseClass_ = base;
     this.activeModifier_ = activeModifier;
     this.inactiveModifier_ = inactiveModifier;
+    this.transitionTime_ = transitionTime;
     this.init_();
   }
 
@@ -60,10 +63,12 @@ class MeteredProgressiveDisclosure {
       zip<HTMLElement>(shiftedTargets, this.targets_)
         .slice(1, this.targets_.length);
 
-    this.setupSequence_(targetsWithNext);
+    this.setupSequence_(targetsWithNext, 0);
   }
 
-  private setupSequence_(targetsWithNext: HTMLElement[][]): void {
+  private setupSequence_(
+    targetsWithNext: HTMLElement[][], transitionTime: number
+  ): void {
     if (targetsWithNext.length === 0) {
       return;
     }
@@ -71,25 +76,25 @@ class MeteredProgressiveDisclosure {
     const [target, next]: HTMLElement[] = targetsWithNext[0];
     const remaining = targetsWithNext.slice(1);
 
-    const seenForDurationListener: number =
-      eventHandler.addListener(
-        target,
-        this.getSeenForDurationClass_(),
-        () => {
-          eventHandler.removeListener(seenForDurationListener);
-          const isBottomVisibleListener: number =
-            eventHandler.addListener(
-              target,
-              IsBottomVisible,
-              () => {
-                eventHandler.removeListener(isBottomVisibleListener);
-                addClassIfMissing(next, this.getActiveCSSClass_());
-                removeClassIfPresent(next, this.getInactiveCSSClass_());
-                this.setupSequence_(remaining);
-              }
-            );
-        }
-      );
+    setTimeout(() => {
+      const seenForDurationListener: number =
+        eventHandler.addListener(
+          target,
+          this.getSeenForDurationClass_(),
+          () => {
+            eventHandler.removeListener(seenForDurationListener);
+            const isBottomVisibleListener: number =
+              eventHandler.addListener(
+                target,
+                IsBottomVisible,
+                () => {
+                  eventHandler.removeListener(isBottomVisibleListener);
+                  addClassIfMissing(next, this.getActiveCSSClass_());
+                  removeClassIfPresent(next, this.getInactiveCSSClass_());
+                  this.setupSequence_(remaining, this.transitionTime_);
+                });
+          });
+    }, transitionTime);
   }
 
   private getActiveCSSClass_() {
