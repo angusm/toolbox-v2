@@ -3,7 +3,7 @@ import {renderLoop} from "../../utils/render-loop";
 import {getElementBehind} from "../../utils/dom/position/get-element-behind";
 import {setStyle} from "../../utils/dom/style/set-style";
 
-class ColorTextFromBackground {
+class HighContrastText {
   private target_: HTMLElement;
   private candidateBgElements_: HTMLElement[];
   private colorOptions_: Color[];
@@ -59,4 +59,4 @@ class ColorTextFromBackground {
   }
 }
 
-export {ColorTextFromBackground};
+export {HighContrastText};
