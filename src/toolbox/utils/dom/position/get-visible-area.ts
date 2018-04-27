@@ -1,7 +1,6 @@
 import {getOpacity} from '../style/get-opacity';
-import {getVisibleHeight} from './get-visible-height';
-import {getVisibleWidth} from './get-visible-width';
 import {isDisplayed} from "../style/is-displayed";
+import {getVisibleDimensions} from "./get-visible-dimensions";
 
 function getVisibleArea(
   target: HTMLElement,
@@ -13,8 +12,7 @@ function getVisibleArea(
   }
 
   const opacityFactor: number = factorInOpacity ? getOpacity(target) : 1;
-  return getVisibleWidth(target, container) *
-    getVisibleHeight(target, container) * opacityFactor;
+  return getVisibleDimensions(target, container).getArea() * opacityFactor;
 }
 
 export {getVisibleArea};
