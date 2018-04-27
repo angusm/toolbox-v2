@@ -8,16 +8,19 @@ class ColorTextFromBackground {
   private candidateBgElements_: HTMLElement[];
   private colorOptions_: Color[];
   private destroyed_: boolean;
+  private colorMap_: Map<Color, Color>; // Maps background colors to test colors
 
   constructor(
     target: HTMLElement,
     candidateBgElements: HTMLElement[],
-    colorOptions: Color[]
+    colorOptions: Color[],
+    colorMap: Map<Color, Color> = null,
   ) {
     this.destroyed_ = false;
     this.target_ = target;
     this.candidateBgElements_ = candidateBgElements;
     this.colorOptions_ = colorOptions;
+    this.colorMap_ = colorMap || new Map();
 
     this.init_();
   }
@@ -36,15 +39,24 @@ class ColorTextFromBackground {
       const elementBehind =
         getElementBehind(this.target_, this.candidateBgElements_);
       const behindBgColor = Color.fromElementBackgroundColor(elementBehind);
-      const textColorToSet =
-        behindBgColor.getColorWithHighestContrast(...this.colorOptions_);
+      const textColorToSet = this.getTextColorToSet_(behindBgColor);
 
       renderLoop.mutate(
         () => setStyle(this.target_, 'color', textColorToSet.toStyleString()));
     });
   }
 
+  private getTextColorToSet_(behindBgColor: Color): Color {
+    if (this.colorMap_.has(behindBgColor)) {
+      return this.colorMap_.get(behindBgColor);
+    } else {
+      return behindBgColor.getColorWithHighestContrast(...this.colorOptions_);
+    }
+  }
+
   public destroy(): void {
     this.destroyed_ = true;
   }
 }
+
+export {ColorTextFromBackground};

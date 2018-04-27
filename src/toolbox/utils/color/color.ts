@@ -5,8 +5,12 @@ import {hexToInt} from '../hex-to-int';
 import {max} from '../iterable/max';
 import {trim} from '../string/trim';
 import {getStyle} from "../dom/style/get-style";
+import {MultiValueMap} from "../map/multi-value";
 
 const HEX_VALUES = '0123456789abcdefABCDEF';
+
+const colorInstances = new MultiValueMap<number, Color>();
+const rgbInstances = new MultiValueMap<number, RGB>();
 
 class RGB extends Vector {
   private red_: number;
@@ -15,9 +19,15 @@ class RGB extends Vector {
 
   constructor(red: number = 0, green: number = 0, blue: number = 0) {
     super(red, green, blue);
-    this.red_ = red;
-    this.green_ = green;
-    this.blue_ = blue;
+
+    if (rgbInstances.has([red, green, blue])) {
+      return rgbInstances.get([red, green, blue])
+    } else {
+      this.red_ = red;
+      this.green_ = green;
+      this.blue_ = blue;
+      return this;
+    }
   }
 }
 
@@ -29,8 +39,13 @@ class Color {
   constructor(
     red: number = 0, green: number = 0, blue: number = 0, alpha: number = 1
   ) {
-    this.rgb_ = new RGB(red, green, blue);
-    this.alpha_ = alpha;
+    if (colorInstances.has([red, green, blue, alpha])) {
+      return colorInstances.get([red, green, blue, alpha])
+    } else {
+      this.rgb_ = new RGB(red, green, blue);
+      this.alpha_ = alpha;
+      return this;
+    }
   }
 
   public static fromString(value: string): Color {
