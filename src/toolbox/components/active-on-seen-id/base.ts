@@ -53,15 +53,23 @@ class ActiveOnSeenId {
       const elementsToDeactivate: HTMLElement[] =
         subtract(elements, elementsToActivate);
       const activeClass = `${this.baseClass_}--active`;
+      const inactiveClass = `${this.baseClass_}--inactive`;
 
       renderLoop.mutate(() => {
         elementsToDeactivate
           .forEach(
-            (candidate) =>
+            (candidate) => {
               removeClassModifiers(
-                candidate, this.baseClass_, {whitelist: [activeClass]}));
+                candidate, this.baseClass_, {whitelist: [activeClass]});
+              addClassIfMissing(candidate, inactiveClass);
+            });
         elementsToActivate
-          .forEach((candidate) => addClassIfMissing(candidate, activeClass));
+          .forEach(
+            (candidate) => {
+              removeClassModifiers(
+                candidate, this.baseClass_, {whitelist: [inactiveClass]});
+              addClassIfMissing(candidate, activeClass);
+            });
       });
 
       renderLoop.cleanup(() => this.render_());
