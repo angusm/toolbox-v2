@@ -10,16 +10,16 @@ interface IHighContrastPropertyOptions {
 
 abstract class HighContrastProperty {
   private getColorOptionsFn_: () => Color[];
-  private target_: HTMLElement;
-  private candidateBgElements_: HTMLElement[];
+  private getTargetsFn_: () => HTMLElement[];
+  private getCandidateBgElements_: () => HTMLElement[];
 
   private destroyed_: boolean;
   private getColorMapFn_: () => Map<Color, Color>; // Maps background colors to test colors
   private getHighContrastColorFn_: (target: HTMLElement, bgElement: HTMLElement) => Color; // Maps background colors to test colors
 
   constructor(
-    target: HTMLElement,
-    candidateBgElements: HTMLElement[],
+    getTargetsFn: () => HTMLElement[],
+    getCandidateBgElements: () => HTMLElement[],
     getColorOptionsFn: () => Color[],
     {
       getColorMapFn = () => new Map(),
@@ -30,8 +30,8 @@ abstract class HighContrastProperty {
     },
   ) {
     this.destroyed_ = false;
-    this.target_ = target;
-    this.candidateBgElements_ = candidateBgElements;
+    this.getTargetsFn_ = getTargetsFn;
+    this.getCandidateBgElements_ = getCandidateBgElements;
     this.getColorOptionsFn_ = getColorOptionsFn;
     this.getColorMapFn_ = getColorMapFn;
     this.getHighContrastColorFn_ = getHighContrastColorFn;
@@ -54,23 +54,28 @@ abstract class HighContrastProperty {
 
     renderLoop.measure(() => {
       renderLoop.cleanup(() => this.render_());
-      const bgElement =
-        getElementBehind(this.target_, this.candidateBgElements_);
-      const textColorToSet = this.getTextColorToSet_(bgElement);
+      const bgElements = this.getCandidateBgElements_();
+      this.getTargetsFn_().forEach(
+        (target) => {
+          const bgElement = getElementBehind(target, bgElements);
+          const textColorToSet = this.getTextColorToSet_(target, bgElement);
 
-      // Update the color
-      renderLoop.mutate(
-        () => setStyle(
-          this.target_,
-          (<typeof HighContrastProperty>this.constructor).getProperty(),
-          textColorToSet.toStyleString()));
+          // Update the color
+          renderLoop.mutate(
+            () => setStyle(
+              target,
+              (<typeof HighContrastProperty>this.constructor).getProperty(),
+              textColorToSet.toStyleString()));
+        });
     });
   }
 
-  private getTextColorToSet_(bgElement: HTMLElement): Color {
+  private getTextColorToSet_(
+    target: HTMLElement, bgElement: HTMLElement
+  ): Color {
     const behindBgColor = Color.fromElementBackgroundColor(bgElement);
     if (this.getHighContrastColorFn_) {
-      return this.getHighContrastColorFn_(this.target_, bgElement);
+      return this.getHighContrastColorFn_(target, bgElement);
     }
     else if (this.getColorMapFn_().has(behindBgColor)) {
       return this.getColorMapFn_().get(behindBgColor);
