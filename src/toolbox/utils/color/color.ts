@@ -21,11 +21,12 @@ class RGB extends Vector {
     super(red, green, blue);
 
     if (rgbInstances.has([red, green, blue])) {
-      return rgbInstances.get([red, green, blue])
+      return rgbInstances.get([red, green, blue]);
     } else {
       this.red_ = red;
       this.green_ = green;
       this.blue_ = blue;
+      rgbInstances.set([red, green, blue], this);
       return this;
     }
   }
@@ -40,10 +41,11 @@ class Color {
     red: number = 0, green: number = 0, blue: number = 0, alpha: number = 1
   ) {
     if (colorInstances.has([red, green, blue, alpha])) {
-      return colorInstances.get([red, green, blue, alpha])
+      return colorInstances.get([red, green, blue, alpha]);
     } else {
       this.rgb_ = new RGB(red, green, blue);
       this.alpha_ = alpha;
+      colorInstances.set([red, green, blue, alpha], this);
       return this;
     }
   }
