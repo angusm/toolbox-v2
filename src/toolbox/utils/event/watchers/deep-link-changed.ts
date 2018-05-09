@@ -47,12 +47,13 @@ class DeepLinkChangedTracker {
   }
 
   public track(target: any): symbol {
+    const isTracking = this.isTracking_();
     const uid = Symbol(this.uid_++);
     const uids = this.watchers_.get(target);
     uids.add(uid);
 
     // Start the render loop if it's not been running previously
-    if (!this.isTracking_()) {
+    if (!isTracking) {
       this.render_();
     }
 
