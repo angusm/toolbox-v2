@@ -8,14 +8,14 @@ import {DynamicDefaultMap} from "../../map/dynamic-default";
  */
 class DeepLinkChangedTracker {
   private uid_: number;
-  private watchers_: DynamicDefaultMap<any, Set<Symbol>>;
+  private watchers_: DynamicDefaultMap<any, Set<symbol>>;
   private previousHashes_: Map<any, string>;
 
   constructor() {
     this.uid_ = 0;
     this.watchers_ =
       DynamicDefaultMap
-        .usingFunction<any, Set<Symbol>>(() => new Set<Symbol>());
+        .usingFunction<any, Set<symbol>>(() => new Set<symbol>());
     this.previousHashes_ = new Map<any, string>();
   }
 
@@ -46,7 +46,7 @@ class DeepLinkChangedTracker {
     return Array.from(this.watchers_.values()).some((s) => s.size > 0);
   }
 
-  public track(target: any) {
+  public track(target: any): symbol {
     if (!this.isTracking_()) {
       this.render_();
     }
@@ -57,7 +57,7 @@ class DeepLinkChangedTracker {
     return uid;
   }
 
-  public untrack(target: any, uid: Symbol) {
+  public untrack(target: any, uid: symbol) {
     const uids = this.watchers_.get(target);
     uids.delete(uid);
     if (!uids.size) {
