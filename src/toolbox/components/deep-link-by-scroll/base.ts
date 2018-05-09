@@ -1,6 +1,5 @@
 import {Scroll} from '../../utils/cached-vectors/scroll';
 import {renderLoop} from '../../utils/render-loop';
-import {setScrollTop} from '../../utils/dom/position/set-scroll-top';
 import {CommonSelector} from "../../utils/dom/common-selector";
 
 const windowScroll: Scroll = Scroll.getSingleton();
@@ -21,6 +20,8 @@ class DeepLinkByScroll {
   private init_(): void {
     this.render_();
   }
+
+
 
   private render_(): void {
     renderLoop.measure(() => {
