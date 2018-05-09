@@ -43,7 +43,7 @@ class DeepLinkChangedTracker {
   }
 
   private isTracking_(): boolean {
-    return Array.from(this.watchers_.keys()).some((s) => s.size);
+    return Array.from(this.watchers_.values()).some((s) => s.size > 0);
   }
 
   public track(target: any) {
