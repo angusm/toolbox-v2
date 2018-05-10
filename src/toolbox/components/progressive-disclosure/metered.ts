@@ -104,7 +104,7 @@ class MeteredProgressiveDisclosure {
   }
 
   private isFullyDisclosed_() {
-    return this.getTargets_().length > 0;
+    return this.getTargets_().length <= 0;
   }
 
   private getTargets_() {
