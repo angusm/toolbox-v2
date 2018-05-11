@@ -93,8 +93,10 @@ class MeteredProgressiveDisclosure {
               IsBottomVisible,
               () => {
                 eventHandler.removeListener(seenBottomListener);
-                this.timeBottomSeenByElement_
-                  .set(target, <number>new Date().valueOf());
+                const timeSeen = <number>new Date().valueOf();
+                this.timeBottomSeenByElement_.set(target, timeSeen);
+                this.updateFunction_(
+                  target, this.nextTargets_.get(target), timeSeen, timeSeen);
               });
         });
   }
