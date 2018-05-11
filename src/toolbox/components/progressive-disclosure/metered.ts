@@ -13,7 +13,6 @@ interface ICSSClassOptions {
   inactiveModifier?: string;
   timerStartedModifier?: string;
   timerEndedModifier?: string;
-  transitionTime?: number;
   updateFunction?: (target: HTMLElement, next: HTMLElement, timeSeen: number, currentTime: number) => void;
 }
 
@@ -28,7 +27,6 @@ class MeteredProgressiveDisclosure {
   private baseClass_: string;
   private activeModifier_: string;
   private inactiveModifier_: string;
-  private transitionTime_: number;
   private updateFunction_: (target: HTMLElement, next: HTMLElement, timeSeen: number, currentTime: number) => void;
   private timeBottomSeenByElement_: Map<HTMLElement, number>;
   private nextTargets_: Map<HTMLElement, HTMLElement>;
@@ -40,7 +38,6 @@ class MeteredProgressiveDisclosure {
       base = DefaultClassOptions.base,
       activeModifier = DefaultClassOptions.activeModifier,
       inactiveModifier = DefaultClassOptions.inactiveModifier,
-      transitionTime = 0,
       updateFunction = noop,
     }: ICSSClassOptions,
   ) {
@@ -48,7 +45,6 @@ class MeteredProgressiveDisclosure {
     this.baseClass_ = base;
     this.activeModifier_ = activeModifier;
     this.inactiveModifier_ = inactiveModifier;
-    this.transitionTime_ = transitionTime;
     this.updateFunction_ = updateFunction;
     this.timeBottomSeenByElement_ = new Map();
     this.nextTargets_ = new Map();
@@ -128,7 +124,7 @@ class MeteredProgressiveDisclosure {
     const currentTime = <number>new Date().valueOf();
     const timeSeen = this.timeBottomSeenByElement_.get(target);
 
-    if (currentTime > timeSeen + this.transitionTime_) {
+    if (currentTime > timeSeen + this.threshold_) {
       this.nextTargets_.delete(target);
       this.disclose_(next);
     } else {
