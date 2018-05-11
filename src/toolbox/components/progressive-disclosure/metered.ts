@@ -124,11 +124,11 @@ class MeteredProgressiveDisclosure {
     const currentTime = <number>new Date().valueOf();
     const timeSeen = this.timeBottomSeenByElement_.get(target);
 
+    this.updateFunction_(target, next, timeSeen, currentTime);
+
     if (currentTime > timeSeen + this.threshold_) {
       this.nextTargets_.delete(target);
       this.disclose_(next);
-    } else {
-      this.updateFunction_(target, next, timeSeen, currentTime);
     }
   }
 
