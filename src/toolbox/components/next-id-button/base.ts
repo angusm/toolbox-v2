@@ -1,11 +1,15 @@
 import {renderLoop} from "../../utils/render-loop";
 import {getCurrentAnchorByVisibleOrSeen} from "../../utils/dom/anchor/get-current-anchor-by-visible-or-seen";
+import {getAnchorsWithCommonSelector} from "../../utils/dom/anchor/get-anchors-with-common-selector";
 
 class NextIdButton {
   private element_: HTMLElement;
   private getAnchorsFn_: () => HTMLElement[];
 
-  constructor(element: HTMLElement, getAnchorsFn: () => HTMLElement[]) {
+  constructor(
+    element: HTMLElement,
+    getAnchorsFn: () => HTMLElement[] = getAnchorsWithCommonSelector
+  ) {
     this.element_ = element;
     this.getAnchorsFn_ = getAnchorsFn;
     this.render_();
