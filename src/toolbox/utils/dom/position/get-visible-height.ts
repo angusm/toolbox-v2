@@ -4,7 +4,8 @@ import {Vector2d} from "../../math/geometry/vector-2d";
 import {getAncestorDimensions} from "./get-ancestor-dimensions";
 
 function getVisibleHeight(
-  target: HTMLElement, container: HTMLElement = null
+  target: HTMLElement,
+  container: HTMLElement = null
 ): number {
   const distance: Vector2d =
     getVisibleDistanceBetweenElements(target, container);

@@ -1,30 +1,47 @@
 class Range {
-  private min: number;
-  private max: number;
+  private min_: number;
+  private max_: number;
 
   constructor(min: number, max: number) {
-    this.min = min;
-    this.max = max;
+    this.min_ = min;
+    this.max_ = max;
   }
 
   public clamp(value: number): number {
-    return Math.min(this.max, Math.max(this.min, value));
+    return Math.min(this.max_, Math.max(this.min_, value));
   }
 
   public contains(value: number): boolean {
-    return this.min <= value && value <= this.max;
+    return this.min_ <= value && value <= this.max_;
   }
 
   public adjust(value: number): Range {
-    return new Range(this.min + value, this.max + value);
+    return new Range(this.min_ + value, this.max_ + value);
   }
 
   public expand(value: number): Range {
-    return new Range(this.min - value, this.max + value);
+    return new Range(this.min_ - value, this.max_ + value);
   }
 
   public collapse(value: number): Range {
     return this.expand(-value);
+  }
+
+  get min() {
+    return this.min_;
+  }
+
+  get max() {
+    return this.max_;
+  }
+
+  public getOverlap(overlap: Range): Range {
+    if (this.max_ <= overlap.min || overlap.max <= this.min_) {
+      return null;
+    } else {
+      return new Range(
+        Math.max(this.min_, overlap.min), Math.min(this.max_, overlap.max));
+    }
   }
 }
 
