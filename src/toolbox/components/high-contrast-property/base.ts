@@ -2,11 +2,19 @@ import {Color} from "../../utils/color/color";
 import {renderLoop} from "../../utils/render-loop";
 import {getElementBehind} from "../../utils/dom/position/get-element-behind";
 import {setStyle} from "../../utils/dom/style/set-style";
+import {MultiValueDynamicDefaultMap} from "../../utils/map/multi-value-dynamic-default";
 
 interface IHighContrastPropertyOptions {
   getColorMapFn: () => Map<Color, Color>
   getHighContrastColorFn: (target: HTMLElement, bgElement: HTMLElement) => Color,
 }
+
+const colorContrastResults =
+  MultiValueDynamicDefaultMap.usingFunction(
+    ([color, colorOptions]: [Color, Color[]]) => {
+      return color.getColorWithHighestContrast(...colorOptions);
+    }
+  );
 
 abstract class HighContrastProperty {
   private getColorOptionsFn_: () => Color[];
@@ -81,8 +89,8 @@ abstract class HighContrastProperty {
       return this.getColorMapFn_().get(behindBgColor);
     }
     else {
-      return behindBgColor
-        .getColorWithHighestContrast(...this.getColorOptionsFn_());
+      return colorContrastResults
+        .get([behindBgColor, this.getColorOptionsFn_()]);
     }
   }
 
