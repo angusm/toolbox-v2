@@ -16,8 +16,6 @@ const STEP_ORDER: Array<symbol> = [
   RenderStep.CLEANUP,
 ];
 
-const FPS = Number.MAX_VALUE;
-
 class RenderFunctionID {
   private step_: symbol;
 
@@ -45,7 +43,7 @@ class RenderLoop {
       DynamicDefaultMap
         .usingFunction<symbol, RenderFunctionMap>(
           (unused: symbol) => new Map<RenderFunctionID, RenderFunction>());
-    this.msPerFrame_ = 1000 / FPS;
+    this.msPerFrame_ = 0;
     this.lastRun_ = null;
     this.runLoop();
   }
@@ -81,7 +79,7 @@ class RenderLoop {
   }
 
   private getTimeUntilNextRun(currentTime: number): number {
-    return currentTime - this.lastRun_ + this.msPerFrame_;
+    return currentTime - this.lastRun_ - this.msPerFrame_;
   }
 
   private runLoop(): void {
