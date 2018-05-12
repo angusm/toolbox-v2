@@ -54,12 +54,14 @@ class VerticalBatchHighContrastProperty {
 
       const ranges = this.getBackgroundHeightRanges_();
       const yPositions = this.getTargetYPositions_();
-      Array.from(ranges.entries()).forEach(
-        ([range, backgroundElement]) => {
-          Array.from(yPositions.entries()).forEach(
-            ([yPosition, target]) => {
+      Array.from(yPositions.entries()).forEach(
+        ([yPosition, target]) => {
+          Array.from(ranges.entries()).some(
+            ([range, backgroundElement]) => {
               if (range.contains(yPosition)) {
                 this.updateTarget_(target, backgroundElement);
+                // No point checking an updated target
+                return true; // Short circuits
               }
             }
           );
