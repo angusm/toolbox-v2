@@ -35,7 +35,6 @@ class RenderLoop {
   private static singleton_: RenderLoop = null;
 
   private msPerFrame_: number;
-  private lastRun_: number;
   private scheduledFns_: DynamicDefaultMap<symbol, RenderFunctionMap>;
 
   constructor() {
@@ -44,7 +43,6 @@ class RenderLoop {
         .usingFunction<symbol, RenderFunctionMap>(
           (unused: symbol) => new Map<RenderFunctionID, RenderFunction>());
     this.msPerFrame_ = 0;
-    this.lastRun_ = null;
     this.runLoop();
   }
 
@@ -78,19 +76,17 @@ class RenderLoop {
     return renderFn;
   }
 
-  private getTimeUntilNextRun(currentTime: number): number {
-    return currentTime - this.lastRun_ - this.msPerFrame_;
+  private static getTimeUntilNextRun_(nextRun: number): number {
+    return nextRun - <number>new Date().valueOf();
   }
 
   private runLoop(): void {
-    const time = <number>new Date().valueOf();
-    const timeUntilNextRun = this.getTimeUntilNextRun(time);
-    this.lastRun_ = time;
+    const nextRun = <number>new Date().valueOf() + this.msPerFrame_;
     this.runFns();
-    if (timeUntilNextRun > 2) {
+    if (RenderLoop.getTimeUntilNextRun_(nextRun) > 2) {
       setTimeout(
         () => window.requestAnimationFrame(() => this.runLoop()),
-        timeUntilNextRun);
+        RenderLoop.getTimeUntilNextRun_(nextRun));
     } else {
       window.requestAnimationFrame(() => this.runLoop())
     }
