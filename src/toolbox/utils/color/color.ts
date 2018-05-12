@@ -72,7 +72,7 @@ class Color {
     return new Color(...colorValues.map((colorValue: string) => hexToInt(colorValue)));
   }
 
-  public static fromHexes(values: string[]): Color[] {
+  public static fromHexes(...values: string[]): Color[] {
     return values.map((value) => this.fromHex(value));
   }
 
