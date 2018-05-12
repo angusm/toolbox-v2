@@ -1,24 +1,24 @@
-import {CommonSelector} from "../../utils/dom/common-selector";
 import {renderLoop} from "../../utils/render-loop";
 import {getClassModifiers} from "../../utils/dom/class/get-class-modifiers";
 import {removeClassModifiers} from "../../utils/dom/class/remove-class-modifiers";
 import {addClassIfMissing} from "../../utils/dom/class/add-class-if-missing";
+import {getAnchorsWithCommonSelector} from "../../utils/dom/anchor/get-anchors-with-common-selector";
 
 const CLASS_NAME = 'tb-id-marker';
 
 class ActiveOnDeepLink {
-  private getCurrentAnchor_: (querySelector: string) => HTMLElement;
+  private getCurrentAnchor_: (getAnchorsFn: () => HTMLElement[]) => HTMLElement;
   private baseClass_: string;
-  private anchorTargetsQuerySelector_: string;
+  private getAnchorsFn_: () => HTMLElement[];
 
   constructor(
-    getCurrentAnchorFn: (querySelector: string) => HTMLElement,
+    getCurrentAnchorFn: (getAnchorsFn: () => HTMLElement[]) => HTMLElement,
     baseClass: string = CLASS_NAME,
-    querySelector: string = CommonSelector.DEEP_LINK_TARGETS,
+    getAnchorsFn: () => HTMLElement[] = getAnchorsWithCommonSelector,
   ) {
     this.getCurrentAnchor_ = getCurrentAnchorFn;
     this.baseClass_ = baseClass;
-    this.anchorTargetsQuerySelector_ = querySelector;
+    this.getAnchorsFn_ = getAnchorsFn;
     this.init_();
   }
 
@@ -31,7 +31,7 @@ class ActiveOnDeepLink {
       renderLoop.cleanup(() => this.render_());
 
       const currentAnchorId: string =
-        this.getCurrentAnchor_(this.anchorTargetsQuerySelector_).id;
+        this.getCurrentAnchor_(this.getAnchorsFn_).id;
       const candidates: NodeList =
         document.querySelectorAll(`.${this.baseClass_}`);
 
