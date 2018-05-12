@@ -84,7 +84,7 @@ class VerticalBatchHighContrastProperty {
       return this.colorMap_.get(behindBgColor);
     }
     else {
-      behindBgColor.getColorWithHighestContrast(...this.colorOptions_);
+      return behindBgColor.getColorWithHighestContrast(...this.colorOptions_);
     }
   }
 
