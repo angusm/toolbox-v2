@@ -5,7 +5,7 @@ import {isAnchorElementFromHashFullyVisible} from "./is-anchor-element-from-hash
 import {getAnchorElementFromHash} from "./get-anchor-element-from-hash";
 import {getAnchorsWithCommonSelector} from "./get-anchors-with-common-selector";
 
-function getCurrentAnchorBySeen_(
+function getCurrentAnchorBySeen(
   getAnchorsFn: () => HTMLElement[] = getAnchorsWithCommonSelector
 ): HTMLElement {
   if (isAnchorElementFromHashFullyVisible()) {
@@ -18,9 +18,5 @@ function getCurrentAnchorBySeen_(
   //noinspection JSSuspiciousNameCombination
   return min(eligibleAnchors, (a) => Math.abs(getDistanceUntilVisible(a).y));
 }
-
-// Frame memoize as it is likely this will be used by both DeepLinkByScroll and
-// IDMarker
-const getCurrentAnchorBySeen = frameMemoize(getCurrentAnchorBySeen_);
 
 export {getCurrentAnchorBySeen};

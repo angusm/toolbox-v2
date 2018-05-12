@@ -6,14 +6,12 @@ import {getAnchorElementFromHash} from "./get-anchor-element-from-hash";
 import {getAnchorsWithCommonSelector} from "./get-anchors-with-common-selector";
 
 
-function getCurrentAnchorByTop_(
+function getCurrentAnchorByTop(
   getAnchorsFn: () => HTMLElement[] = getAnchorsWithCommonSelector
 ): HTMLElement {
   return isAnchorElementFromHashFullyVisible() ?
     getAnchorElementFromHash() :
     getClosestToTopWithoutGoingOver(getDisplayedAnchors(getAnchorsFn));
 }
-
-const getCurrentAnchorByTop = frameMemoize(getCurrentAnchorByTop_);
 
 export {getCurrentAnchorByTop};
