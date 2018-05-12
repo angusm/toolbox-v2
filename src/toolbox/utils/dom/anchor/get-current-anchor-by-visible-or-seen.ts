@@ -4,13 +4,13 @@ import {getDistanceUntilVisible} from "../position/get-distance-until-visible";
 import {min} from "../../array/min";
 import {getDisplayedAnchors} from "./get-displayed-anchors";
 import {getAnchorElementFromHash} from "./get-anchor-element-from-hash";
-import {isAnchorElementFromHashFullyVisible} from "./is-anchor-element-from-hash-fully-visible";
+import {isAnchorElementFromHashDominant} from "./is-anchor-element-from-hash-dominant";
 import {getAnchorsWithCommonSelector} from "./get-anchors-with-common-selector";
 
 function getCurrentAnchorByVisibleOrSeen_(
   getAnchorsFn: () => HTMLElement[] = getAnchorsWithCommonSelector
 ): HTMLElement {
-  if (isAnchorElementFromHashFullyVisible()) {
+  if (isAnchorElementFromHashDominant()) {
     return getAnchorElementFromHash();
   }
 

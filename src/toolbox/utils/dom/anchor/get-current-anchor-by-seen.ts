@@ -1,14 +1,14 @@
 import {frameMemoize} from "../../frame-memoize";
 import {getDistanceUntilVisible} from "../position/get-distance-until-visible";
 import {min} from "../../array/min";
-import {isAnchorElementFromHashFullyVisible} from "./is-anchor-element-from-hash-fully-visible";
+import {isAnchorElementFromHashDominant} from "./is-anchor-element-from-hash-dominant";
 import {getAnchorElementFromHash} from "./get-anchor-element-from-hash";
 import {getAnchorsWithCommonSelector} from "./get-anchors-with-common-selector";
 
 function getCurrentAnchorBySeen(
   getAnchorsFn: () => HTMLElement[] = getAnchorsWithCommonSelector
 ): HTMLElement {
-  if (isAnchorElementFromHashFullyVisible()) {
+  if (isAnchorElementFromHashDominant()) {
     return getAnchorElementFromHash();
   }
 
