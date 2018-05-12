@@ -5,16 +5,17 @@ import {min} from "../../array/min";
 import {getDisplayedAnchors} from "./get-displayed-anchors";
 import {getAnchorElementFromHash} from "./get-anchor-element-from-hash";
 import {isAnchorElementFromHashFullyVisible} from "./is-anchor-element-from-hash-fully-visible";
+import {getAnchorsWithCommonSelector} from "./get-anchors-with-common-selector";
 
 function getCurrentAnchorByVisibleOrSeen_(
-  querySelector: string = CommonSelector.DEEP_LINK_TARGETS
+  getAnchorsFn: () => HTMLElement[] = getAnchorsWithCommonSelector
 ): HTMLElement {
   if (isAnchorElementFromHashFullyVisible()) {
     return getAnchorElementFromHash();
   }
 
   const eligibleAnchors: HTMLElement[] =
-    getDisplayedAnchors(querySelector)
+    getDisplayedAnchors(getAnchorsFn)
       .filter((anchor) => getDistanceUntilVisible(anchor).y <= 0);
 
   //noinspection JSSuspiciousNameCombination

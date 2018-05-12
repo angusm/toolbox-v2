@@ -85,7 +85,7 @@ class RenderLoop {
   }
 
   private runLoop(): void {
-    this.lastRun_ = new Date().valueOf();
+    this.lastRun_ = <number>new Date().valueOf();
 
     this.runFns();
     const timeUntilNextRun = this.getTimeUntilNextRun();

@@ -1,11 +1,11 @@
-import {CommonSelector} from "../common-selector";
 import {isAbove} from "../position/is-above";
 import {isDisplayed} from "../style/is-displayed";
+import {getAnchorsWithCommonSelector} from "./get-anchors-with-common-selector";
 
 function hasAnchorBeenSeen(
   id: string,
-  getCurrentAnchorFn: (querySelector: string) => HTMLElement,
-  anchorsQuerySelector: string = CommonSelector.DEEP_LINK_TARGETS
+  getCurrentAnchorFn: (getAnchorsFn: () => HTMLElement[]) => HTMLElement,
+  getAnchorsFn: () => HTMLElement[] = getAnchorsWithCommonSelector,
 ): boolean {
   const targetedAnchor: HTMLElement =
     <HTMLElement>document.querySelector(`#${id}`);
@@ -14,9 +14,8 @@ function hasAnchorBeenSeen(
     return false;
   }
 
-  const currentAnchor: HTMLElement = getCurrentAnchorFn(anchorsQuerySelector);
-  return currentAnchor.id === id ||
-    isAbove(targetedAnchor, currentAnchor);
+  const currentAnchor: HTMLElement = getCurrentAnchorFn(getAnchorsFn);
+  return currentAnchor.id === id || isAbove(targetedAnchor, currentAnchor);
 }
 
 export {hasAnchorBeenSeen};

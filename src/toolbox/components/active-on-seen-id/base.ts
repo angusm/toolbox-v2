@@ -6,22 +6,23 @@ import {addClassIfMissing} from "../../utils/dom/class/add-class-if-missing";
 import {isAbove} from "../../utils/dom/position/is-above";
 import {subtract} from "../../utils/array/subtract";
 import {getDisplayedAnchors} from "../../utils/dom/anchor/get-displayed-anchors";
+import {getAnchorsWithCommonSelector} from "../../utils/dom/anchor/get-anchors-with-common-selector";
 
 const CLASS_NAME = 'tb-active-on-seen';
 
 class ActiveOnSeenId {
-  private getCurrentAnchor_: (querySelector: string) => HTMLElement;
+  private getCurrentAnchor_: (getAnchorsFn: () => HTMLElement[]) => HTMLElement;
   private baseClass_: string;
-  private anchorTargetsQuerySelector_: string;
+  private getAnchorsFn_: () => HTMLElement[];
 
   constructor(
-    getCurrentAnchorFn: (querySelector: string) => HTMLElement,
+    getCurrentAnchorFn: (getAnchorsFn: () => HTMLElement[]) => HTMLElement,
     baseClass: string = CLASS_NAME,
-    querySelector: string = CommonSelector.DEEP_LINK_TARGETS,
+    getAnchorsFn: () => HTMLElement[] = getAnchorsWithCommonSelector,
   ) {
     this.getCurrentAnchor_ = getCurrentAnchorFn;
     this.baseClass_ = baseClass;
-    this.anchorTargetsQuerySelector_ = querySelector;
+    this.getAnchorsFn_ = getAnchorsFn;
     this.init_();
   }
 
@@ -32,14 +33,14 @@ class ActiveOnSeenId {
   private render_(): void {
     renderLoop.measure(() => {
       const currentAnchor: HTMLElement =
-        this.getCurrentAnchor_(this.anchorTargetsQuerySelector_);
+        this.getCurrentAnchor_(this.getAnchorsFn_);
 
       const elements: HTMLElement[] =
         <HTMLElement[]>Array.from(
           document.querySelectorAll(`.${this.baseClass_}`));
 
       const scrolledPastIds: string[] =
-        getDisplayedAnchors(this.anchorTargetsQuerySelector_)
+        getDisplayedAnchors(this.getAnchorsFn_)
           .filter((element: HTMLElement) => isAbove(element, currentAnchor))
           .map((element: Node) => (<HTMLElement>element).id)
           .concat(currentAnchor.id);

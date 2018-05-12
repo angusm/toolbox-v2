@@ -3,11 +3,11 @@ import {getCurrentAnchorByVisibleOrSeen} from "../../utils/dom/anchor/get-curren
 
 class NextIdButton {
   private element_: HTMLElement;
-  private querySelector_: string;
+  private getAnchorsFn_: () => HTMLElement[];
 
-  constructor(element: HTMLElement, querySelector: string) {
+  constructor(element: HTMLElement, getAnchorsFn: () => HTMLElement[]) {
     this.element_ = element;
-    this.querySelector_ = querySelector;
+    this.getAnchorsFn_ = getAnchorsFn;
     this.render_();
   }
 
@@ -15,10 +15,8 @@ class NextIdButton {
     renderLoop.measure(() => {
       renderLoop.cleanup(() => this.render_());
 
-      const anchors =
-        Array.from(document.querySelectorAll(this.querySelector_));
-      const currentAnchor =
-        getCurrentAnchorByVisibleOrSeen(this.querySelector_);
+      const anchors = this.getAnchorsFn_();
+      const currentAnchor = getCurrentAnchorByVisibleOrSeen(this.getAnchorsFn_);
       const nextIndex = anchors.indexOf(currentAnchor) + 1;
       const nextId = anchors[nextIndex].attributes.getNamedItem('id').value;
       if (nextIndex < anchors.length) {
