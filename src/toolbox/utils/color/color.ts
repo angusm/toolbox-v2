@@ -72,6 +72,10 @@ class Color {
     return new Color(...colorValues.map((colorValue: string) => hexToInt(colorValue)));
   }
 
+  public static fromHexes(values: string[]): Color[] {
+    return values.map((value) => this.fromHex(value));
+  }
+
   public static fromRgb(value: string): Color {
     const values = value.split('(').slice(-1)[0].split(')')[0].split(',');
     const intValues = values.map(trim).map((trimmed) => parseInt(trimmed));
