@@ -36,7 +36,7 @@ type RenderFunctionMap = Map<RenderFunctionID, RenderFunction>;
 class RenderLoop {
   private static singleton_: RenderLoop = null;
 
-  private fps_: number;
+  private msPerFrame_: number;
   private lastRun_: number;
   private scheduledFns_: DynamicDefaultMap<symbol, RenderFunctionMap>;
 
@@ -45,7 +45,7 @@ class RenderLoop {
       DynamicDefaultMap
         .usingFunction<symbol, RenderFunctionMap>(
           (unused: symbol) => new Map<RenderFunctionID, RenderFunction>());
-    this.fps_ = FPS;
+    this.msPerFrame_ = 1000 / FPS;
     this.lastRun_ = null;
     this.runLoop();
   }
@@ -71,7 +71,7 @@ class RenderLoop {
   }
 
   public setFps(fps: number): void {
-    this.fps_ = fps;
+    this.msPerFrame_ = 1000 / fps;
   }
 
   private addFnToStep(fn: RenderFunction, step: symbol): RenderFunctionID {
@@ -80,15 +80,15 @@ class RenderLoop {
     return renderFn;
   }
 
-  private getTimeUntilNextRun(): number {
-    return new Date().valueOf() - (this.lastRun_ + (1000 / this.fps_));
+  private getTimeUntilNextRun(currentTime: number): number {
+    return currentTime - this.lastRun_ + this.msPerFrame_;
   }
 
   private runLoop(): void {
-    this.lastRun_ = <number>new Date().valueOf();
-
+    const time = <number>new Date().valueOf();
+    const timeUntilNextRun = this.getTimeUntilNextRun(time);
+    this.lastRun_ = time;
     this.runFns();
-    const timeUntilNextRun = this.getTimeUntilNextRun();
     if (timeUntilNextRun > 2) {
       setTimeout(
         () => window.requestAnimationFrame(() => this.runLoop()),
