@@ -7,6 +7,7 @@ import {MultiValueDynamicDefaultMap} from "../../utils/map/multi-value-dynamic-d
 interface IHighContrastPropertyOptions {
   getColorMapFn: () => Map<Color, Color>
   getHighContrastColorFn: (target: HTMLElement, bgElement: HTMLElement) => Color,
+  limit: true,
 }
 
 const colorContrastResults =
@@ -24,6 +25,7 @@ abstract class HighContrastProperty {
   private destroyed_: boolean;
   private getColorMapFn_: () => Map<Color, Color>; // Maps background colors to test colors
   private getHighContrastColorFn_: (target: HTMLElement, bgElement: HTMLElement) => Color; // Maps background colors to test colors
+  private limit_: boolean;
 
   constructor(
     getTargetsFn: () => HTMLElement[],
@@ -32,9 +34,11 @@ abstract class HighContrastProperty {
     {
       getColorMapFn = () => new Map(),
       getHighContrastColorFn = null,
+      limit = null,
     }: IHighContrastPropertyOptions = {
         getColorMapFn: () => new Map(),
         getHighContrastColorFn: null,
+        limit: null,
     },
   ) {
     this.destroyed_ = false;
@@ -43,6 +47,7 @@ abstract class HighContrastProperty {
     this.getColorOptionsFn_ = getColorOptionsFn;
     this.getColorMapFn_ = getColorMapFn;
     this.getHighContrastColorFn_ = getHighContrastColorFn;
+    this.limit_ = limit;
 
     this.init_();
   }
@@ -52,16 +57,20 @@ abstract class HighContrastProperty {
   }
 
   private init_(): void {
-    renderLoop.cleanup(() => this.render_());
+    renderLoop.cleanup(() => this.render());
   }
 
-  private render_(): void {
+  public render(): void {
     if (this.destroyed_) {
       return; // Stop render loop if destroyed.
     }
 
     renderLoop.measure(() => {
-      renderLoop.cleanup(() => this.render_());
+
+      if (!this.limit_) {
+        renderLoop.cleanup(() => this.render());
+      }
+
       const bgElements = this.getCandidateBgElements_();
       this.getTargetsFn_().forEach(
         (target) => {
