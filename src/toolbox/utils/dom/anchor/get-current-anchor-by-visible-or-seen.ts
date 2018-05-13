@@ -3,12 +3,14 @@ import {getAnchorElementFromHash} from "./get-anchor-element-from-hash";
 import {getAnchorsWithCommonSelector} from "./get-anchors-with-common-selector";
 import {isElementDominant} from "../position/is-element-dominant";
 import {contains} from "../../array/contains";
-import {getCurrentAnchorByCenter} from "./get-current-anchor-by-center";
 import {isVisible} from "../position/is-visible";
 import {isVisible as isStyledVisible} from "../style/is-visible";
 import {isScrolledPast} from "../position/is-scrolled-past";
-import {getDistanceBetweenCenters} from "../position/get-distance-between-centers";
 import {isDisplayed} from "../style/is-displayed";
+import {min} from "../../array/min";
+import {getVisibleDistanceFromRoot} from "../position/get-visible-distance-from-root";
+import {max} from "../../array/max";
+import {getDistanceBetweenCenters} from "../position/get-distance-between-centers";
 
 function getCurrentAnchorByVisibleOrSeen_(
   getAnchorsFn: () => HTMLElement[] = getAnchorsWithCommonSelector
@@ -30,12 +32,13 @@ function getCurrentAnchorByVisibleOrSeen_(
       .filter((anchor) => isVisible(anchor) || isScrolledPast(anchor))
       .filter((anchor) => isStyledVisible(anchor) && isDisplayed(anchor))
       .filter((anchor) => {
-        return getDistanceBetweenCenters(anchor).getLength() <
-          window.innerHeight / 2;
+        return getDistanceBetweenCenters(anchor, null).y <= window.innerHeight;
       });
 
   //noinspection JSSuspiciousNameCombination
-  return getCurrentAnchorByCenter(() => eligibleAnchors);
+  return max(
+    eligibleAnchors,
+    (el) => getVisibleDistanceFromRoot(el).getLength());
 }
 
 // Frame memoize as it is likely this will be used by both DeepLinkByScroll and

@@ -7,7 +7,7 @@ import {getAncestorDimensions} from "./get-ancestor-dimensions";
 function getDistanceOnAxisUntilVisible_(
   rawDistance: number, ancestorDistance: number, elementDistance: number
 ): number {
-  const ancestorRange = new Range(-elementDistance + 1, ancestorDistance - 1);
+  const ancestorRange = new Range(-elementDistance, ancestorDistance);
   if (ancestorRange.contains(rawDistance)) {
     return 0;
   }
