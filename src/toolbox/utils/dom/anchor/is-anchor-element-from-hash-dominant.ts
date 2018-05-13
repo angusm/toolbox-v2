@@ -1,12 +1,9 @@
-import {isFullyVisible} from "../position/is-fully-visible";
 import {getAnchorElementFromHash} from "./get-anchor-element-from-hash";
-import {isFillingVisibleArea} from "../position/is-filling-visible-area";
+import {isElementDominant} from "../position/is-element-dominant";
 
 function isAnchorElementFromHashDominant(): boolean {
-  return getAnchorElementFromHash() ?
-    isFullyVisible(getAnchorElementFromHash()) ||
-    isFillingVisibleArea(getAnchorElementFromHash()) :
-    false;
+  const anchor = getAnchorElementFromHash();
+  return anchor ? isElementDominant(anchor) : false;
 }
 
 export {isAnchorElementFromHashDominant};
