@@ -23,7 +23,7 @@ const DefaultClassOptions = Object.freeze({
 });
 
 class MeteredProgressiveDisclosure {
-  private threshold_: number;
+  private getThresholdFn_: (el: HTMLElement) => number;
   private baseClass_: string;
   private activeModifier_: string;
   private inactiveModifier_: string;
@@ -33,7 +33,7 @@ class MeteredProgressiveDisclosure {
 
   constructor(
     targets: HTMLElement[],
-    threshold: number,
+    getThresholdFn: (el: HTMLElement) => number,
     {
       base = DefaultClassOptions.base,
       activeModifier = DefaultClassOptions.activeModifier,
@@ -41,7 +41,7 @@ class MeteredProgressiveDisclosure {
       updateFunction = noop,
     }: ICSSClassOptions,
   ) {
-    this.threshold_ = threshold;
+    this.getThresholdFn_ = getThresholdFn;
     this.baseClass_ = base;
     this.activeModifier_ = activeModifier;
     this.inactiveModifier_ = inactiveModifier;
@@ -128,7 +128,7 @@ class MeteredProgressiveDisclosure {
 
     this.updateFunction_(target, next, timeSeen, currentTime);
 
-    if (currentTime > timeSeen + this.threshold_) {
+    if (currentTime > timeSeen + this.getThresholdFn_(next)) {
       this.nextTargets_.delete(target);
       this.disclose_(next);
     }
