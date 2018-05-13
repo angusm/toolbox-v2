@@ -1,17 +1,25 @@
-import {CommonSelector} from "../common-selector";
 import {frameMemoize} from "../../frame-memoize";
 import {getDistanceUntilVisible} from "../position/get-distance-until-visible";
 import {min} from "../../array/min";
 import {getDisplayedAnchors} from "./get-displayed-anchors";
 import {getAnchorElementFromHash} from "./get-anchor-element-from-hash";
-import {isAnchorElementFromHashDominant} from "./is-anchor-element-from-hash-dominant";
 import {getAnchorsWithCommonSelector} from "./get-anchors-with-common-selector";
+import {isElementDominant} from "../position/is-element-dominant";
+import {contains} from "../../array/contains";
 
 function getCurrentAnchorByVisibleOrSeen_(
   getAnchorsFn: () => HTMLElement[] = getAnchorsWithCommonSelector
 ): HTMLElement {
-  if (isAnchorElementFromHashDominant()) {
-    return getAnchorElementFromHash();
+  // Store these values to avoid multiple calls.
+  const anchorElementFromHash = getAnchorElementFromHash();
+  const anchors = getAnchorsFn();
+
+  const useAnchorFromElementHash =
+    contains(anchors, anchorElementFromHash) &&
+    isElementDominant(anchorElementFromHash);
+
+  if (useAnchorFromElementHash) {
+    return anchorElementFromHash;
   }
 
   const eligibleAnchors: HTMLElement[] =
