@@ -25,8 +25,7 @@ function getCurrentAnchorByVisibleOrSeen_(
 
   const eligibleAnchors: HTMLElement[] =
     getAnchorsFn()
-      .filter((anchor) => isVisible(anchor))
-      .filter((anchor) => isScrolledPast(anchor))
+      .filter((anchor) => isVisible(anchor) || isScrolledPast(anchor))
       .filter((anchor) => {
         return getDistanceBetweenCenters(anchor).getLength() <
           window.innerHeight / 2;
