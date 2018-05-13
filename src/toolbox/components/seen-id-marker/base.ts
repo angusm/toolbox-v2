@@ -1,20 +1,20 @@
-import {CommonSelector} from "../../utils/dom/common-selector";
 import {isAbove} from "../../utils/dom/position/is-above";
 import {renderLoop} from "../../utils/render-loop";
 import {updateClassModifiers} from "../../utils/dom/class/update-class-modifiers";
+import {getAnchorsWithCommonSelector} from "../../utils/dom/anchor/get-anchors-with-common-selector";
 
 const CLASS_NAME = 'tb-id-marker';
 
 class SeenIdMarker {
-  private getCurrentAnchor_: (querySelector: string) => HTMLElement;
-  private querySelector_: string;
+  private getCurrentAnchor_: (getAnchorsFn: () => HTMLElement[]) => HTMLElement;
+  private getAnchorsFn_: () => HTMLElement[];
 
   constructor(
-    getCurrentAnchorFn: (querySelector: string) => HTMLElement,
-    querySelector: string = CommonSelector.DEEP_LINK_TARGETS,
+    getCurrentAnchorFn: (getAnchorsFn: () => HTMLElement[]) => HTMLElement,
+    getAnchorsFn: () => HTMLElement[] = getAnchorsWithCommonSelector,
   ) {
     this.getCurrentAnchor_ = getCurrentAnchorFn;
-    this.querySelector_ = querySelector;
+    this.getAnchorsFn_ = getAnchorsFn;
     this.init_();
   }
 
@@ -27,11 +27,11 @@ class SeenIdMarker {
       renderLoop.cleanup(() => this.render_());
 
       const currentAnchor: HTMLElement =
-        <HTMLElement>this.getCurrentAnchor_(this.querySelector_);
+        <HTMLElement>this.getCurrentAnchor_(this.getAnchorsFn_);
 
       const html: Element = <Element>document.querySelector('html');
       const scrolledPastIds: string[] =
-        Array.from(document.querySelectorAll(this.querySelector_))
+        this.getAnchorsFn_()
           .filter((element: HTMLElement) => isAbove(element, currentAnchor))
           .map((element: Node) => (<HTMLElement>element).id)
           .concat(currentAnchor.id);

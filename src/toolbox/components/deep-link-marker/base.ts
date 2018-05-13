@@ -1,19 +1,19 @@
 import {renderLoop} from '../../utils/render-loop';
 import {updateClassModifiers} from "../../utils/dom/class/update-class-modifiers";
-import {CommonSelector} from "../../utils/dom/common-selector";
+import {getAnchorsWithCommonSelector} from "../../utils/dom/anchor/get-anchors-with-common-selector";
 
 const CLASS_NAME: string = 'tb-deep-link-by-scroll';
 
 class DeepLinkMarker {
-  private getCurrentAnchor_: (querySelector: string) => HTMLElement;
-  private querySelector_: string;
+  private getCurrentAnchor_: (getAnchorsFn: () => HTMLElement[]) => HTMLElement;
+  private getAnchorsFn_: () => HTMLElement[];
 
   constructor(
-    getCurrentAnchorFn: (querySelector: string) => HTMLElement,
-    querySelector: string = CommonSelector.DEEP_LINK_TARGETS
+    getCurrentAnchorFn: (getAnchorsFn: () => HTMLElement[]) => HTMLElement,
+    getAnchorsFn: () => HTMLElement[] = getAnchorsWithCommonSelector,
   ) {
     this.getCurrentAnchor_ = getCurrentAnchorFn;
-    this.querySelector_ = querySelector;
+    this.getAnchorsFn_ = getAnchorsFn;
     this.init_();
   }
 
@@ -28,7 +28,7 @@ class DeepLinkMarker {
       renderLoop.cleanup(() => this.render_());
 
       const currentAnchorId: string =
-        (<HTMLElement>this.getCurrentAnchor_(this.querySelector_)).id;
+        (<HTMLElement>this.getCurrentAnchor_(this.getAnchorsFn_)).id;
       const html: Element = <Element>document.querySelector('html');
 
       renderLoop.measure(() => {

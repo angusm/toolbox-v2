@@ -1,4 +1,3 @@
-import {CommonSelector} from "../../utils/dom/common-selector";
 import {renderLoop} from "../../utils/render-loop";
 import {getClassModifiers} from "../../utils/dom/class/get-class-modifiers";
 import {removeClassModifiers} from "../../utils/dom/class/remove-class-modifiers";
