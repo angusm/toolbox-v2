@@ -11,6 +11,7 @@ import {min} from "../../array/min";
 import {getVisibleDistanceFromRoot} from "../position/get-visible-distance-from-root";
 import {max} from "../../array/max";
 import {getDistanceBetweenCenters} from "../position/get-distance-between-centers";
+import {getDistanceUntilVisible} from "../position/get-distance-until-visible";
 
 function getCurrentAnchorByVisibleOrSeen_(
   getAnchorsFn: () => HTMLElement[] = getAnchorsWithCommonSelector
@@ -29,7 +30,7 @@ function getCurrentAnchorByVisibleOrSeen_(
 
   const eligibleAnchors: HTMLElement[] =
     getAnchorsFn()
-      .filter((anchor) => isVisible(anchor) || isScrolledPast(anchor))
+      .filter((anchor) => getDistanceUntilVisible(anchor).y <= 0)
       .filter((anchor) => isStyledVisible(anchor) && isDisplayed(anchor))
       .filter((anchor) => {
         return getDistanceBetweenCenters(anchor, null).y <= window.innerHeight;
