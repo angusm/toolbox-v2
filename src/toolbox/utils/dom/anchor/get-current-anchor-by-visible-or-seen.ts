@@ -1,6 +1,5 @@
 import {frameMemoize} from "../../frame-memoize";
 import {getDistanceUntilVisible} from "../position/get-distance-until-visible";
-import {min} from "../../array/min";
 import {getDisplayedAnchors} from "./get-displayed-anchors";
 import {getAnchorElementFromHash} from "./get-anchor-element-from-hash";
 import {getAnchorsWithCommonSelector} from "./get-anchors-with-common-selector";
@@ -25,7 +24,7 @@ function getCurrentAnchorByVisibleOrSeen_(
 
   const eligibleAnchors: HTMLElement[] =
     getDisplayedAnchors(getAnchorsFn)
-      .filter((anchor) => getDistanceUntilVisible(anchor).y < 0);
+      .filter((anchor) => getDistanceUntilVisible(anchor).y <= 0);
 
   //noinspection JSSuspiciousNameCombination
   return getCurrentAnchorByCenter(() => eligibleAnchors);
