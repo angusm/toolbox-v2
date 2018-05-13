@@ -2,13 +2,14 @@ import {getOpacity} from '../style/get-opacity';
 import {isDisplayed} from "../style/is-displayed";
 import {getVisibleDimensions} from "./get-visible-dimensions";
 import {frameMemoize} from "../../frame-memoize";
+import {isVisible} from "../style/is-visible";
 
 function getVisibleArea_(
   target: HTMLElement,
   container: HTMLElement = null,
   factorInOpacity: boolean = false
 ): number {
-  if (!isDisplayed(target)) {
+  if (!isDisplayed(target) || !isVisible(target)) {
     return 0;
   }
 

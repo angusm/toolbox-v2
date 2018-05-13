@@ -1,11 +1,12 @@
 import {frameMemoize} from "../../frame-memoize";
-import {getDistanceUntilVisible} from "../position/get-distance-until-visible";
-import {getDisplayedAnchors} from "./get-displayed-anchors";
 import {getAnchorElementFromHash} from "./get-anchor-element-from-hash";
 import {getAnchorsWithCommonSelector} from "./get-anchors-with-common-selector";
 import {isElementDominant} from "../position/is-element-dominant";
 import {contains} from "../../array/contains";
 import {getCurrentAnchorByCenter} from "./get-current-anchor-by-center";
+import {isVisible} from "../position/is-visible";
+import {isScrolledPast} from "../position/is-scrolled-past";
+import {getDistanceBetweenCenters} from "../position/get-distance-between-centers";
 
 function getCurrentAnchorByVisibleOrSeen_(
   getAnchorsFn: () => HTMLElement[] = getAnchorsWithCommonSelector
@@ -23,8 +24,13 @@ function getCurrentAnchorByVisibleOrSeen_(
   }
 
   const eligibleAnchors: HTMLElement[] =
-    getDisplayedAnchors(getAnchorsFn)
-      .filter((anchor) => getDistanceUntilVisible(anchor).y <= 0);
+    getAnchorsFn()
+      .filter((anchor) => isVisible(anchor))
+      .filter((anchor) => isScrolledPast(anchor))
+      .filter((anchor) => {
+        return getDistanceBetweenCenters(anchor).getLength() <
+          window.innerHeight / 2;
+      });
 
   //noinspection JSSuspiciousNameCombination
   return getCurrentAnchorByCenter(() => eligibleAnchors);
