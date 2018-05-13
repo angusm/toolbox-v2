@@ -1,27 +1,25 @@
 import {Scroll} from '../../utils/cached-vectors/scroll';
 import {renderLoop} from '../../utils/render-loop';
-import {CommonSelector} from "../../utils/dom/common-selector";
+import {getAnchorsWithCommonSelector} from "../../utils/dom/anchor/get-anchors-with-common-selector";
 
 const windowScroll: Scroll = Scroll.getSingleton();
 
 class DeepLinkByScroll {
-  private getCurrentAnchor_: (querySelector: string) => HTMLElement;
-  private querySelector_: string;
+  private getCurrentAnchor_: (getAnchorsFn: () => HTMLElement[]) => HTMLElement;
+  private getAnchorsFn_: () => HTMLElement[];
 
   constructor(
-    getCurrentAnchorFn: (querySelector: string) => HTMLElement,
-    querySelector: string = CommonSelector.DEEP_LINK_TARGETS
+    getCurrentAnchorFn: (getAnchorsFn: () => HTMLElement[]) => HTMLElement,
+    getAnchorsFn: () => HTMLElement[] = getAnchorsWithCommonSelector,
   ) {
     this.getCurrentAnchor_ = getCurrentAnchorFn;
-    this.querySelector_ = querySelector;
+    this.getAnchorsFn_ = getAnchorsFn;
     this.init_();
   }
 
   private init_(): void {
     this.render_();
   }
-
-
 
   private render_(): void {
     renderLoop.measure(() => {
@@ -33,7 +31,7 @@ class DeepLinkByScroll {
       }
 
       const currentAnchorId: string =
-        `#${(<HTMLElement>this.getCurrentAnchor_(this.querySelector_)).id}`;
+        `#${(<HTMLElement>this.getCurrentAnchor_(this.getAnchorsFn_)).id}`;
 
       // Do nothing if the hash hasn't changed
       if (window.location.hash === currentAnchorId) {
