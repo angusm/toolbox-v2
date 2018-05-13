@@ -33,13 +33,12 @@ function getCurrentAnchorByVisibleOrSeen_(
       .filter((anchor) => getDistanceUntilVisible(anchor).y <= 0)
       .filter((anchor) => isStyledVisible(anchor) && isDisplayed(anchor))
       .filter((anchor) => {
-        return getDistanceBetweenCenters(anchor, null).y <= window.innerHeight;
+        return getDistanceBetweenCenters(anchor, null).y <=
+          window.innerHeight / 2;
       });
 
   //noinspection JSSuspiciousNameCombination
-  return max(
-    eligibleAnchors,
-    (el) => getVisibleDistanceFromRoot(el).getLength());
+  return max(eligibleAnchors, (el) => getVisibleDistanceFromRoot(el).y);
 }
 
 // Frame memoize as it is likely this will be used by both DeepLinkByScroll and
