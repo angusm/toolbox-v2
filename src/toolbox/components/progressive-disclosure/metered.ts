@@ -114,7 +114,9 @@ class MeteredProgressiveDisclosure {
       renderLoop.measure(() => renderLoop.cleanup(() => this.update_()));
     }
 
-    this.getTargets_().forEach((target) => this.updateTarget_(target));
+    renderLoop.measure(() => {
+      this.getTargets_().forEach((target) => this.updateTarget_(target));
+    });
   }
 
   private updateTarget_(target: HTMLElement) {
