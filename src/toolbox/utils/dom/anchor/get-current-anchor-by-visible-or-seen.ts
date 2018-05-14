@@ -3,15 +3,14 @@ import {getAnchorElementFromHash} from "./get-anchor-element-from-hash";
 import {getAnchorsWithCommonSelector} from "./get-anchors-with-common-selector";
 import {isElementDominant} from "../position/is-element-dominant";
 import {contains} from "../../array/contains";
-import {isVisible} from "../position/is-visible";
 import {isVisible as isStyledVisible} from "../style/is-visible";
-import {isScrolledPast} from "../position/is-scrolled-past";
 import {isDisplayed} from "../style/is-displayed";
-import {min} from "../../array/min";
 import {getVisibleDistanceFromRoot} from "../position/get-visible-distance-from-root";
 import {max} from "../../array/max";
 import {getDistanceBetweenCenters} from "../position/get-distance-between-centers";
 import {getDistanceUntilVisible} from "../position/get-distance-until-visible";
+
+// TODO: Make functional with horizontal scrolling as well.
 
 function getCurrentAnchorByVisibleOrSeen_(
   getAnchorsFn: () => HTMLElement[] = getAnchorsWithCommonSelector
