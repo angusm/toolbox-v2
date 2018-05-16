@@ -27,15 +27,17 @@ class ActiveOnEvent {
         <HTMLElement[]>Array.from(
           document.querySelectorAll(`.${this.baseClass_}`));
       candidates.forEach((candidate) => {
-        eventHandler.addListener(
-          candidate,
-          this.EventClass_,
-          () => {
-            renderLoop.measure(() => {
-              const activeClass = `${this.baseClass_}--${this.modifier_}`;
-              addClassIfMissing(candidate, activeClass);
+        const uid =
+          eventHandler.addListener(
+            candidate,
+            this.EventClass_,
+            () => {
+              renderLoop.measure(() => {
+                const activeClass = `${this.baseClass_}--${this.modifier_}`;
+                addClassIfMissing(candidate, activeClass);
+                eventHandler.removeListener(uid);
+              });
             });
-          });
       });
     });
   }
