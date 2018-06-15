@@ -22,10 +22,13 @@ class NextIdButton {
       const anchors = this.getAnchorsFn_();
       const currentAnchor = getCurrentAnchorByVisibleOrSeen(this.getAnchorsFn_);
       const nextIndex = anchors.indexOf(currentAnchor) + 1;
-      const nextId = anchors[nextIndex].attributes.getNamedItem('id').value;
+
       if (nextIndex < anchors.length) {
+        const nextAnchor = anchors[nextIndex];
+        const nextId = nextAnchor.attributes.getNamedItem('id').value;
         renderLoop.mutate(() => {
-          this.element_.attributes.getNamedItem('href').value = '#' + nextId;
+          this.element_.attributes.getNamedItem('href').value =
+            '#' + nextId;
         });
       }
     });
