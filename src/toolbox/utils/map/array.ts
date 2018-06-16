@@ -11,14 +11,6 @@ class ArrayMap<K, V> extends MapWrapper<K, V[]> {
         InnerMapClass,
         (key: K) => []));
   }
-
-  public get(key: K): V[] {
-    return super.get(key);
-  }
-
-  public set(key: K, value: V[]): this {
-    return super.set(key, value);
-  }
 }
 
 export {ArrayMap};
