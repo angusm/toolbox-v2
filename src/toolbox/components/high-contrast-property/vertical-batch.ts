@@ -18,7 +18,7 @@ interface IOptions {
 class VerticalBatchHighContrastProperty {
   private targets_: ITarget[];
   private backgrounds_: HTMLElement[];
-  private colorOptions_: Color[];
+  private getColorOptionsFn_: () => Color[];
 
   // Optionally set properties
   private limit_: boolean;
@@ -27,7 +27,7 @@ class VerticalBatchHighContrastProperty {
   constructor(
     targets: ITarget[],
     backgrounds: HTMLElement[],
-    colorOptions: Color[],
+    getColorOptionsFn: () => Color[],
     {
       limit = false,
       colorMap = new Map(),
@@ -38,7 +38,7 @@ class VerticalBatchHighContrastProperty {
   ) {
     this.targets_= targets;
     this.backgrounds_ = backgrounds;
-    this.colorOptions_ = colorOptions;
+    this.getColorOptionsFn_ = getColorOptionsFn;
 
     this.limit_ = limit;
     this.colorMap_ = colorMap;
@@ -86,7 +86,8 @@ class VerticalBatchHighContrastProperty {
       return this.colorMap_.get(behindBgColor);
     }
     else {
-      return behindBgColor.getColorWithHighestContrast(...this.colorOptions_);
+      return behindBgColor
+        .getColorWithHighestContrast(...this.getColorOptionsFn_());
     }
   }
 

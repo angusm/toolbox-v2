@@ -1,7 +1,6 @@
 import {zip} from "../../utils/array/zip";
 import {eventHandler} from "../../utils/event/event-handler";
 import {addClassIfMissing} from "../../utils/dom/class/add-class-if-missing";
-import {SeenBottomForDuration} from "../../utils/event/events/seen-bottom-for-duration";
 import {removeClassIfPresent} from "../../utils/dom/class/remove-class-if-present";
 import {IsBottomVisible} from "../../utils/event/events/is-bottom-visible";
 import {noop} from "../../utils/noop";

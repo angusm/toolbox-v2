@@ -28,7 +28,7 @@ class NextIdButton {
         const nextId = nextAnchor.attributes.getNamedItem('id').value;
         renderLoop.mutate(() => {
           this.element_.attributes.getNamedItem('href').value =
-            '#' + nextId;
+            `#${nextId}`;
         });
       }
     });
