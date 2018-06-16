@@ -4,7 +4,7 @@ import {Color} from "../../utils/color/color";
 import {setStyle} from "../../utils/dom/style/set-style";
 import {getVisibleCenterYPosition} from "../../utils/dom/position/vertical/get-visible-center-y-position";
 import {getVisibleYRange} from "../../utils/dom/position/vertical/get-visible-y-range";
-import {ArrayMap} from "../../utils/map";
+import {ArrayMap} from "../../utils/map/array";
 
 interface ITarget {
   element: HTMLElement;
