@@ -85,12 +85,15 @@ class VerticalBatchHighContrastProperty {
 
   private getColorToSet_(bgElement: HTMLElement): Color {
     const behindBgColor = Color.fromElementBackgroundColor(bgElement);
-    if (this.colorMap_.has(behindBgColor)) {
+    const colorOptions = this.getColorOptionsFn_();
+    if (
+      this.colorMap_.has(behindBgColor) &&
+      colorOptions.some((c) => c === this.colorMap_.get(behindBgColor))
+    ) {
       return this.colorMap_.get(behindBgColor);
     }
     else {
-      return behindBgColor
-        .getColorWithHighestContrast(...this.getColorOptionsFn_());
+      return behindBgColor.getColorWithHighestContrast(...colorOptions);
     }
   }
 
