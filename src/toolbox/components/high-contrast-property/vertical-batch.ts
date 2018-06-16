@@ -4,6 +4,7 @@ import {Color} from "../../utils/color/color";
 import {setStyle} from "../../utils/dom/style/set-style";
 import {getVisibleCenterYPosition} from "../../utils/dom/position/vertical/get-visible-center-y-position";
 import {getVisibleYRange} from "../../utils/dom/position/vertical/get-visible-y-range";
+import {ArrayMap} from "../../utils/map";
 
 interface ITarget {
   element: HTMLElement;
@@ -55,16 +56,18 @@ class VerticalBatchHighContrastProperty {
       const ranges = this.getBackgroundHeightRanges_();
       const yPositions = this.getTargetYPositions_();
       Array.from(yPositions.entries()).forEach(
-        ([yPosition, target]) => {
-          Array.from(ranges.entries()).some(
-            ([range, backgroundElement]) => {
-              if (range.contains(yPosition)) {
-                this.updateTarget_(target, backgroundElement);
-                // No point checking an updated target
-                return true; // Short circuits
+        ([yPosition, targets]) => {
+          targets.forEach((target) => {
+            Array.from(ranges.entries()).some(
+              ([range, backgroundElement]) => {
+                if (range.contains(yPosition)) {
+                  this.updateTarget_(target, backgroundElement);
+                  // No point checking an updated target
+                  return true; // Short circuits
+                }
               }
-            }
-          );
+            );
+          });
         });
     });
   }
@@ -106,18 +109,18 @@ class VerticalBatchHighContrastProperty {
       );
   }
 
-  private getTargetYPositions_(): Map<number, ITarget> {
+  private getTargetYPositions_(): ArrayMap<number, ITarget> {
     const windowRange = new Range(0, window.innerHeight);
     return this.targets_
       .reduce(
         (mapping, target) => {
           const centerY = getVisibleCenterYPosition(target.element);
           if (windowRange.contains(centerY)) {
-            mapping.set(centerY, target);
+            mapping.get(centerY).push(target);
           }
           return mapping;
         },
-        new Map()
+        new ArrayMap<number, ITarget>()
       );
   }
 }
