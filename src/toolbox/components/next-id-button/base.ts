@@ -28,10 +28,14 @@ class NextIdButton {
         const nextHref =
           isDisplayed(nextAnchor) ?
             `#${nextAnchor.attributes.getNamedItem('id').value}` :
-            '';
+            null;
 
         renderLoop.mutate(() => {
-          this.element_.attributes.getNamedItem('href').value = nextHref;
+          if (nextHref) {
+            this.element_.setAttribute('href', nextHref);
+          } else {
+            this.element_.removeAttribute('href');
+          }
         });
       }
     });
