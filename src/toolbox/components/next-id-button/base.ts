@@ -1,6 +1,8 @@
 import {renderLoop} from "../../utils/render-loop";
 import {getCurrentAnchorByVisibleOrSeen} from "../../utils/dom/anchor/get-current-anchor-by-visible-or-seen";
 import {getAnchorsWithCommonSelector} from "../../utils/dom/anchor/get-anchors-with-common-selector";
+import {getNextAnchor} from "../../utils/dom/anchor/get-next-anchor";
+import {isDisplayed} from "../../utils/dom/style/is-displayed";
 
 class NextIdButton {
   private element_: HTMLElement;
@@ -19,16 +21,17 @@ class NextIdButton {
     renderLoop.measure(() => {
       renderLoop.cleanup(() => this.render_());
 
-      const anchors = this.getAnchorsFn_();
-      const currentAnchor = getCurrentAnchorByVisibleOrSeen(this.getAnchorsFn_);
-      const nextIndex = anchors.indexOf(currentAnchor) + 1;
+      const nextAnchor =
+        getNextAnchor(getCurrentAnchorByVisibleOrSeen, this.getAnchorsFn_);
 
-      if (nextIndex < anchors.length) {
-        const nextAnchor = anchors[nextIndex];
-        const nextId = nextAnchor.attributes.getNamedItem('id').value;
+      if (nextAnchor) {
+        const nextHref =
+          isDisplayed(nextAnchor) ?
+            `#${nextAnchor.attributes.getNamedItem('id').value}` :
+            '';
+
         renderLoop.mutate(() => {
-          this.element_.attributes.getNamedItem('href').value =
-            `#${nextId}`;
+          this.element_.attributes.getNamedItem('href').value = nextHref;
         });
       }
     });
