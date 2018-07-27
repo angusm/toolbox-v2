@@ -3,7 +3,8 @@ import {ParallaxDistanceFunction} from "./parallax-distance-function";
 import {IParallaxOptions} from "./types/parallax-options";
 import {renderLoop} from "../../utils/render-loop";
 import {Range} from "../../utils/math/range";
-import {generateBasicParallaxEffect} from "./effect-functions/base-generator";
+import {generateBasicParallaxEffect} from "./effect-generators/basic-parallax";
+import {isDisplayed} from "../../utils/dom/style/is-displayed";
 
 // Type definition
 type GetDistanceFn = (a: HTMLElement, b?: HTMLElement) => number;
@@ -51,6 +52,11 @@ class Parallax {
    * @private
    */
   private runEffect_(): void {
+    // Do nothing if the target is not displayed
+    if (!isDisplayed(this.target_)) {
+      return;
+    }
+
     const distance = this.getRunDistance_();
     if (distance === this.lastRunDistance_) {
       return; // Do nothing if there've been no real changes.

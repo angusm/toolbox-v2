@@ -1,4 +1,5 @@
 import {Numeric} from '../../types';
+import {Vector2d} from "../../math/geometry/vector-2d";
 
 class Matrix {
   private a: number;
@@ -46,6 +47,15 @@ class Matrix {
     return new Matrix(this.a, this.b, this.c, this.d, this.tx, value);
   }
 
+  public set2dTranslation(translation: Vector2d) {
+    return new Matrix(
+      this.a, this.b, this.c, this.d, translation.x, translation.y);
+  }
+
+  public setScale(scale: number) {
+    return new Matrix(scale, this.b, this.c, scale, this.tx, this.ty);
+  }
+
   public static parseFromString(str: string): Matrix {
     const valuesStr = str.split('matrix(').splice(-1)[0].split(')')[0];
     const values = valuesStr.split(',').map((str) => str.trim());
@@ -68,6 +78,37 @@ class Matrix {
 
   public applyToElementTransform(element: HTMLElement): void {
     element.style.transform = this.toCSSString();
+  }
+
+  public applyToElementTransformAsChange(
+    element: HTMLElement,
+    originalMatrix: Matrix
+  ) {
+    Matrix.fromElementTransform(element)
+      .applyDifference(this.getDifference(originalMatrix))
+      .applyToElementTransform(element);
+  }
+
+  public applyDifference(differenceMatrix: Matrix) {
+    return new Matrix(
+      this.a + differenceMatrix.a,
+      this.b + differenceMatrix.b,
+      this.c + differenceMatrix.c,
+      this.d + differenceMatrix.d,
+      this.tx + differenceMatrix.tx,
+      this.ty + differenceMatrix.ty
+    );
+  }
+
+  public getDifference(matrix: Matrix) {
+    return new Matrix(
+      this.a - matrix.a,
+      this.b - matrix.b,
+      this.c - matrix.c,
+      this.d - matrix.d,
+      this.tx - matrix.tx,
+      this.ty - matrix.ty
+    );
   }
 }
 
