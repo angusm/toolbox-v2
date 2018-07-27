@@ -1,6 +1,6 @@
 import {Dimensions2d} from "../../math/geometry/dimensions-2d";
 import {Range} from "../../math/range";
-import {getVisibleDistanceBetweenElementBottoms} from "./get-visible-distance-between-element-bottoms";
+import {getVisibleDistanceBetweenElementBottoms} from "./vertical/get-visible-distance-between-element-bottoms";
 import {isVisible} from "./is-visible";
 
 function isBottomVisible(

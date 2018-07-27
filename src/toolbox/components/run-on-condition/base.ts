@@ -8,7 +8,7 @@ class RunOnCondition {
 
   constructor(
     actionFn: () => void,
-    conditionFn: () => boolean,
+    conditionFn: () => boolean = () => true,
     alternateFn: () => void = null
   ) {
     this.actionFn_ = actionFn;
