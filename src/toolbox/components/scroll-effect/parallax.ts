@@ -54,11 +54,6 @@ class Parallax {
    * @private
    */
   private runEffect_(): void {
-    // Do nothing if the target is not displayed
-    if (!isDisplayed(this.target_)) {
-      return;
-    }
-
     const distance = this.getRunDistance_();
     if (distance === this.lastRunDistance_) {
       return; // Do nothing if there've been no real changes.
