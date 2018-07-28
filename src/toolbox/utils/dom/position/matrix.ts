@@ -91,6 +91,7 @@ class Matrix {
   ): void {
     matrixChangesByElement_.get(element)
       .push(this.getDifference(originalMatrix));
+    preChangeMatrixByElement_.set(element, originalMatrix);
     Matrix.mutateElementWithMatrixChanges(element);
   }
 
