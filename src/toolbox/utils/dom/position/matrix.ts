@@ -102,6 +102,11 @@ class Matrix {
         const originalMatrix = preChangeMatrixByElement_.get(element);
         const changes = matrixChangesByElement_.get(element);
 
+        // Do nothing if the changes have already been applied for this element
+        if (changes.length < 1) {
+          return;
+        }
+
         matrixChangesByElement_.delete(element);
         const finalMatrix =
           changes.reduce(
