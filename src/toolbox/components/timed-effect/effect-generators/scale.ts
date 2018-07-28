@@ -12,13 +12,13 @@ function generateScaleEffect(
     const originalMatrix = Matrix.fromElementTransform(target);
     const scaleMatrix = originalMatrix.setScale(scale);
 
-    renderLoop.mutate(() => {
-      if (applyAsChange) {
-        scaleMatrix.applyToElementTransformAsChange(target, originalMatrix);
-      } else {
+    if (applyAsChange) {
+      scaleMatrix.applyToElementTransformAsChange(target, originalMatrix);
+    } else {
+      renderLoop.mutate(() => {
         scaleMatrix.applyToElementTransform(target)
-      }
-    });
+      });
+    }
   }
 }
 

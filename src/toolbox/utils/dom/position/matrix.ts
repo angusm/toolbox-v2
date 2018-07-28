@@ -1,5 +1,10 @@
 import {Numeric} from '../../types';
 import {Vector2d} from "../../math/geometry/vector-2d";
+import {renderLoop} from "../../render-loop";
+import {ArrayMap} from "../../map/array";
+
+const matrixChangesByElement_: ArrayMap<HTMLElement, Matrix> = new ArrayMap();
+const preChangeMatrixByElement_: Map<HTMLElement, Matrix> = new Map();
 
 class Matrix {
   private a: number;
@@ -83,13 +88,36 @@ class Matrix {
   public applyToElementTransformAsChange(
     element: HTMLElement,
     originalMatrix: Matrix
-  ) {
-    Matrix.fromElementTransform(element)
-      .applyDifference(this.getDifference(originalMatrix))
-      .applyToElementTransform(element);
+  ): void {
+    matrixChangesByElement_.get(element)
+      .push(this.getDifference(originalMatrix));
+    Matrix.mutateElementWithMatrixChanges(element);
   }
 
-  public applyDifference(differenceMatrix: Matrix) {
+  // Applies all matrix changes to an element, allowing multiple effects to
+  // collaborate on transform values for a single element
+  private static mutateElementWithMatrixChanges(element: HTMLElement) {
+      renderLoop.mutate(() => {
+        const originalMatrix = preChangeMatrixByElement_.get(element);
+        const changes = matrixChangesByElement_.get(element);
+
+        matrixChangesByElement_.delete(element);
+        const finalMatrix =
+          changes.reduce(
+            (accumulationMatrix, changeMatrix) => {
+              return accumulationMatrix.applyDifference(changeMatrix);
+            },
+            originalMatrix);
+        finalMatrix.applyToElementTransform(element);
+
+        renderLoop.cleanup(() => {
+          preChangeMatrixByElement_.clear();
+          matrixChangesByElement_.clear()
+        });
+      });
+  }
+
+  public applyDifference(differenceMatrix: Matrix): Matrix {
     return new Matrix(
       this.a + differenceMatrix.a,
       this.b + differenceMatrix.b,
@@ -100,7 +128,7 @@ class Matrix {
     );
   }
 
-  public getDifference(matrix: Matrix) {
+  public getDifference(matrix: Matrix): Matrix {
     return new Matrix(
       this.a - matrix.a,
       this.b - matrix.b,
