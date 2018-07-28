@@ -15,9 +15,7 @@ function generateScaleEffect(
     if (applyAsChange) {
       scaleMatrix.applyToElementTransformAsChange(target, originalMatrix);
     } else {
-      renderLoop.mutate(() => {
-        scaleMatrix.applyToElementTransform(target)
-      });
+      renderLoop.mutate(() => scaleMatrix.applyToElementTransform(target));
     }
   }
 }

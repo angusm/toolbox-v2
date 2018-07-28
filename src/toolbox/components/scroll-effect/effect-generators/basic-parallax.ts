@@ -13,13 +13,12 @@ function generateBasicParallaxEffect(
     const originalMatrix = Matrix.fromElementTransform(target);
     const translation =
       originalMatrix.set2dTranslation(new Vector2d(0, offset));
-    renderLoop.mutate(() => {
-      if (applyAsChange) {
-        translation.applyToElementTransformAsChange(target, originalMatrix);
-      } else {
-        translation.applyToElementTransform(target)
-      }
-    });
+
+    if (applyAsChange) {
+      translation.applyToElementTransformAsChange(target, originalMatrix);
+    } else {
+      renderLoop.mutate(() => translation.applyToElementTransform(target));
+    }
   }
 }
 
