@@ -5,6 +5,7 @@ class RunOnCondition {
   private conditionFn_: () => boolean;
   private alternateFn_: () => void;
   private lastValue_: boolean;
+  private destroyed_: boolean;
 
   constructor(
     actionFn: () => void,
@@ -14,6 +15,7 @@ class RunOnCondition {
     this.actionFn_ = actionFn;
     this.conditionFn_ = conditionFn;
     this.alternateFn_ = alternateFn;
+    this.destroyed_ = false;
     this.init_();
   }
 
@@ -26,6 +28,10 @@ class RunOnCondition {
   }
 
   private render_(): void {
+    if (this.destroyed_) {
+      return;
+    }
+
     renderLoop.measure(() => {
       renderLoop.cleanup(() => this.render_());
 
@@ -40,6 +46,10 @@ class RunOnCondition {
 
       this.lastValue_ = conditionResult;
     });
+  }
+
+  public destroy() {
+    this.destroyed_ = true;
   }
 }
 

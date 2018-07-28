@@ -24,6 +24,7 @@ class Parallax {
   private effectFunctions_: Array<
       (target: HTMLElement, distance: number, distancePercent: number) => void>;
   private lastRunDistance_: number;
+  private runLoop_: RunOnScroll;
 
   constructor(
     target: HTMLElement,
@@ -39,12 +40,13 @@ class Parallax {
     this.distanceRange_ = new Range(startDistance, endDistance);
     this.effectFunctions_ = effectFunctions;
     this.lastRunDistance_ = null;
+    this.runLoop_ = null;
     this.init_();
   }
 
   private init_(): void {
     renderLoop.measure(() => this.runEffect_());
-    new RunOnScroll(() => this.runEffect_());
+    this.runLoop_ = new RunOnScroll(() => this.runEffect_());
   }
 
   /**
@@ -71,6 +73,10 @@ class Parallax {
 
   private getRunDistance_(): number {
     return this.distanceRange_.clamp(this.getDistanceFunction_(this.target_));
+  }
+
+  public destroy() {
+    this.runLoop_.destroy();
   }
 }
 

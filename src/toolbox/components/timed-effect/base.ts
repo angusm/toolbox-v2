@@ -7,6 +7,7 @@ class TimedEffect {
   private endTime_: number;
   private target_: HTMLElement;
   private effectFunctions_: TEffectFunctions;
+  private destroyed_: boolean;
 
   constructor(
     target: HTMLElement,
@@ -17,6 +18,7 @@ class TimedEffect {
     this.startTime_ = <number>new Date().valueOf();
     this.endTime_ = this.startTime_ + duration;
     this.effectFunctions_ = effectFunctions;
+    this.destroyed_ = false;
     this.init_();
   }
 
@@ -29,8 +31,13 @@ class TimedEffect {
   }
 
   private render_() {
+    if (this.destroyed_) {
+      return;
+    }
+
     if (this.getTime_() > this.endTime_) {
       this.runEffectFunctions_(1);
+      return
     }
 
     renderLoop.measure(() => {
@@ -49,6 +56,10 @@ class TimedEffect {
       this.effectFunctions_
         .forEach((effectFunction) => effectFunction(this.target_, percent));
     });
+  }
+
+  public destroy() {
+    this.destroyed_ = true;
   }
 }
 
