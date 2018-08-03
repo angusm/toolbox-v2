@@ -12,6 +12,7 @@ function generateBasicVideoScrubEffect(): TScrollEffectEffectFunction {
     const duration = video.duration;
     if (!isNaN(duration)) {
       renderLoop.mutate(() => {
+        video.pause();
         video.currentTime = duration * distanceAsPercent;
       });
     }
