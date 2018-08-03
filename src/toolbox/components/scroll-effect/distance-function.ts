@@ -5,11 +5,11 @@ import {Scroll} from "../../utils/cached-vectors/scroll";
 
 const scroll = Scroll.getSingleton();
 
-class ParallaxDistanceFunction {
+class DistanceFunction {
   public static DISTANCE_FROM_DOCUMENT_TOP = getVisibleDistanceBetweenElements;
   public static DISTANCE_FROM_DOCUMENT_CENTER = getVisibleDistanceBetweenElementCenters;
   public static DISTANCE_FROM_DOCUMENT_BOTTOM = getVisibleDistanceBetweenElementBottoms;
   public static DOCUMENT_SCROLL = (unused_a: HTMLElement, unused_b:HTMLElement) => scroll.getPosition().y;
 }
 
-export {ParallaxDistanceFunction}
+export {DistanceFunction}

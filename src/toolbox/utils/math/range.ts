@@ -39,6 +39,10 @@ class Range {
     return (val - this.min_) / (this.max_ - this.min_);
   }
 
+  public getPercentAsValue(percent: number): number {
+    return this.min_ + (this.max_ - this.min_) * percent;
+  }
+
   public getOverlap(overlap: Range): Range {
     if (this.max_ <= overlap.min || overlap.max <= this.min_) {
       return null;

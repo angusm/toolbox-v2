@@ -1,11 +1,11 @@
-import {TParallaxEffectFunction} from "../types/parallax-effect-function";
+import {TScrollEffectEffectFunction} from "../types/scroll-effect-effect-function";
 import {Matrix} from "../../../utils/dom/position/matrix";
 import {renderLoop} from "../../../utils/render-loop";
 import {Vector2d} from "../../../utils/math/geometry/vector-2d";
 
 function generateBasicParallaxEffect(
   ratio: number, applyAsChange: boolean = false
-): TParallaxEffectFunction {
+): TScrollEffectEffectFunction {
   return function(
     target: HTMLElement, distance: number, distanceAsPercent: number
   ) {

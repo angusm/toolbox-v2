@@ -1,23 +1,21 @@
 import {RunOnScroll} from "../run-on-condition/scroll";
-import {ParallaxDistanceFunction} from "./parallax-distance-function";
-import {IParallaxOptions} from "./types/parallax-options";
+import {DistanceFunction} from "./distance-function";
+import {IScrollEffectOptions} from "./types/scroll-effect-options";
 import {renderLoop} from "../../utils/render-loop";
 import {Range} from "../../utils/math/range";
-import {generateBasicParallaxEffect} from "./effect-generators/basic-parallax";
-import {isDisplayed} from "../../utils/dom/style/is-displayed";
 
 // Type definition
 type GetDistanceFn = (a: HTMLElement, b?: HTMLElement) => number;
 
-const defaultOptions: IParallaxOptions =
+const defaultOptions: IScrollEffectOptions =
   {
-    getDistanceFunction: ParallaxDistanceFunction.DISTANCE_FROM_DOCUMENT_CENTER,
+    getDistanceFunction: DistanceFunction.DISTANCE_FROM_DOCUMENT_CENTER,
     startDistance: -Number.MAX_VALUE,
     endDistance: Number.MAX_VALUE,
-    effectFunctions: [generateBasicParallaxEffect(-.1)],
+    effectFunctions: [],
   };
 
-class Parallax {
+class ScrollEffect {
   private target_: HTMLElement;
   private getDistanceFunction_: GetDistanceFn;
   private distanceRange_: Range;
@@ -33,7 +31,7 @@ class Parallax {
       startDistance = defaultOptions.startDistance,
       endDistance = defaultOptions.endDistance,
       effectFunctions = defaultOptions.effectFunctions,
-    }: IParallaxOptions = defaultOptions,
+    }: IScrollEffectOptions = defaultOptions,
   ) {
     this.target_ = target;
     this.getDistanceFunction_ = getDistanceFunction;
@@ -75,4 +73,4 @@ class Parallax {
   }
 }
 
-export {Parallax};
+export {ScrollEffect};
