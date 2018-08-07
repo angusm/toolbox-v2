@@ -55,19 +55,18 @@ class ScrollEffect {
       return;
     }
 
-    // Make the effect repeatable
-    renderLoop.scrollCleanup(
-      () => renderLoop.scrollMeasure(() => this.runEffect_()));
+    renderLoop.scrollMeasure(() => {
+      renderLoop.scrollCleanup(() => this.runEffect_());
+      const distance = this.getRunDistance_();
+      if (distance === this.lastRunDistance_) {
+        return; // Do nothing if there've been no real changes.
+      }
+      this.lastRunDistance_ = distance;
 
-    const distance = this.getRunDistance_();
-    if (distance === this.lastRunDistance_) {
-      return; // Do nothing if there've been no real changes.
-    }
-    this.lastRunDistance_ = distance;
-
-    const percent = this.distanceRange_.getValueAsPercent(distance);
-    this.effects_
-      .forEach((effect) => effect.run(this.target_, distance, percent));
+      const percent = this.distanceRange_.getValueAsPercent(distance);
+      this.effects_
+        .forEach((effect) => effect.run(this.target_, distance, percent));
+    });
   }
 
   private getRunDistance_(): number {
