@@ -1,7 +1,5 @@
 import {TScrollEffectEffectFunction} from "../types/scroll-effect-effect-function";
 import {renderLoop} from "../../../utils/render-loop";
-import {percentToIndex} from "../../../utils/array/percent-to-index";
-import {setStyle} from "../../../utils/dom/style/set-style";
 import {DynamicDefaultMap} from "../../../utils/map/dynamic-default";
 
 const waitForLoadMap = new Map();

@@ -11,7 +11,7 @@ function generateBasicFrameSequenceBGEffect(
   ) {
     const frame = percentToIndex(distanceAsPercent, frameSequences);
     renderLoop.mutate(() => {
-      setStyle(target, 'background-image', frameSequences[frame]);
+      setStyle(target, 'background-image', `url(${frameSequences[frame]})`);
     });
   }
 }
