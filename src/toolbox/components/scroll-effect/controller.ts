@@ -2,6 +2,7 @@ import {DistanceFunction} from "./distance-function";
 import {IScrollEffectOptions} from "./types/scroll-effect-options";
 import {renderLoop} from "../../utils/render-loop";
 import {Range} from "../../utils/math/range";
+import {IEffect} from "./effects/ieffect";
 
 // Type definition
 type GetDistanceFn = (a: HTMLElement, b?: HTMLElement) => number;
@@ -11,15 +12,14 @@ const defaultOptions: IScrollEffectOptions =
     getDistanceFunction: DistanceFunction.DISTANCE_FROM_DOCUMENT_CENTER,
     startDistance: -Number.MAX_VALUE,
     endDistance: Number.MAX_VALUE,
-    effectFunctions: [],
+    effects: [],
   };
 
 class ScrollEffect {
   private target_: HTMLElement;
   private getDistanceFunction_: GetDistanceFn;
   private distanceRange_: Range;
-  private effectFunctions_: Array<
-      (target: HTMLElement, distance: number, distancePercent: number) => void>;
+  private effects_: Array<IEffect>;
   private lastRunDistance_: number;
   private destroyed_: boolean;
 
@@ -29,13 +29,13 @@ class ScrollEffect {
       getDistanceFunction = defaultOptions.getDistanceFunction,
       startDistance = defaultOptions.startDistance,
       endDistance = defaultOptions.endDistance,
-      effectFunctions = defaultOptions.effectFunctions,
+      effects = defaultOptions.effects,
     }: IScrollEffectOptions = defaultOptions,
   ) {
     this.target_ = target;
     this.getDistanceFunction_ = getDistanceFunction;
     this.distanceRange_ = new Range(startDistance, endDistance);
-    this.effectFunctions_ = effectFunctions;
+    this.effects_ = effects;
     this.lastRunDistance_ = null;
     this.destroyed_ = false;
     this.init_();
@@ -66,9 +66,8 @@ class ScrollEffect {
     this.lastRunDistance_ = distance;
 
     const percent = this.distanceRange_.getValueAsPercent(distance);
-    this.effectFunctions_
-      .forEach(
-        (effectFunction) => effectFunction(this.target_, distance, percent));
+    this.effects_
+      .forEach((effect) => effect.run(this.target_, distance, percent));
   }
 
   private getRunDistance_(): number {
@@ -77,6 +76,7 @@ class ScrollEffect {
 
   public destroy() {
     this.destroyed_ = true;
+    this.effects_.forEach((effect) => effect.destroy());
   }
 }
 
