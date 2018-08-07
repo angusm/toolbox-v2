@@ -55,6 +55,10 @@ class ScrollEffect {
       return;
     }
 
+    // Make the effect repeatable
+    renderLoop.scrollCleanup(
+      () => renderLoop.scrollMeasure(() => this.runEffect_()));
+
     const distance = this.getRunDistance_();
     if (distance === this.lastRunDistance_) {
       return; // Do nothing if there've been no real changes.
@@ -65,8 +69,6 @@ class ScrollEffect {
     this.effectFunctions_
       .forEach(
         (effectFunction) => effectFunction(this.target_, distance, percent));
-    renderLoop.scrollCleanup(
-      () => renderLoop.scrollMeasure(() => this.runEffect_()));
   }
 
   private getRunDistance_(): number {
