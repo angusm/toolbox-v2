@@ -1,4 +1,3 @@
-import {RunOnScroll} from "../run-on-condition/scroll";
 import {DistanceFunction} from "./distance-function";
 import {IScrollEffectOptions} from "./types/scroll-effect-options";
 import {renderLoop} from "../../utils/render-loop";
@@ -22,7 +21,7 @@ class ScrollEffect {
   private effectFunctions_: Array<
       (target: HTMLElement, distance: number, distancePercent: number) => void>;
   private lastRunDistance_: number;
-  private runLoop_: RunOnScroll;
+  private destroyed_: boolean;
 
   constructor(
     target: HTMLElement,
@@ -38,13 +37,13 @@ class ScrollEffect {
     this.distanceRange_ = new Range(startDistance, endDistance);
     this.effectFunctions_ = effectFunctions;
     this.lastRunDistance_ = null;
-    this.runLoop_ = null;
+    this.destroyed_ = false;
     this.init_();
   }
 
   private init_(): void {
     renderLoop.measure(() => this.runEffect_());
-    this.runLoop_ = new RunOnScroll(() => this.runEffect_());
+    renderLoop.scrollMeasure(() => this.runEffect_());
   }
 
   /**
@@ -52,6 +51,10 @@ class ScrollEffect {
    * @private
    */
   private runEffect_(): void {
+    if (this.destroyed_) {
+      return;
+    }
+
     const distance = this.getRunDistance_();
     if (distance === this.lastRunDistance_) {
       return; // Do nothing if there've been no real changes.
@@ -62,6 +65,8 @@ class ScrollEffect {
     this.effectFunctions_
       .forEach(
         (effectFunction) => effectFunction(this.target_, distance, percent));
+    renderLoop.scrollCleanup(
+      () => renderLoop.scrollMeasure(() => this.runEffect_()));
   }
 
   private getRunDistance_(): number {
@@ -69,7 +74,7 @@ class ScrollEffect {
   }
 
   public destroy() {
-    this.runLoop_.destroy();
+    this.destroyed_ = true;
   }
 }
 

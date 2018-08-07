@@ -6,6 +6,9 @@ class RenderStep {
   public static readonly MEASURE = Symbol('Measure');
   public static readonly MUTATE = Symbol('Mutate');
   public static readonly PRE_MEASURE = Symbol('Pre-measure');
+  public static readonly SCROLL_MEASURE = Symbol('Scroll-measure');
+  public static readonly SCROLL_MUTATE = Symbol('Scroll-mutate');
+  public static readonly SCROLL_CLEANUP = Symbol('Scroll-cleanup');
 }
 
 const STEP_ORDER: Array<symbol> = [
@@ -14,6 +17,12 @@ const STEP_ORDER: Array<symbol> = [
   RenderStep.MEASURE,
   RenderStep.MUTATE,
   RenderStep.CLEANUP,
+];
+
+const SCROLL_STEP_ORDER: Array<symbol> = [
+  RenderStep.SCROLL_MEASURE,
+  RenderStep.SCROLL_MUTATE,
+  RenderStep.SCROLL_CLEANUP,
 ];
 
 class RenderFunctionID {
@@ -43,34 +52,47 @@ class RenderLoop {
         .usingFunction<symbol, RenderFunctionMap>(
           (unused: symbol) => new Map<RenderFunctionID, RenderFunction>());
     this.msPerFrame_ = 0;
-    this.runLoop();
+    window.addEventListener('scroll', () => this.runScrollLoop_());
+    this.runLoop_();
   }
 
   public framecount(fn: RenderFunction): RenderFunctionID {
-    return this.addFnToStep(fn, RenderStep.FRAME_COUNT);
+    return this.addFnToStep_(fn, RenderStep.FRAME_COUNT);
   }
 
   public premeasure(fn: RenderFunction): RenderFunctionID {
-    return this.addFnToStep(fn, RenderStep.PRE_MEASURE)
+    return this.addFnToStep_(fn, RenderStep.PRE_MEASURE)
   }
 
   public measure(fn: RenderFunction): RenderFunctionID {
-    return this.addFnToStep(fn, RenderStep.MEASURE);
+    return this.addFnToStep_(fn, RenderStep.MEASURE);
   }
 
   public mutate(fn: RenderFunction): RenderFunctionID {
-    return this.addFnToStep(fn, RenderStep.MUTATE);
+    return this.addFnToStep_(fn, RenderStep.MUTATE);
   }
 
   public cleanup(fn: RenderFunction): RenderFunctionID {
-    return this.addFnToStep(fn, RenderStep.CLEANUP);
+    return this.addFnToStep_(fn, RenderStep.CLEANUP);
+  }
+
+  public scrollMeasure(fn: RenderFunction): RenderFunctionID {
+    return this.addFnToStep_(fn, RenderStep.SCROLL_MEASURE);
+  }
+
+  public scrollMutate(fn: RenderFunction): RenderFunctionID {
+    return this.addFnToStep_(fn, RenderStep.SCROLL_MUTATE);
+  }
+
+  scrollCleanup(fn: RenderFunction): RenderFunctionID {
+    return this.addFnToStep_(fn, RenderStep.SCROLL_CLEANUP);
   }
 
   public setFps(fps: number): void {
     this.msPerFrame_ = 1000 / fps;
   }
 
-  private addFnToStep(fn: RenderFunction, step: symbol): RenderFunctionID {
+  private addFnToStep_(fn: RenderFunction, step: symbol): RenderFunctionID {
     const renderFn = new RenderFunctionID(step);
     this.scheduledFns_.get(step).set(renderFn, fn);
     return renderFn;
@@ -80,23 +102,31 @@ class RenderLoop {
     return nextRun - <number>new Date().valueOf();
   }
 
-  private runLoop(): void {
+  private runLoop_(): void {
     const nextRun = <number>new Date().valueOf() + this.msPerFrame_;
-    this.runFns();
+    this.runFns_();
     if (RenderLoop.getTimeUntilNextRun_(nextRun) > 2) {
       setTimeout(
-        () => window.requestAnimationFrame(() => this.runLoop()),
+        () => window.requestAnimationFrame(() => this.runLoop_()),
         RenderLoop.getTimeUntilNextRun_(nextRun));
     } else {
-      window.requestAnimationFrame(() => this.runLoop())
+      window.requestAnimationFrame(() => this.runLoop_())
     }
   }
 
-  private runFns(): void {
-    STEP_ORDER.forEach((step) => this.runFnsForStep(step));
+  private runScrollLoop_(): void {
+    this.runScrollFns_();
   }
 
-  private runFnsForStep(step: symbol): void {
+  private runScrollFns_(): void {
+    SCROLL_STEP_ORDER.forEach((step) => this.runFnsForStep_(step));
+  }
+
+  private runFns_(): void {
+    STEP_ORDER.forEach((step) => this.runFnsForStep_(step));
+  }
+
+  private runFnsForStep_(step: symbol): void {
     const fns = this.scheduledFns_.get(step).values();
     let nextFn;
     while (nextFn = fns.next().value) {

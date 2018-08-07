@@ -4,7 +4,7 @@ import {renderLoop} from "../../../utils/render-loop";
 import {Vector2d} from "../../../utils/math/geometry/vector-2d";
 
 function generateBasicParallaxEffect(
-  ratio: number, applyAsChange: boolean = false
+  ratio: number
 ): TScrollEffectEffectFunction {
   return function(
     target: HTMLElement, distance: number, distanceAsPercent: number
@@ -14,11 +14,7 @@ function generateBasicParallaxEffect(
     const translation =
       originalMatrix.set2dTranslation(new Vector2d(0, offset));
 
-    if (applyAsChange) {
-      translation.applyToElementTransformAsChange(target, originalMatrix);
-    } else {
-      renderLoop.mutate(() => translation.applyToElementTransform(target));
-    }
+    renderLoop.scrollMutate(() => translation.applyToElementTransform(target));
   }
 }
 
