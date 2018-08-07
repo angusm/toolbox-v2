@@ -65,10 +65,18 @@ abstract class CachedElementVector<T extends Vector> {
   }
 
   private render(): void {
-    renderLoop.premeasure(() => {
-      renderLoop.cleanup(() => this.render());
+    this.renderLoopPremeasure_(() => {
+      this.renderLoopCleanup_(() => this.render());
       this.measureValues();
     });
+  }
+
+  protected renderLoopCleanup_(fn: () => void): void {
+    renderLoop.cleanup(fn);
+  }
+
+  protected renderLoopPremeasure_(fn: () => void): void {
+    renderLoop.premeasure(fn);
   }
 
   private measureValues(): void {

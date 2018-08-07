@@ -6,6 +6,7 @@ class RenderStep {
   public static readonly MEASURE = Symbol('Measure');
   public static readonly MUTATE = Symbol('Mutate');
   public static readonly PRE_MEASURE = Symbol('Pre-measure');
+  public static readonly SCROLL_PRE_MEASURE = Symbol('Scroll-measure');
   public static readonly SCROLL_MEASURE = Symbol('Scroll-measure');
   public static readonly SCROLL_MUTATE = Symbol('Scroll-mutate');
   public static readonly SCROLL_CLEANUP = Symbol('Scroll-cleanup');
@@ -20,6 +21,7 @@ const STEP_ORDER: Array<symbol> = [
 ];
 
 const SCROLL_STEP_ORDER: Array<symbol> = [
+  RenderStep.SCROLL_PRE_MEASURE,
   RenderStep.SCROLL_MEASURE,
   RenderStep.SCROLL_MUTATE,
   RenderStep.SCROLL_CLEANUP,
@@ -74,6 +76,10 @@ class RenderLoop {
 
   public cleanup(fn: RenderFunction): RenderFunctionID {
     return this.addFnToStep_(fn, RenderStep.CLEANUP);
+  }
+
+  public scrollPremeasure(fn: RenderFunction): RenderFunctionID {
+    return this.addFnToStep_(fn, RenderStep.SCROLL_PRE_MEASURE);
   }
 
   public scrollMeasure(fn: RenderFunction): RenderFunctionID {

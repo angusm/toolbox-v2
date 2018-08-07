@@ -3,6 +3,7 @@ import {Vector2d} from '../math/geometry/vector-2d';
 import {getScrollElement} from "../dom/position/get-scroll-element";
 import {Dimensions} from "./dimensions";
 import {zip} from "../array/zip";
+import {renderLoop} from "../render-loop";
 
 class Scroll extends CachedElementVector<Vector2d> {
   protected static VectorClass: typeof Vector2d = Vector2d;
@@ -69,6 +70,14 @@ class Scroll extends CachedElementVector<Vector2d> {
 
   public static getSingleton(): Scroll {
     return <Scroll>CachedElementVector.getSingleton.bind(this)();
+  }
+
+  protected renderLoopCleanup_(fn: () => void): void {
+    renderLoop.scrollCleanup(fn);
+  }
+
+  protected renderLoopPremeasure_(fn: () => void): void {
+    renderLoop.scrollPremeasure(fn);
   }
 }
 
