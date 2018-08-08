@@ -3,11 +3,11 @@ import {IEffect} from "./ieffect";
 import {DynamicDefaultMap} from "../../../utils/map/dynamic-default";
 
 class VideoPlayUntilScroll implements IEffect {
-  private targetTimes_: Map<HTMLMediaElement, number>;
+  private targetPercentages_: Map<HTMLMediaElement, number>;
   private destroyed_: boolean;
 
   constructor() {
-    this.targetTimes_ =
+    this.targetPercentages_ =
       DynamicDefaultMap.usingFunction<HTMLMediaElement, number>(() => 0);
     this.destroyed_ = false;
     this.render_();
@@ -16,9 +16,7 @@ class VideoPlayUntilScroll implements IEffect {
   public run(
     target: HTMLElement, distance: number, distanceAsPercent: number
   ): void {
-    const video = <HTMLMediaElement>target;
-    this.targetTimes_.set(
-      video, Math.round(video.duration * distanceAsPercent * 100) / 100);
+    this.targetPercentages_.set(<HTMLMediaElement>target, distanceAsPercent);
   }
 
   private render_() {
@@ -27,10 +25,15 @@ class VideoPlayUntilScroll implements IEffect {
     }
     renderLoop.mutate(() => {
       renderLoop.cleanup(() => this.render_());
-      Array.from(this.targetTimes_.entries())
+      Array.from(this.targetPercentages_.entries())
         .forEach(
-          ([video, targetTime]) => {
-            if (video.currentTime >= targetTime) {
+          ([video, percentage]) => {
+            const targetTime =
+              Math.round(video.duration * percentage * 100) / 100;
+            if (
+              isNaN(targetTime) || isNaN(video.currentTime) ||
+              video.currentTime >= targetTime
+            ) {
               video.pause();
             } else {
               video.play();
