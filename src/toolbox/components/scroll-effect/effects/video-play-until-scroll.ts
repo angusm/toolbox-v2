@@ -1,12 +1,14 @@
 import {renderLoop} from "../../../utils/render-loop";
 import {IEffect} from "./ieffect";
+import {DynamicDefaultMap} from "../../../utils/map/dynamic-default";
 
 class VideoPlayUntilScroll implements IEffect {
   private targetTimes_: Map<HTMLMediaElement, number>;
   private destroyed_: boolean;
 
   constructor() {
-    this.targetTimes_ = new Map<HTMLMediaElement, number>();
+    this.targetTimes_ =
+      DynamicDefaultMap.usingFunction<HTMLMediaElement, number>(() => 0);
     this.destroyed_ = false;
     this.render_();
   }
@@ -26,13 +28,14 @@ class VideoPlayUntilScroll implements IEffect {
     renderLoop.mutate(() => {
       renderLoop.cleanup(() => this.render_());
       Array.from(this.targetTimes_.entries())
-        .forEach(([video, targetTime]) => {
-          if (video.currentTime >= targetTime) {
-            video.pause();
-          } else {
-            video.play();
-          }
-        });
+        .forEach(
+          ([video, targetTime]) => {
+            if (video.currentTime >= targetTime) {
+              video.pause();
+            } else {
+              video.play();
+            }
+          });
     });
   }
 

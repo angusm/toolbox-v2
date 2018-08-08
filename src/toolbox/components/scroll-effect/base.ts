@@ -43,30 +43,34 @@ class ScrollEffect {
 
   private init_(): void {
     renderLoop.measure(() => this.runEffect_());
-    renderLoop.scrollMeasure(() => this.runEffect_());
+    renderLoop.scrollMeasure(() => this.handleScroll_());
   }
 
   /**
    * NOTE: Runs as part of the render measure loop.
    * @private
    */
-  private runEffect_(): void {
+  private handleScroll_(): void {
     if (this.destroyed_) {
       return;
     }
 
     renderLoop.scrollMeasure(() => {
-      renderLoop.scrollCleanup(() => this.runEffect_());
-      const distance = this.getRunDistance_();
-      if (distance === this.lastRunDistance_) {
-        return; // Do nothing if there've been no real changes.
-      }
-      this.lastRunDistance_ = distance;
-
-      const percent = this.distanceRange_.getValueAsPercent(distance);
-      this.effects_
-        .forEach((effect) => effect.run(this.target_, distance, percent));
+      renderLoop.scrollCleanup(() => this.handleScroll_());
+      this.runEffect_();
     });
+  }
+
+  private runEffect_() {
+    const distance = this.getRunDistance_();
+    if (distance === this.lastRunDistance_) {
+      return; // Do nothing if there've been no real changes.
+    }
+    this.lastRunDistance_ = distance;
+
+    const percent = this.distanceRange_.getValueAsPercent(distance);
+    this.effects_
+      .forEach((effect) => effect.run(this.target_, distance, percent));
   }
 
   private getRunDistance_(): number {
