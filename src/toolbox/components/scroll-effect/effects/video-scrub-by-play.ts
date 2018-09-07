@@ -73,6 +73,13 @@ class VideoScrubByPlay implements IEffect {
             let primaryVideo;
             let secondaryVideo;
             let targetTime;
+
+            if (
+              isNaN(forwardsVideo.duration) || isNaN(backwardsVideo.duration)
+            ) {
+              return;
+            }
+
             if (!this.scroll_.isScrollingUp()) {
               if (!this.wasScrollingDown_) {
                 forwardsVideo.currentTime =

@@ -49,11 +49,11 @@ class Scroll extends CachedElementVector<Vector2d> {
   }
 
   public isScrollingDown(): boolean {
-    return this.getDelta().y > 0;
+    return this.getDelta().y < 0;
   }
 
   public isScrollingUp(): boolean {
-    return this.getDelta().y < 0;
+    return this.getDelta().y > 0;
   }
 
   public isScrollingRight(): boolean {
