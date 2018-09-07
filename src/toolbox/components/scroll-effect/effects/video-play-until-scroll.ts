@@ -5,8 +5,18 @@ import {DynamicDefaultMap} from "../../../utils/map/dynamic-default";
 class VideoPlayUntilScroll implements IEffect {
   private targetPercentages_: Map<HTMLMediaElement, number>;
   private destroyed_: boolean;
+  private playStartOffset_: number;
+  private playEndOffset_: number;
 
-  constructor() {
+  constructor({
+    playStartOffset = 0,
+    playEndOffset = 0,
+  }: {
+    playStartOffset?: number,
+    playEndOffset?: number
+  } = {}) {
+    this.playStartOffset_ = playStartOffset;
+    this.playEndOffset_ = playEndOffset;
     this.targetPercentages_ =
       DynamicDefaultMap.usingFunction<HTMLMediaElement, number>(() => 0);
     this.destroyed_ = false;
@@ -28,8 +38,10 @@ class VideoPlayUntilScroll implements IEffect {
       Array.from(this.targetPercentages_.entries())
         .forEach(
           ([video, percentage]) => {
+            const viableDuration = video.duration - this.playEndOffset_;
             const targetTime =
-              Math.round(video.duration * percentage * 100) / 100;
+              this.playStartOffset_ +
+              Math.round(viableDuration * percentage * 100) / 100;
             if (
               isNaN(targetTime) || isNaN(video.currentTime) ||
               video.currentTime >= targetTime
