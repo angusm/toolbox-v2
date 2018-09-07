@@ -111,6 +111,7 @@ class VideoScrubByPlay implements IEffect {
 
             secondaryVideo.currentTime =
               secondaryVideo.duration - primaryVideo.currentTime;
+            secondaryVideo.pause();
           });
     });
   }
