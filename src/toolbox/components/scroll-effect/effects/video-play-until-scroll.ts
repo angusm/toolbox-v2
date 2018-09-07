@@ -42,8 +42,8 @@ class VideoPlayUntilScroll implements IEffect {
               video.duration - this.playEndOffset_ - this.playStartOffset_;
             const rawTargetTime =
               this.playStartOffset_ +
-              Math.round(viableDuration * percentage * 100) / 100;
-            const targetTime = Math.max(rawTargetTime, video.duration);
+              Math.round(viableDuration * percentage * 1000) / 1000;
+            const targetTime = Math.min(rawTargetTime, video.duration);
             if (isNaN(targetTime) || isNaN(video.currentTime)) {
               video.pause();
             } else if (video.currentTime >= targetTime) {
