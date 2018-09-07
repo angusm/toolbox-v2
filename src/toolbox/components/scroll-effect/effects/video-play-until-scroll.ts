@@ -38,7 +38,8 @@ class VideoPlayUntilScroll implements IEffect {
       Array.from(this.targetPercentages_.entries())
         .forEach(
           ([video, percentage]) => {
-            const viableDuration = video.duration - this.playEndOffset_;
+            const viableDuration =
+              video.duration - this.playEndOffset_ - this.playStartOffset_;
             const targetTime =
               this.playStartOffset_ +
               Math.round(viableDuration * percentage * 100) / 100;
