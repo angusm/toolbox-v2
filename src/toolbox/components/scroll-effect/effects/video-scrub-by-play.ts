@@ -81,10 +81,6 @@ class VideoScrubByPlay implements IEffect {
             }
 
             if (!this.scroll_.isScrollingUp()) {
-              if (!this.wasScrollingDown_) {
-                forwardsVideo.currentTime =
-                  forwardsVideo.duration - backwardsVideo.currentTime;
-              }
               targetTime =
                 VideoScrubByPlay.getTargetTime_(
                   forwardsVideo,
@@ -94,14 +90,10 @@ class VideoScrubByPlay implements IEffect {
               primaryVideo = forwardsVideo;
               secondaryVideo = backwardsVideo;
             } else {
-              if (this.wasScrollingDown_) {
-                backwardsVideo.currentTime =
-                  backwardsVideo.duration - forwardsVideo.currentTime;
-              }
               targetTime =
                 VideoScrubByPlay.getTargetTime_(
                   backwardsVideo,
-                  percentage,
+                  (1 - percentage),
                   this.playEndOffset_,
                   this.playStartOffset_);
               primaryVideo = backwardsVideo;
@@ -121,8 +113,8 @@ class VideoScrubByPlay implements IEffect {
               secondaryVideo.duration - primaryVideo.currentTime;
             secondaryVideo.pause();
 
-            setStyle(primaryVideo, 'display', 'block');
-            setStyle(secondaryVideo, 'display', 'none');
+            setStyle(primaryVideo, 'opacity', '1');
+            setStyle(secondaryVideo, 'opacity', '0');
           });
     });
   }
