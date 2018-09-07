@@ -2,6 +2,7 @@ import {renderLoop} from "../../../utils/render-loop";
 import {IEffect} from "./ieffect";
 import {DynamicDefaultMap} from "../../../utils/map/dynamic-default";
 import {Scroll} from "../../../utils/cached-vectors/scroll";
+import {setStyle} from "../../../utils/dom/style/set-style";
 
 type TGetVideoFunction = (target: HTMLElement) => HTMLMediaElement;
 
@@ -112,6 +113,9 @@ class VideoScrubByPlay implements IEffect {
             secondaryVideo.currentTime =
               secondaryVideo.duration - primaryVideo.currentTime;
             secondaryVideo.pause();
+
+            setStyle(primaryVideo, 'display', 'block');
+            setStyle(secondaryVideo, 'display', 'none');
           });
     });
   }
