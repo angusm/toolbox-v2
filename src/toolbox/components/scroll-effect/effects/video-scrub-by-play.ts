@@ -12,10 +12,19 @@ class VideoScrubByPlay implements IEffect {
   private scroll_: Scroll;
   private getForwardsVideo_: TGetVideoFunction;
   private getBackwardsVideo_: TGetVideoFunction;
+  private playStartOffset_: number;
+  private playEndOffset_: number;
 
   constructor(
     getForwardsVideoFunction: TGetVideoFunction,
-    getBackwardsVideoFunction: TGetVideoFunction
+    getBackwardsVideoFunction: TGetVideoFunction,
+    {
+      playStartOffset = 0,
+      playEndOffset = 0,
+    }: {
+      playStartOffset?: number,
+      playEndOffset?: number
+    } = {}
   ) {
     this.getForwardsVideo_ = getForwardsVideoFunction;
     this.getBackwardsVideo_ = getBackwardsVideoFunction;
@@ -24,6 +33,8 @@ class VideoScrubByPlay implements IEffect {
     this.destroyed_ = false;
     this.scroll_ = Scroll.getSingleton();
     this.wasScrollingDown_ = true;
+    this.playStartOffset_ = playStartOffset;
+    this.playEndOffset_ = playEndOffset;
     this.render_();
   }
 
@@ -31,6 +42,19 @@ class VideoScrubByPlay implements IEffect {
     target: HTMLElement, distance: number, distanceAsPercent: number
   ): void {
     this.targetPercentages_.set(target, distanceAsPercent);
+  }
+
+  static getTargetTime_(
+    video: HTMLMediaElement,
+    percentage: number,
+    startOffset: number,
+    endOffset: number
+  ): number {
+    const viableDuration = video.duration - startOffset - endOffset;
+    const rawTargetTime =
+      startOffset +
+      Math.round(viableDuration * percentage * 1000) / 1000;
+    return Math.min(rawTargetTime, video.duration);
   }
 
   private render_() {
@@ -54,7 +78,11 @@ class VideoScrubByPlay implements IEffect {
                   forwardsVideo.duration - backwardsVideo.currentTime;
               }
               targetTime =
-                Math.round(forwardsVideo.duration * percentage * 100) / 100;
+                VideoScrubByPlay.getTargetTime_(
+                  forwardsVideo,
+                  percentage,
+                  this.playStartOffset_,
+                  this.playEndOffset_);
               primaryVideo = forwardsVideo;
               secondaryVideo = backwardsVideo;
             } else {
@@ -63,8 +91,11 @@ class VideoScrubByPlay implements IEffect {
                   backwardsVideo.duration - forwardsVideo.currentTime;
               }
               targetTime =
-                Math.round(
-                  backwardsVideo.duration * (1 - percentage) * 100) / 100;
+                VideoScrubByPlay.getTargetTime_(
+                  backwardsVideo,
+                  percentage,
+                  this.playEndOffset_,
+                  this.playStartOffset_);
               primaryVideo = backwardsVideo;
               secondaryVideo = forwardsVideo;
             }
