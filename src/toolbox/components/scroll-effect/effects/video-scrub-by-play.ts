@@ -2,6 +2,7 @@ import {renderLoop} from "../../../utils/render-loop";
 import {IEffect} from "./ieffect";
 import {DynamicDefaultMap} from "../../../utils/map/dynamic-default";
 import {setStyle} from "../../../utils/dom/style/set-style";
+import {Scroll} from "../../../utils/cached-vectors/scroll";
 
 type TGetVideoFunction = (target: HTMLElement) => HTMLMediaElement;
 const FRAME_STEP: number = 0.1;
@@ -14,6 +15,7 @@ class VideoScrubByPlay implements IEffect {
   private getBackwardsVideo_: TGetVideoFunction;
   private playStartOffset_: number;
   private playEndOffset_: number;
+  private scroll_: Scroll;
 
   constructor(
     getForwardsVideoFunction: TGetVideoFunction,
@@ -34,6 +36,7 @@ class VideoScrubByPlay implements IEffect {
     this.wasPlayingForwards_ = true;
     this.playStartOffset_ = playStartOffset;
     this.playEndOffset_ = playEndOffset;
+    this.scroll_ = Scroll.getSingleton();
 
     this.render_();
   }
@@ -97,7 +100,7 @@ class VideoScrubByPlay implements IEffect {
 
             let playForwards =
               Math.abs(forwardsGap - backwardsGap) < FRAME_STEP ?
-                this.wasPlayingForwards_ : forwardsGap >= -FRAME_STEP;
+                this.scroll_.isScrollingDown() : forwardsGap >= -FRAME_STEP;
 
             if (playForwards) {
               targetTime = forwardsTargetTime;
