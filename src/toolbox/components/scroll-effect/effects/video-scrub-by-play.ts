@@ -1,16 +1,15 @@
 import {renderLoop} from "../../../utils/render-loop";
 import {IEffect} from "./ieffect";
 import {DynamicDefaultMap} from "../../../utils/map/dynamic-default";
-import {Scroll} from "../../../utils/cached-vectors/scroll";
 import {setStyle} from "../../../utils/dom/style/set-style";
 
 type TGetVideoFunction = (target: HTMLElement) => HTMLMediaElement;
+const FRAME_STEP: number = 0.1;
 
 class VideoScrubByPlay implements IEffect {
   private targetPercentages_: Map<HTMLElement, number>;
   private wasPlayingForwards_: boolean;
   private destroyed_: boolean;
-  private scroll_: Scroll;
   private getForwardsVideo_: TGetVideoFunction;
   private getBackwardsVideo_: TGetVideoFunction;
   private playStartOffset_: number;
@@ -34,7 +33,6 @@ class VideoScrubByPlay implements IEffect {
     this.targetPercentages_ =
       DynamicDefaultMap.usingFunction<HTMLElement, number>(() => 0);
     this.destroyed_ = false;
-    this.scroll_ = Scroll.getSingleton();
     this.wasPlayingForwards_ = true;
     this.playStartOffset_ = playStartOffset;
     this.playEndOffset_ = playEndOffset;
@@ -94,8 +92,17 @@ class VideoScrubByPlay implements IEffect {
                 this.playEndOffset_,
                 this.playStartOffset_);
 
-            const playForwards =
-              forwardsTargetTime > forwardsVideo.currentTime - 0.09;
+            const forwardsGap = forwardsTargetTime - forwardsVideo.currentTime;
+            const backwardsGap =
+              backwardsTargetTime - backwardsVideo.currentTime;
+
+            let playForwards;
+            if (Math.abs(forwardsGap - backwardsGap) > FRAME_STEP) {
+              playForwards = forwardsGap > backwardsGap;
+            } else {
+              playForwards = this.wasPlayingForwards_;
+            }
+
             if (playForwards) {
               targetTime = forwardsTargetTime;
               primaryVideo = forwardsVideo;
