@@ -105,7 +105,7 @@ class VideoScrubByPlay implements IEffect {
             if (isScrollingDown !== this.wasScrollingDown_) {
               // Remove previous listener to swap the opacities
               secondaryVideo
-                .removeEventListener('seeked', this.bufferedHandler_);
+                .removeEventListener('canplay', this.bufferedHandler_);
               this.bufferedHandler_ = () => {
                 renderLoop.mutate(() => {
                   setStyle(primaryVideo, 'opacity', '1');
@@ -113,10 +113,10 @@ class VideoScrubByPlay implements IEffect {
                   primaryVideo.play();
                 });
                 primaryVideo
-                  .removeEventListener('seeked', this.bufferedHandler_);
+                  .removeEventListener('canplay', this.bufferedHandler_);
                 this.bufferedHandler_ = null;
               };
-              primaryVideo.addEventListener('seeked', this.bufferedHandler_);
+              primaryVideo.addEventListener('canplay', this.bufferedHandler_);
               primaryVideo.currentTime =
                 primaryVideo.duration - secondaryVideo.currentTime;
             } else {
