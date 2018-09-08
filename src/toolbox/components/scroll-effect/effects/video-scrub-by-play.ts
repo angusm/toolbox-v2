@@ -8,7 +8,7 @@ type TGetVideoFunction = (target: HTMLElement) => HTMLMediaElement;
 
 class VideoScrubByPlay implements IEffect {
   private targetPercentages_: Map<HTMLElement, number>;
-  private wasScrollingDown_: boolean;
+  private wasPlayingForwards_: boolean;
   private destroyed_: boolean;
   private scroll_: Scroll;
   private getForwardsVideo_: TGetVideoFunction;
@@ -34,7 +34,7 @@ class VideoScrubByPlay implements IEffect {
       DynamicDefaultMap.usingFunction<HTMLElement, number>(() => 0);
     this.destroyed_ = false;
     this.scroll_ = Scroll.getSingleton();
-    this.wasScrollingDown_ = true;
+    this.wasPlayingForwards_ = true;
     this.playStartOffset_ = playStartOffset;
     this.playEndOffset_ = playEndOffset;
     this.render_();
@@ -80,29 +80,32 @@ class VideoScrubByPlay implements IEffect {
             ) {
               return;
             }
+            const forwardsTargetTime =
+              VideoScrubByPlay.getTargetTime_(
+                forwardsVideo,
+                percentage,
+                this.playStartOffset_,
+                this.playEndOffset_);
+            const backwardsTargetTime =
+              VideoScrubByPlay.getTargetTime_(
+                backwardsVideo,
+                (1 - percentage),
+                this.playEndOffset_,
+                this.playStartOffset_);
 
-            const isScrollingDown = !this.scroll_.isScrollingUp();
-            if (isScrollingDown) {
-              targetTime =
-                VideoScrubByPlay.getTargetTime_(
-                  forwardsVideo,
-                  percentage,
-                  this.playStartOffset_,
-                  this.playEndOffset_);
+            const playForwards =
+              forwardsTargetTime > forwardsVideo.currentTime - 0.01;
+            if (playForwards) {
+              targetTime = forwardsTargetTime;
               primaryVideo = forwardsVideo;
               secondaryVideo = backwardsVideo;
             } else {
-              targetTime =
-                VideoScrubByPlay.getTargetTime_(
-                  backwardsVideo,
-                  (1 - percentage),
-                  this.playEndOffset_,
-                  this.playStartOffset_);
+              targetTime = backwardsTargetTime;
               primaryVideo = backwardsVideo;
               secondaryVideo = forwardsVideo;
             }
 
-            if (isScrollingDown !== this.wasScrollingDown_) {
+            if (playForwards !== this.wasPlayingForwards_) {
               // Remove previous listener to swap the opacities
               secondaryVideo
                 .removeEventListener('canplay', this.bufferedHandler_);
@@ -135,7 +138,7 @@ class VideoScrubByPlay implements IEffect {
               primaryVideo.play();
             }
 
-            this.wasScrollingDown_ = isScrollingDown;
+            this.wasPlayingForwards_ = playForwards;
           });
     });
   }
