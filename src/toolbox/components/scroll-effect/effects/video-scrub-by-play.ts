@@ -72,19 +72,6 @@ class VideoScrubByPlay implements IEffect {
             const forwardsVideo = this.getForwardsVideo_(target);
             const backwardsVideo = this.getBackwardsVideo_(target);
 
-            // Ensure the backwards video is handled properly on initial load
-            if (!this.metadataHandledVideos_.has(backwardsVideo)) {
-              if (backwardsVideo.duration) {
-                backwardsVideo.currentTime = backwardsVideo.duration;
-              } else {
-                backwardsVideo.addEventListener(
-                  'loadedmetadata',
-                  () => {
-                    backwardsVideo.currentTime = backwardsVideo.duration;
-                  });
-              }
-            }
-
             let primaryVideo: HTMLMediaElement;
             let secondaryVideo: HTMLMediaElement;
             let targetTime;
@@ -152,13 +139,17 @@ class VideoScrubByPlay implements IEffect {
                 secondaryVideo.duration - primaryVideo.currentTime;
             }
 
-            secondaryVideo.pause();
+            if (!secondaryVideo.paused) {
+              secondaryVideo.pause();
+            }
 
             if (
               isNaN(targetTime) || isNaN(primaryVideo.currentTime) ||
               primaryVideo.currentTime >= targetTime
             ) {
-              primaryVideo.pause();
+              if (!primaryVideo.paused) {
+                primaryVideo.pause();
+              }
             } else if (this.bufferedHandler_ === null && primaryVideo.paused) {
               primaryVideo.play();
             }
