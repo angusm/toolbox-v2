@@ -80,7 +80,8 @@ class VideoScrubByPlay implements IEffect {
               return;
             }
 
-            if (!this.scroll_.isScrollingUp()) {
+            const isScrollingDown = !this.scroll_.isScrollingUp();
+            if (isScrollingDown) {
               targetTime =
                 VideoScrubByPlay.getTargetTime_(
                   forwardsVideo,
@@ -100,10 +101,18 @@ class VideoScrubByPlay implements IEffect {
               secondaryVideo = forwardsVideo;
             }
 
+            if (isScrollingDown !== this.wasScrollingDown_) {
+              primaryVideo.currentTime =
+                primaryVideo.duration - secondaryVideo.currentTime;
+            }
+
             if (
               isNaN(targetTime) || isNaN(primaryVideo.currentTime) ||
               primaryVideo.currentTime >= targetTime
             ) {
+              if (primaryVideo.currentTime >= targetTime) {
+                primaryVideo.currentTime = targetTime;
+              }
               primaryVideo.pause();
             } else {
               primaryVideo.play();
@@ -115,6 +124,8 @@ class VideoScrubByPlay implements IEffect {
 
             setStyle(primaryVideo, 'opacity', '1');
             setStyle(secondaryVideo, 'opacity', '0');
+
+            this.wasScrollingDown_ = isScrollingDown;
           });
     });
   }
