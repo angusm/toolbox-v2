@@ -14,8 +14,6 @@ class VideoScrubByPlay implements IEffect {
   private getBackwardsVideo_: TGetVideoFunction;
   private playStartOffset_: number;
   private playEndOffset_: number;
-  private bufferedHandler_: () => void;
-  private metadataHandledVideos_: Set<HTMLMediaElement>;
 
   constructor(
     getForwardsVideoFunction: TGetVideoFunction,
@@ -36,7 +34,6 @@ class VideoScrubByPlay implements IEffect {
     this.wasPlayingForwards_ = true;
     this.playStartOffset_ = playStartOffset;
     this.playEndOffset_ = playEndOffset;
-    this.metadataHandledVideos_ = new Set();
 
     this.render_();
   }
@@ -116,22 +113,6 @@ class VideoScrubByPlay implements IEffect {
             }
 
             if (playForwards !== this.wasPlayingForwards_) {
-              // Remove previous listener to swap the opacities
-              secondaryVideo
-                .removeEventListener('canplay', this.bufferedHandler_);
-              primaryVideo
-                .removeEventListener('canplay', this.bufferedHandler_);
-              this.bufferedHandler_ = () => {
-                renderLoop.mutate(() => {
-                  setStyle(primaryVideo, 'opacity', '1');
-                  setStyle(secondaryVideo, 'opacity', '0');
-                  primaryVideo.play();
-                });
-                primaryVideo
-                  .removeEventListener('canplay', this.bufferedHandler_);
-                this.bufferedHandler_ = null;
-              };
-              primaryVideo.addEventListener('canplay', this.bufferedHandler_);
               primaryVideo.currentTime =
                 primaryVideo.duration - secondaryVideo.currentTime;
             } else {
@@ -150,7 +131,9 @@ class VideoScrubByPlay implements IEffect {
               if (!primaryVideo.paused) {
                 primaryVideo.pause();
               }
-            } else if (this.bufferedHandler_ === null && primaryVideo.paused) {
+            } else if (primaryVideo.readyState >= 3) {
+              setStyle(primaryVideo, 'opacity', '1');
+              setStyle(secondaryVideo, 'opacity', '0');
               primaryVideo.play();
             }
 
