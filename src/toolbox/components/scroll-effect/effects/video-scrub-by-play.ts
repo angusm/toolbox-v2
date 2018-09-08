@@ -16,6 +16,7 @@ class VideoScrubByPlay implements IEffect {
   private playStartOffset_: number;
   private playEndOffset_: number;
   private bufferedHandler_: () => void;
+  private bufferedHandlerTimeout_: number;
 
   constructor(
     getForwardsVideoFunction: TGetVideoFunction,
@@ -94,7 +95,7 @@ class VideoScrubByPlay implements IEffect {
                 this.playStartOffset_);
 
             const playForwards =
-              forwardsTargetTime > forwardsVideo.currentTime - 0.01;
+              forwardsTargetTime > forwardsVideo.currentTime - 0.09;
             if (playForwards) {
               targetTime = forwardsTargetTime;
               primaryVideo = forwardsVideo;
@@ -117,9 +118,12 @@ class VideoScrubByPlay implements IEffect {
                 });
                 primaryVideo
                   .removeEventListener('canplay', this.bufferedHandler_);
+                clearTimeout(this.bufferedHandlerTimeout_);
                 this.bufferedHandler_ = null;
               };
               primaryVideo.addEventListener('canplay', this.bufferedHandler_);
+              this.bufferedHandlerTimeout_ =
+                setTimeout(this.bufferedHandler_, 500); // Emergency catch-all
               primaryVideo.currentTime =
                 primaryVideo.duration - secondaryVideo.currentTime;
             } else {
