@@ -95,12 +95,9 @@ class VideoScrubByPlay implements IEffect {
             const backwardsGap =
               backwardsTargetTime - backwardsVideo.currentTime;
 
-            let playForwards;
-            if (Math.abs(forwardsGap - backwardsGap) > FRAME_STEP) {
-              playForwards = forwardsGap > backwardsGap;
-            } else {
-              playForwards = this.wasPlayingForwards_;
-            }
+            let playForwards =
+              Math.abs(forwardsGap - backwardsGap) < FRAME_STEP ?
+                this.wasPlayingForwards_ : forwardsGap >= -FRAME_STEP;
 
             if (playForwards) {
               targetTime = forwardsTargetTime;
