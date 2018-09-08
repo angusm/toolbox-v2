@@ -117,6 +117,8 @@ class VideoScrubByPlay implements IEffect {
               // Remove previous listener to swap the opacities
               secondaryVideo
                 .removeEventListener('canplay', this.bufferedHandler_);
+              primaryVideo
+                .removeEventListener('canplay', this.bufferedHandler_);
               this.bufferedHandler_ = () => {
                 renderLoop.mutate(() => {
                   setStyle(primaryVideo, 'opacity', '1');
