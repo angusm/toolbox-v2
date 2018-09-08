@@ -15,7 +15,7 @@ class VideoScrubByPlay implements IEffect {
   private playStartOffset_: number;
   private playEndOffset_: number;
   private bufferedHandler_: () => void;
-  private bufferedHandlerTimeout_: number;
+  private metadataHandledVideos_: Set<HTMLMediaElement>;
 
   constructor(
     getForwardsVideoFunction: TGetVideoFunction,
@@ -36,6 +36,8 @@ class VideoScrubByPlay implements IEffect {
     this.wasPlayingForwards_ = true;
     this.playStartOffset_ = playStartOffset;
     this.playEndOffset_ = playEndOffset;
+    this.metadataHandledVideos_ = new Set();
+
     this.render_();
   }
 
@@ -69,6 +71,19 @@ class VideoScrubByPlay implements IEffect {
           ([target, percentage]) => {
             const forwardsVideo = this.getForwardsVideo_(target);
             const backwardsVideo = this.getBackwardsVideo_(target);
+
+            // Ensure the backwards video is handled properly on initial load
+            if (!this.metadataHandledVideos_.has(backwardsVideo)) {
+              if (backwardsVideo.duration) {
+                backwardsVideo.currentTime = backwardsVideo.duration;
+              } else {
+                backwardsVideo.addEventListener(
+                  'loadedmetadata',
+                  () => {
+                    backwardsVideo.currentTime = backwardsVideo.duration;
+                  });
+              }
+            }
 
             let primaryVideo: HTMLMediaElement;
             let secondaryVideo: HTMLMediaElement;
@@ -127,12 +142,9 @@ class VideoScrubByPlay implements IEffect {
                 });
                 primaryVideo
                   .removeEventListener('canplay', this.bufferedHandler_);
-                clearTimeout(this.bufferedHandlerTimeout_);
                 this.bufferedHandler_ = null;
               };
               primaryVideo.addEventListener('canplay', this.bufferedHandler_);
-              this.bufferedHandlerTimeout_ =
-                setTimeout(this.bufferedHandler_, 500); // Emergency catch-all
               primaryVideo.currentTime =
                 primaryVideo.duration - secondaryVideo.currentTime;
             } else {
