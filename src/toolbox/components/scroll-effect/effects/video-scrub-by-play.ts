@@ -15,6 +15,7 @@ class VideoScrubByPlay implements IEffect {
   private getBackwardsVideo_: TGetVideoFunction;
   private playStartOffset_: number;
   private playEndOffset_: number;
+  private bufferedHandler_: () => void;
 
   constructor(
     getForwardsVideoFunction: TGetVideoFunction,
@@ -70,8 +71,8 @@ class VideoScrubByPlay implements IEffect {
             const forwardsVideo = this.getForwardsVideo_(target);
             const backwardsVideo = this.getBackwardsVideo_(target);
 
-            let primaryVideo;
-            let secondaryVideo;
+            let primaryVideo: HTMLMediaElement;
+            let secondaryVideo: HTMLMediaElement;
             let targetTime;
 
             if (
@@ -102,28 +103,37 @@ class VideoScrubByPlay implements IEffect {
             }
 
             if (isScrollingDown !== this.wasScrollingDown_) {
+              // Remove previous listener to swap the opacities
+              secondaryVideo
+                .removeEventListener('seeked', this.bufferedHandler_);
+              this.bufferedHandler_ = () => {
+                renderLoop.mutate(() => {
+                  setStyle(primaryVideo, 'opacity', '1');
+                  setStyle(secondaryVideo, 'opacity', '0');
+                  primaryVideo.play();
+                });
+                primaryVideo
+                  .removeEventListener('seeked', this.bufferedHandler_);
+                this.bufferedHandler_ = null;
+              };
+              primaryVideo.addEventListener('seeked', this.bufferedHandler_);
               primaryVideo.currentTime =
                 primaryVideo.duration - secondaryVideo.currentTime;
+            } else {
+              secondaryVideo.currentTime =
+                secondaryVideo.duration - primaryVideo.currentTime;
             }
+
+            secondaryVideo.pause();
 
             if (
               isNaN(targetTime) || isNaN(primaryVideo.currentTime) ||
               primaryVideo.currentTime >= targetTime
             ) {
-              if (primaryVideo.currentTime >= targetTime) {
-                primaryVideo.currentTime = targetTime;
-              }
               primaryVideo.pause();
-            } else {
+            } else if (this.bufferedHandler_ === null && primaryVideo.paused) {
               primaryVideo.play();
             }
-
-            secondaryVideo.currentTime =
-              secondaryVideo.duration - primaryVideo.currentTime;
-            secondaryVideo.pause();
-
-            setStyle(primaryVideo, 'opacity', '1');
-            setStyle(secondaryVideo, 'opacity', '0');
 
             this.wasScrollingDown_ = isScrollingDown;
           });
