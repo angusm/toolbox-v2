@@ -9,6 +9,10 @@ import {renderLoop} from "../../utils/render-loop";
 import {sortByDomHierarchy} from "../../utils/dom/position/sort-by-dom-hierarchy";
 
 const DEFAULT_SET_ID = Symbol('EvenOddVisibilityGlobalSet');
+const STYLE_OBSERVER_CONFIG = {
+  attributes: true,
+  attributeFilter: ["style"]
+};
 
 class SetManager {
   private static singleton_: SetManager;
@@ -55,11 +59,16 @@ class SetManager {
               isOdd = !isOdd;
             });
         });
+      this.setsToProcess_.clear();
     });
   }
 
   processSet(set: EvenOddSet) {
     this.setsToProcess_.add(set);
+  }
+
+  removeSet(set: EvenOddSet) {
+    this.setsToProcess_.delete(set);
   }
 
   get(setId: Symbol): EvenOddSet {
@@ -85,6 +94,13 @@ class EvenOddSet {
   getElements(): Array<EvenOddElement> {
     return Array.from(this.elements_.values());
   }
+
+  removeElement(el: EvenOddElement) {
+    this.elements_.delete(el);
+    if (this.elements_.size === 0) {
+      SetManager.getSingleton().removeSet(this);
+    }
+  }
 }
 
 class EvenOddElement {
@@ -92,6 +108,8 @@ class EvenOddElement {
   private getEvenClassFn_: () => string;
   private getOddClassFn_: () => string;
   private isExcludedFn_: (el: HTMLElement) => boolean;
+  private observer_: MutationObserver;
+  private set_: EvenOddSet;
 
   constructor(
     element: HTMLElement,
@@ -111,8 +129,19 @@ class EvenOddElement {
     this.getEvenClassFn_ = getEvenClassFn;
     this.getOddClassFn_ = getOddClassFn;
     this.isExcludedFn_ = isExcludedFn;
-    const set = SetManager.getSingleton().get(setId);
-    set.addElement(this);
+    this.set_ = SetManager.getSingleton().get(setId);
+    this.set_.addElement(this);
+
+    this.observer_ =
+      new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+          if (mutation.attributeName === 'style'){
+            SetManager.getSingleton().processSet(this.set_);
+          }
+        });
+      });
+
+    this.observer_.observe(this.element_, STYLE_OBSERVER_CONFIG);
   }
 
   isExcluded() {
@@ -136,6 +165,11 @@ class EvenOddElement {
   markNothing() {
     removeClassIfPresent(this.element_, this.getEvenClassFn_());
     removeClassIfPresent(this.element_, this.getOddClassFn_());
+  }
+
+  destroy() {
+    this.observer_.disconnect();
+    this.set_.removeElement(this);
   }
 }
 
