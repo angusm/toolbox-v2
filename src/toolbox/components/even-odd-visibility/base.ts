@@ -6,6 +6,7 @@ import HTML = Mocha.reporters.HTML;
 import {removeClassIfPresent} from "../../utils/dom/class/remove-class-if-present";
 import {addClassIfMissing} from "../../utils/dom/class/add-class-if-missing";
 import {renderLoop} from "../../utils/render-loop";
+import {sortByDomHierarchy} from "../../utils/dom/position/sort-by-dom-hierarchy";
 
 const DEFAULT_SET_ID = Symbol('EvenOddVisibilityGlobalSet');
 
@@ -26,12 +27,34 @@ class SetManager {
 
       this.setsToProcess_.forEach(
         (setToProcess) => {
+          // Deactivate invalid elements
+          setToProcess.getElements()
+            .filter((element) => element.isExcluded())
+            .forEach((element) => element.markNothing());
 
+          const validElements =
+            setToProcess.getElements()
+              .filter((element) => !element.isExcluded());
+          const elementsToEvenOddElement = new Map();
+          const htmlElements =
+            validElements.map((evenOddEl) => {
+              const htmlEl = evenOddEl.getElement();
+              elementsToEvenOddElement.set(htmlEl, evenOddEl);
+              return htmlEl;
+            });
+
+          let isOdd = true; // Follow CSS convention, first element is odd
+          sortByDomHierarchy(htmlElements)
+            .map((htmlEl) => elementsToEvenOddElement.get(htmlEl))
+            .forEach((evenOddEl) => {
+              if (isOdd) {
+                evenOddEl.markOdd();
+              } else {
+                evenOddEl.markEven();
+              }
+              isOdd = !isOdd;
+            });
         });
-
-      renderLoop.mutate(() => {
-
-      });
     });
   }
 
@@ -57,6 +80,10 @@ class EvenOddSet {
 
   addElement(el: EvenOddElement) {
     this.elements_.add(el);
+  }
+
+  getElements(): Array<EvenOddElement> {
+    return Array.from(this.elements_.values());
   }
 }
 
@@ -90,6 +117,10 @@ class EvenOddElement {
 
   isExcluded() {
     return this.isExcludedFn_(this.element_);
+  }
+
+  getElement() {
+    return this.element_;
   }
 
   markEven() {
