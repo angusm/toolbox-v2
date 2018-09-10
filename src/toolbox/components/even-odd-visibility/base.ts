@@ -142,6 +142,7 @@ class EvenOddElement {
       });
 
     this.observer_.observe(this.element_, STYLE_OBSERVER_CONFIG);
+    SetManager.getSingleton().processSet(this.set_);
   }
 
   isExcluded() {
