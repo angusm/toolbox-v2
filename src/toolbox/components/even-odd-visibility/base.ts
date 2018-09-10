@@ -138,3 +138,5 @@ class EvenOddElement {
     removeClassIfPresent(this.element_, this.getOddClassFn_());
   }
 }
+
+export {EvenOddElement};
