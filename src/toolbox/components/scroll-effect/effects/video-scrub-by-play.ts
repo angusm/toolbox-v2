@@ -125,7 +125,6 @@ class VideoScrubByPlay implements IEffect {
               if (!primaryVideo.paused) {
                 primaryVideo.pause();
               }
-              primaryVideo.currentTime = targetTime;
             } else if (primaryVideo.readyState >= 3) {
               setStyle(primaryVideo, 'opacity', '1');
               setStyle(secondaryVideo, 'opacity', '0');
