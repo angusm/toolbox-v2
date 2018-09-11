@@ -112,9 +112,6 @@ class VideoScrubByPlay implements IEffect {
             if (playForwards !== this.wasPlayingForwards_) {
               primaryVideo.currentTime =
                 primaryVideo.duration - secondaryVideo.currentTime;
-            } else {
-              secondaryVideo.currentTime =
-                secondaryVideo.duration - primaryVideo.currentTime;
             }
 
             if (!secondaryVideo.paused) {
@@ -128,11 +125,19 @@ class VideoScrubByPlay implements IEffect {
               if (!primaryVideo.paused) {
                 primaryVideo.pause();
               }
+              primaryVideo.currentTime = targetTime;
             } else if (primaryVideo.readyState >= 3) {
               setStyle(primaryVideo, 'opacity', '1');
               setStyle(secondaryVideo, 'opacity', '0');
-              primaryVideo.play();
+              if (Math.abs(primaryVideo.currentTime - targetTime) < FRAME_STEP) {
+                primaryVideo.currentTime = targetTime;
+              } else {
+                primaryVideo.play();
+              }
             }
+
+            secondaryVideo.currentTime =
+              secondaryVideo.duration - primaryVideo.currentTime;
 
             this.wasPlayingForwards_ = playForwards;
           });
