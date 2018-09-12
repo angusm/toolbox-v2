@@ -16,7 +16,7 @@ class ActiveOnCondition {
     modifier: string = MODIFIER,
   ) {
     this.baseClass_ = baseClass;
-    this.conditionFn_ = conditionFn,
+    this.conditionFn_ = conditionFn;
     this.modifier_ = modifier;
     this.init_();
   }
