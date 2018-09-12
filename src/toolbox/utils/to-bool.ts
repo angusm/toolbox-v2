@@ -4,7 +4,7 @@
  */
 
 function toBool(val: any): boolean {
-  return val ? true : false;
+  return !!val;
 }
 
 export {toBool};
