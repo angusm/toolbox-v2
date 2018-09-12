@@ -1,3 +1,8 @@
+/**
+ * Class is used as a namespace to collect various useful Query Parameter
+ * functions.
+ */
+
 // TODO(Angus): Properly type this file
 
 type QueryParamMap = {[key: string]: string};
