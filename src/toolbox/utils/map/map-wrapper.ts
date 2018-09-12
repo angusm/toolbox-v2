@@ -1,4 +1,4 @@
-import {isDef} from '../is-def';
+import {isDefined} from '../is-defined';
 
 /**
  * Generic Types
@@ -44,7 +44,7 @@ class MapWrapper<K, V> implements Map<K, V> {
     callbackFn: (value: V, index: K, map: Map<K, V>) => void,
     thisArg?: any
   ): void {
-    const finalThisArg = isDef(thisArg) ? thisArg : this;
+    const finalThisArg = isDefined(thisArg) ? thisArg : this;
     this.map.forEach(callbackFn, <this>finalThisArg);
   }
 

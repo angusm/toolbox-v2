@@ -1,9 +1,10 @@
-import {isDef} from '../is-def';
+import {isDefined} from '../is-defined';
 
 function isNewMaxScore<T>(
   currentMaxValue: T, maxScore: number, score: number
 ): boolean {
-  return (!isDef(currentMaxValue) && !isDef(maxScore)) || maxScore < score;
+  return (!isDefined(currentMaxValue) && !isDefined(maxScore)) ||
+    maxScore < score;
 }
 
 function max<T>(values: T[], scoreFn: (v: T) => number): T {
