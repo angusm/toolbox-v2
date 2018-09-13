@@ -9,6 +9,7 @@ class ActiveOnCondition {
   private baseClass_: string;
   private conditionFn_: (element: HTMLElement) => boolean;
   private modifier_: string;
+  private destroyed_: boolean;
 
   constructor(
     baseClass: string,
@@ -18,6 +19,7 @@ class ActiveOnCondition {
     this.baseClass_ = baseClass;
     this.conditionFn_ = conditionFn;
     this.modifier_ = modifier;
+    this.destroyed_ = false;
     this.init_();
   }
 
@@ -26,6 +28,10 @@ class ActiveOnCondition {
   }
 
   private render_(): void {
+    if (this.destroyed_) {
+      return;
+    }
+
     renderLoop.measure(() => {
       renderLoop.cleanup(() => this.render_());
 
@@ -51,6 +57,10 @@ class ActiveOnCondition {
           .forEach((candidate) => addClassIfMissing(candidate, activeClass));
       });
     });
+  }
+
+  destroy() {
+    this.destroyed_ = true;
   }
 }
 
