@@ -3,7 +3,7 @@ import {isElementDominant} from "../position/is-element-dominant";
 
 function isAnchorElementFromHashDominant(): boolean {
   const anchor = getAnchorElementFromHash();
-  return anchor ? isElementDominant(anchor) : false;
+  return anchor ? isElementDominant(<HTMLElement>anchor) : false;
 }
 
 export {isAnchorElementFromHashDominant};

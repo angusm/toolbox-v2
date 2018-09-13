@@ -6,7 +6,10 @@ function getClosestToCenter(
 ): Node {
   return min<Node>(
     Array.from(elements),
-    (el) => Math.abs(getDistanceBetweenCenters(el, container).getLength()));
+    (el) => {
+      return Math.abs(
+        getDistanceBetweenCenters(<HTMLElement>el, container).getLength());
+    });
 }
 
 export {getClosestToCenter};

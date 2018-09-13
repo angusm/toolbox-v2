@@ -1,13 +1,6 @@
 import {Vector2d} from '../../math/geometry/vector-2d';
-import {frameMemoize} from '../../frame-memoize';
 
-type GetOffsetFromAncestorSignature =
-  (element: HTMLElement, ancestor: HTMLElement) => Vector2d;
-
-const getOffsetFromAncestor: GetOffsetFromAncestorSignature =
-  frameMemoize(getOffsetFromAncestor_);
-
-function getOffsetFromAncestor_(
+function getOffsetFromAncestor(
   element: HTMLElement, ancestor: HTMLElement
 ): Vector2d {
   if (!element || element === ancestor) {

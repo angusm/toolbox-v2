@@ -1,4 +1,3 @@
-import {frameMemoize} from "../../frame-memoize";
 import {getAnchorElementFromHash} from "./get-anchor-element-from-hash";
 import {getAnchorsWithCommonSelector} from "./get-anchors-with-common-selector";
 import {isElementDominant} from "../position/is-element-dominant";
@@ -12,7 +11,7 @@ import {getDistanceUntilVisible} from "../position/get-distance-until-visible";
 
 // TODO: Make functional with horizontal scrolling as well.
 
-function getCurrentAnchorByVisibleOrSeen_(
+function getCurrentAnchorByVisibleOrSeen(
   getAnchorsFn: () => HTMLElement[] = getAnchorsWithCommonSelector
 ): HTMLElement {
   // Store these values to avoid multiple calls.
@@ -21,10 +20,10 @@ function getCurrentAnchorByVisibleOrSeen_(
 
   const useAnchorFromElementHash =
     contains(anchors, anchorElementFromHash) &&
-    isElementDominant(anchorElementFromHash);
+    isElementDominant(<HTMLElement>anchorElementFromHash);
 
   if (useAnchorFromElementHash) {
-    return anchorElementFromHash;
+    return <HTMLElement>anchorElementFromHash;
   }
 
   const eligibleAnchors: HTMLElement[] =
@@ -38,11 +37,6 @@ function getCurrentAnchorByVisibleOrSeen_(
 
   //noinspection JSSuspiciousNameCombination
   return max(eligibleAnchors, (el) => getVisibleDistanceFromRoot(el).y);
-}
-
-// Frame memoize as it is likely this will be used by both DeepLinkByScroll and
-// IDMarker
-const getCurrentAnchorByVisibleOrSeen =
-  frameMemoize(getCurrentAnchorByVisibleOrSeen_);
+};
 
 export {getCurrentAnchorByVisibleOrSeen};

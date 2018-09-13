@@ -1,10 +1,9 @@
 import {getOpacity} from '../style/get-opacity';
 import {isDisplayed} from "../style/is-displayed";
 import {getVisibleDimensions} from "./get-visible-dimensions";
-import {frameMemoize} from "../../frame-memoize";
 import {isVisible} from "../style/is-visible";
 
-function getVisibleArea_(
+function getVisibleArea(
   target: HTMLElement,
   container: HTMLElement = null,
   factorInOpacity: boolean = false
@@ -16,7 +15,5 @@ function getVisibleArea_(
   const opacityFactor: number = factorInOpacity ? getOpacity(target) : 1;
   return getVisibleDimensions(target, container).getArea() * opacityFactor;
 }
-
-const getVisibleArea = frameMemoize(getVisibleArea_);
 
 export {getVisibleArea};
