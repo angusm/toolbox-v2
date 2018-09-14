@@ -5,7 +5,7 @@ import {defaultSymbol} from './default-symbol';
  * - Removes risk of accidental fall through.
  * - More concise syntax than if statements, and switch statements in some cases
  *
- * Uses Toolbox's default symbol as the key for the desired default case.
+ * Uses Toolbox's default symbol as the key for the
  *
  * So for instance:
  *
@@ -34,6 +34,8 @@ import {defaultSymbol} from './default-symbol';
  *   return runMapAsSwitch(switchMap, value, a, b, c);
  * }
  */
+
+
 function runMapAsSwitch<K, V, R>(
   map: Map<K|symbol, (...any:V[]) => R>, key: K, ...args: Array<V>
 ): R {
