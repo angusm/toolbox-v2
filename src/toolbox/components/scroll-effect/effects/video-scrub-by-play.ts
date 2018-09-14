@@ -61,7 +61,7 @@ class VideoScrubByPlay implements IEffect {
   }
 
   private getAdjustedPercentage_(rawPercentage: number): number {
-    return this.activePercentages_.getPercentAsValue(rawPercentage);
+    return this.activePercentages_.getValueAsPercent(rawPercentage);
   }
 
   private render_() {
