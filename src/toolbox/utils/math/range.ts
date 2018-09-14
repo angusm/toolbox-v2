@@ -36,11 +36,13 @@ class Range {
   }
 
   public getValueAsPercent(val: number): number {
-    return (val - this.min_) / (this.max_ - this.min_);
+    return new Range(0, 1)
+      .clamp((val - this.min_) / (this.max_ - this.min_));
   }
 
   public getPercentAsValue(percent: number): number {
-    return this.min_ + (this.max_ - this.min_) * percent;
+    return this.min_ + (this.max_ - this.min_) *
+      new Range(0, 1).clamp(percent);
   }
 
   public getOverlap(overlap: Range): Range {
