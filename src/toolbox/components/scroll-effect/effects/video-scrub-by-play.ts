@@ -1,6 +1,7 @@
 import {renderLoop} from "../../../utils/render-loop";
 import {IEffect} from "./ieffect";
 import {DynamicDefaultMap} from "../../../utils/map/dynamic-default";
+import {Range} from '../../../utils/math/range';
 import {setStyle} from "../../../utils/dom/style/set-style";
 import {Scroll} from "../../../utils/cached-vectors/scroll";
 
@@ -13,19 +14,19 @@ class VideoScrubByPlay implements IEffect {
   private destroyed_: boolean;
   private getForwardsVideo_: TGetVideoFunction;
   private getBackwardsVideo_: TGetVideoFunction;
-  private playStartOffset_: number;
-  private playEndOffset_: number;
+  private playableTime_: Range;
   private scroll_: Scroll;
+  private activePercentages_: Range;
 
   constructor(
     getForwardsVideoFunction: TGetVideoFunction,
     getBackwardsVideoFunction: TGetVideoFunction,
     {
-      playStartOffset = 0,
-      playEndOffset = 0,
+      playableTime = new Range(Number.MIN_VALUE, Number.MAX_VALUE),
+      activePercentages = new Range(0, 1),
     }: {
-      playStartOffset?: number,
-      playEndOffset?: number
+      playableTime?: Range,
+      activePercentages?: Range,
     } = {}
   ) {
     this.getForwardsVideo_ = getForwardsVideoFunction;
@@ -34,8 +35,8 @@ class VideoScrubByPlay implements IEffect {
       DynamicDefaultMap.usingFunction<HTMLElement, number>(() => 0);
     this.destroyed_ = false;
     this.wasPlayingForwards_ = true;
-    this.playStartOffset_ = playStartOffset;
-    this.playEndOffset_ = playEndOffset;
+    this.playableTime_ = playableTime;
+    this.activePercentages_ = activePercentages;
     this.scroll_ = Scroll.getSingleton();
 
     this.render_();
@@ -48,16 +49,19 @@ class VideoScrubByPlay implements IEffect {
   }
 
   static getTargetTime_(
-    video: HTMLMediaElement,
-    percentage: number,
-    startOffset: number,
-    endOffset: number
-  ): number {
-    const viableDuration = video.duration - startOffset - endOffset;
-    const rawTargetTime =
-      startOffset +
-      Math.round(viableDuration * percentage * 1000) / 1000;
-    return Math.min(rawTargetTime, video.duration);
+    video: HTMLMediaElement, percentage: number, playableTime: Range): number {
+    const actualRange = playableTime.getOverlap(new Range(0, video.duration));
+    return actualRange.getPercentAsValue(percentage);
+  }
+
+  private getReversePlayableTime_(video: HTMLMediaElement): Range {
+      return new Range(
+        Math.max(0, video.duration - this.playableTime_.max),
+        Math.min(video.duration, video.duration - this.playableTime_.min));
+  }
+
+  private getAdjustedPercentage_(rawPercentage: number): number {
+    return this.activePercentages_.getPercentAsValue(rawPercentage);
   }
 
   private render_() {
@@ -68,7 +72,8 @@ class VideoScrubByPlay implements IEffect {
       renderLoop.cleanup(() => this.render_());
       Array.from(this.targetPercentages_.entries())
         .forEach(
-          ([target, percentage]) => {
+          ([target, rawPercentage]) => {
+            const percentage = this.getAdjustedPercentage_(rawPercentage);
             const forwardsVideo = this.getForwardsVideo_(target);
             const backwardsVideo = this.getBackwardsVideo_(target);
 
@@ -83,16 +88,12 @@ class VideoScrubByPlay implements IEffect {
             }
             const forwardsTargetTime =
               VideoScrubByPlay.getTargetTime_(
-                forwardsVideo,
-                percentage,
-                this.playStartOffset_,
-                this.playEndOffset_);
+                forwardsVideo, percentage, this.playableTime_);
             const backwardsTargetTime =
               VideoScrubByPlay.getTargetTime_(
                 backwardsVideo,
                 (1 - percentage),
-                this.playEndOffset_,
-                this.playStartOffset_);
+                this.getReversePlayableTime_(backwardsVideo));
 
             const backwardsGap = backwardsTargetTime - backwardsVideo.currentTime;
 
