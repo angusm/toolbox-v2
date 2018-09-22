@@ -104,7 +104,7 @@ class VideoScrubByPlay implements IEffect {
               primaryVideo = forwardsVideo;
               secondaryVideo = backwardsVideo;
 
-              if (targetTime < this.playableTime_.min) {
+              if (primaryVideo.currentTime < this.playableTime_.min) {
                 return;
               }
             } else {
