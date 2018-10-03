@@ -18,7 +18,9 @@ class ScrollEater {
         this.lastTouchY_ = e.changedTouches[0].clientY;
       });
     new EventEater(
-      'touchmove', {shouldEat: (e: Event) => this.shouldEatTouchMove_(e)});
+      'touchmove',
+      {shouldEat: (e: Event) => this.shouldEatTouchMove_(e)},
+      {passive: false});
   }
 
   shouldEatMouseWheel_(e: Event): boolean {

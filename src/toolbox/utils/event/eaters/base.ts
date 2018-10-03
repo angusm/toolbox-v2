@@ -13,7 +13,8 @@ class EventEater {
       targetParam?: any,
       shouldEat?: ShouldEatFn,
 
-    } = {}
+    } = {},
+    options?: any
   ) {
     this.target_ = targetParam !== null ? targetParam : window;
     this.fn_ = (e: Event) => {
@@ -21,7 +22,7 @@ class EventEater {
         e.preventDefault();
       }
     };
-    this.target_.addEventListener(event, this.fn_);
+    this.target_.addEventListener(event, this.fn_, options);
   }
 
   destroy() {
