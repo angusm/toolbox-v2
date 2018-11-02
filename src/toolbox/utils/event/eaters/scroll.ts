@@ -12,6 +12,8 @@ class ScrollEater {
     this.shouldEat_ = shouldEat;
     new EventEater(
       'mousewheel', {shouldEat: (e: Event) => this.shouldEatMouseWheel_(e)});
+    new EventEater(
+      'wheel', {shouldEat: (e: Event) => this.shouldEatMouseWheel_(e)});
     window.addEventListener(
       'touchstart',
       (e: TouchEvent) => {

@@ -20,6 +20,7 @@ class EventEater {
     this.fn_ = (e: Event) => {
       if (shouldEat(e)) {
         e.preventDefault();
+        return false;
       }
     };
     this.target_.addEventListener(event, this.fn_, options);
