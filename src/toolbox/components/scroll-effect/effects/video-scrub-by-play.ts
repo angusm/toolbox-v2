@@ -22,7 +22,8 @@ class VideoScrubByPlay implements IEffect {
     getForwardsVideoFunction: TGetVideoFunction,
     getBackwardsVideoFunction: TGetVideoFunction,
     {
-      playableTime = new Range(Number.MIN_VALUE, Number.MAX_VALUE),
+      playableTime =
+        new Range(Number.NEGATIVE_INFINITY, Number.POSITIVE_INFINITY),
       activePercentages = new Range(0, 1),
     }: {
       playableTime?: Range,

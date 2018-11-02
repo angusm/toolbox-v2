@@ -82,7 +82,8 @@ class Slide extends Transition {
   private static initPosition_(target: HTMLElement, carousel: ICarousel): void {
     renderLoop.measure(() => {
       const translation =
-        Slide.getTransitionTranslation_(target, carousel, Number.MAX_VALUE);
+        Slide
+          .getTransitionTranslation_(target, carousel, Number.POSITIVE_INFINITY);
       Slide.transition_(target, carousel, translation);
     });
   }

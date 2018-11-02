@@ -10,8 +10,8 @@ type GetDistanceFn = (a: HTMLElement, b?: HTMLElement) => number;
 const defaultOptions: IScrollEffectOptions =
   {
     getDistanceFunction: DistanceFunction.DISTANCE_FROM_DOCUMENT_CENTER,
-    startDistance: -Number.MAX_VALUE,
-    endDistance: Number.MAX_VALUE,
+    startDistance: Number.NEGATIVE_INFINITY,
+    endDistance: Number.POSITIVE_INFINITY,
     effects: [],
   };
 

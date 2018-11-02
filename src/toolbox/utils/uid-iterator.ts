@@ -5,7 +5,7 @@ class UidIterator implements IterableIterator<number> {
     this.counter_++;
     return {
       value: this.counter_,
-      done: this.counter_ >= Number.MAX_VALUE,
+      done: this.counter_ >= Number.POSITIVE_INFINITY,
     }
   }
 

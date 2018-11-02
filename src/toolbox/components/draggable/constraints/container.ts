@@ -24,7 +24,7 @@ class ContainerConstraint extends Constraint {
     const overlapDimensions: Dimensions2d =
       draggableDimensions.subtract(containerDimensions);
     const positiveDimensions: Dimensions2d =
-      new Dimensions2d(Number.MAX_VALUE, Number.MAX_VALUE);
+      new Dimensions2d(Number.POSITIVE_INFINITY, Number.POSITIVE_INFINITY);
     const constrainedOverlap: Dimensions2d =
       overlapDimensions.clamp(...positiveDimensions.asRanges()).invert();
 
