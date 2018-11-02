@@ -1,6 +1,7 @@
 import {IEffect} from "./ieffect";
 import {Scroll} from "../../../utils/cached-vectors/scroll";
 import {setStyle} from "../../../utils/dom/style/set-style";
+import {renderLoop} from "../../../utils/render-loop";
 
 // This can be used to only display a header on scroll down.
 // To set this up place a header with a transform that slides it up
@@ -21,9 +22,9 @@ class RemoveTransformOnScrollDown implements IEffect {
       distance > this.minimumScrollDistance_ &&
       Scroll.getSingleton().isScrollingDown()
     ) {
-      setStyle(target, 'transform', 'none');
+      renderLoop.scrollMutate(() => setStyle(target, 'transform', 'none'));
     } else {
-      setStyle(target, 'transform', '');
+      renderLoop.scrollMutate(() => setStyle(target, 'transform', ''));
     }
   }
 
