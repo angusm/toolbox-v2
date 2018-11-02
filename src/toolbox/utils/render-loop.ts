@@ -54,7 +54,7 @@ class RenderLoop {
         .usingFunction<symbol, RenderFunctionMap>(
           (unused: symbol) => new Map<RenderFunctionID, RenderFunction>());
     this.msPerFrame_ = 33; // Default to 30fps
-    window.addEventListener('scroll', () => this.runScrollLoop_());
+    document.addEventListener('scroll', () => this.runScrollLoop_());
     this.runLoop_();
   }
 
