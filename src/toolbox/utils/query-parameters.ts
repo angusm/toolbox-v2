@@ -86,7 +86,7 @@ class QueryParameters {
       window.history.pushState(
         {'path': window.location.origin + window.location.pathname},
         '',
-        `?${paramsString}`);
+        `${window.location.pathname}?${paramsString}`);
     } else {
       window.location.href =
         [window.location.origin, window.location.pathname, '?', paramsString]
