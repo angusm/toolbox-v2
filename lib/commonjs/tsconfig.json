@@ -1,4 +1,3 @@
-// Run with tsc
 {
   "extends": "../../config/base",
   "compilerOptions": {
