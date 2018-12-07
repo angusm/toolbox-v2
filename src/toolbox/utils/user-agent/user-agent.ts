@@ -29,6 +29,9 @@ import {Linux} from "./os/linux";
 import {iOS} from "./os/ios";
 import {BeOS} from "./os/beos";
 import {Android} from "./os/android";
+import {isDefined} from "../is-defined";
+import {UnknownBrowser} from "./browser/unknown";
+import {UnknownOS} from "./os/unknown";
 
 
 const browsers: (typeof Browser)[] = [
@@ -73,8 +76,13 @@ class UserAgent {
   }
 
   public static getBrowser(): typeof Browser {
-    return browsers.find(
+    const matchingBrowser: typeof Browser = browsers.find(
       (browser: typeof Browser) => browser.isCurrentBrowser());
+    if (isDefined(matchingBrowser)) {
+      return matchingBrowser;
+    } else {
+      return UnknownBrowser;
+    }
   }
 
   public static isMobile(): boolean {
@@ -94,7 +102,12 @@ class UserAgent {
   }
 
   public static getOS(): typeof OS {
-    return operatingSystems.find((os) => os.isCurrentOS());
+    const matchingOs = operatingSystems.find((os) => os.isCurrentOS());
+      if (isDefined(matchingOs)) {
+          return matchingOs;
+      } else {
+          return UnknownOS;
+      }
   }
 }
 
