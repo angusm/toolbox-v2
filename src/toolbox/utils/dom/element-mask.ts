@@ -5,7 +5,7 @@
  */
 import {Dimensions} from '../cached-vectors/dimensions';
 import {Dimensions2d} from '../math/geometry/dimensions-2d';
-import {Range} from '../math/range';
+import {NumericRange} from '../math/numeric-range';
 import {Scroll} from '../cached-vectors/scroll';
 import {VisibleDimensions} from '../cached-vectors/visible-dimensions';
 import {VisibleDistance} from '../cached-vectors/visible-distance';
@@ -63,7 +63,7 @@ class ElementMask{
     });
   }
 
-  private getWindowDimensionRanges_(): Range[] {
+  private getWindowDimensionRanges_(): NumericRange[] {
     return windowDimensions.getDimensions()
       .asRanges()
       .map((range) => range.expand(this.buffer_));

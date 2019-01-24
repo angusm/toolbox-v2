@@ -1,41 +1,25 @@
 import {ColorMap} from './color-map';
-import {Vector} from '../math/geometry/vector';
 import {getSubstringsOfLength} from '../string/get-substrings-of-length';
 import {hexToInt} from '../hex-to-int';
 import {max} from '../iterable/max';
 import {trim} from '../string/trim';
 import {getStyle} from "../dom/style/get-style";
 import {MultiValueMap} from "../map/multi-value";
+import {zip} from "../array/zip";
+import {sum} from "../math/sum";
+import {RGB} from "./rgb";
+import {ICssStyleValueInstance} from "../dom/style/interfaces/css-style-value";
+import {IMeasurableInstance} from "../math/interfaces/measurable";
 
 const HEX_VALUES = '0123456789abcdefABCDEF';
 
 const colorInstances = new MultiValueMap<number, Color>();
-const rgbInstances = new MultiValueMap<number, RGB>();
-
-class RGB extends Vector {
-  private red_: number;
-  private green_: number;
-  private blue_: number;
-
-  constructor(red: number = 0, green: number = 0, blue: number = 0) {
-    super(red, green, blue);
-
-    if (rgbInstances.has([red, green, blue])) {
-      return rgbInstances.get([red, green, blue]);
-    } else {
-      this.red_ = red;
-      this.green_ = green;
-      this.blue_ = blue;
-      rgbInstances.set([red, green, blue], this);
-      return this;
-    }
-  }
-}
 
 
-class Color {
-  private rgb_: RGB;
-  private alpha_: number;
+class Color implements ICssStyleValueInstance, IMeasurableInstance {
+  ['constructor']: typeof Color; // For checking interface static methods
+  readonly rgb_: RGB;
+  readonly alpha_: number;
 
   constructor(
     red: number = 0, green: number = 0, blue: number = 0, alpha: number = 1
@@ -50,7 +34,7 @@ class Color {
     }
   }
 
-  public static fromString(value: string): Color {
+  public static fromStyleString(value: string): Color {
     if (Color.isHexValue_(value)) {
       return this.fromHex(value);
     } else if (value.slice(0, 3) === 'rgb') {
@@ -58,8 +42,15 @@ class Color {
     } else if (ColorMap.get(value)) {
       return this.fromHex(ColorMap.get(value));
     } else {
-      console.error('Invalid string provided to Color.fromString');
+      console.error(
+        `Invalid string "${value}" provided to Color.fromStyleString`);
     }
+  }
+
+  public static fromString(value: string): Color {
+    console.warn(
+      'Deprecating in favor of fromStyleString to add wider support for ICssStyleValueInstance');
+    return this.fromStyleString(value);
   }
 
   public static fromHex(value: string): Color {
@@ -98,15 +89,31 @@ class Color {
     return this.rgb_;
   }
 
+  public getAlpha(): number {
+    return this.alpha_;
+  }
+
   public getColorWithHighestContrast(...colors: Color[]): Color {
     return max(
       colors, (color) => color.getRGB().subtract(this.getRGB()).getLength());
   }
 
   public toStyleString(): string {
-    const values = [...this.getRGB().getValues(), this.alpha_];
+    const values =
+      [
+        ...this.getRGB().getValues().map((value) => Math.round(value)),
+        this.alpha_
+      ];
     return `rgba(${values.join(', ')})`;
+  }
+
+  public toNumbers(): number[] {
+    return [...this.rgb_.toNumbers(), this.alpha_];
+  }
+
+  public static fromNumbers(...values: number[]): Color {
+    return new Color(...values);
   }
 }
 
-export {Color, RGB};
+export {Color};

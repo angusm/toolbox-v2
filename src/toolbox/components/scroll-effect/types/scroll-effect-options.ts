@@ -1,7 +1,8 @@
 import {IEffect} from "../effects/ieffect";
+import {GetDistanceFn} from "./get-distance-fn";
 
 interface IScrollEffectOptions {
-  getDistanceFunction: (a: HTMLElement, b?: HTMLElement) => number,
+  getDistanceFunction: GetDistanceFn,
   startDistance: number,
   endDistance: number,
   effects: Array<IEffect>,

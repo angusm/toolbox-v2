@@ -1,13 +1,13 @@
-interface ITbEvent {
+interface IEvent {
   getTarget(): any;
 }
 
-interface ITbEventConstructor {
-  new (...args: any[]): ITbEvent;
+interface IEventConstructor {
+  new (...args: any[]): IEvent;
   createWatcher(target: any): () => void;
 }
 
 export {
-  ITbEvent,
-  ITbEventConstructor
+  IEvent,
+  IEventConstructor
 };

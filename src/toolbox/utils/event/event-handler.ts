@@ -2,20 +2,20 @@ import {MultiValueArrayMap} from '../map/multi-value-array';
 import {TbEvent} from './events/tb-event';
 import {getAncestorClasses} from '../inheritance/get-ancestor-classes';
 import {UidIterator} from "../uid-iterator";
-import {ITbEventConstructor} from "./interfaces/tb-event";
+import {IEventConstructor} from "./interfaces/tb-event";
 
 type Callback = (e: TbEvent) => void;
-type ListenerKey = any | ITbEventConstructor;
+type ListenerKey = any | IEventConstructor;
 
 class CallbackGroup {
   private target_: any;
-  private EventClass_: ITbEventConstructor;
+  private EventClass_: IEventConstructor;
   private callback_: Callback;
   private destroy_: () => void;
 
   constructor(
     target: any,
-    EventClass: ITbEventConstructor,
+    EventClass: IEventConstructor,
     callback: Callback,
     destroy: () => void
   ) {
@@ -29,7 +29,7 @@ class CallbackGroup {
     return this.target_;
   }
 
-  public get EventClass(): ITbEventConstructor {
+  public get EventClass(): IEventConstructor {
     return this.EventClass_;
   }
 
@@ -42,9 +42,9 @@ class CallbackGroup {
   }
 }
 
-function getParentEvents(event: TbEvent): ITbEventConstructor[] {
-  const LeafClass: ITbEventConstructor = <typeof TbEvent>event.constructor;
-  return <ITbEventConstructor[]>[LeafClass, ...getAncestorClasses(LeafClass)];
+function getParentEvents(event: TbEvent): IEventConstructor[] {
+  const LeafClass: IEventConstructor = <typeof TbEvent>event.constructor;
+  return <IEventConstructor[]>[LeafClass, ...getAncestorClasses(LeafClass)];
 }
 
 const uids = new UidIterator();
@@ -59,7 +59,7 @@ class EventHandler {
   }
 
   public addListener(
-    target: any, EventClass: ITbEventConstructor, callback: Callback
+    target: any, EventClass: IEventConstructor, callback: Callback
   ): number {
     const destroyFn: () => void = EventClass.createWatcher(target);
     const cbGroup = new CallbackGroup(target, EventClass, callback, destroyFn);
@@ -88,7 +88,7 @@ class EventHandler {
     callbacks.splice(callbacks.indexOf(cbGroup), 1);
   }
 
-  private getCallbacks(target: any, EventClass: ITbEventConstructor) {
+  private getCallbacks(target: any, EventClass: IEventConstructor) {
     return this.listeners_.get([target, EventClass]);
   }
 

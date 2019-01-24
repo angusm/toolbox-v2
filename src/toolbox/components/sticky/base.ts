@@ -1,4 +1,4 @@
-import {Range} from "../../utils/math/range";
+import {NumericRange} from "../../utils/math/numeric-range";
 import {getVisibleYPosition} from "../../utils/dom/position/vertical/get-visible-y-position";
 import {renderLoop} from "../../utils/render-loop";
 import {getOffsetFromAncestor} from "../../utils/dom/position/get-offset-from-ancestor";
@@ -63,7 +63,7 @@ class Sticky {
       this.container_.offsetHeight -
       this.target_.offsetHeight -
       this.target_.offsetTop;
-    const shouldPin = new Range(0, maxDistance).contains(-yPosition);
+    const shouldPin = new NumericRange(0, maxDistance).contains(-yPosition);
     const position = this.getPosition_(shouldPin, yPosition);
     const containerXOffset: number =
       getOffsetFromAncestor(this.container_, null).x;

@@ -1,7 +1,7 @@
 import {renderLoop} from "../../../utils/render-loop";
 import {IEffect} from "./ieffect";
 import {DynamicDefaultMap} from "../../../utils/map/dynamic-default";
-import {Range} from '../../../utils/math/range';
+import {NumericRange} from '../../../utils/math/numeric-range';
 import {setStyle} from "../../../utils/dom/style/set-style";
 import {Scroll} from "../../../utils/cached-vectors/scroll";
 
@@ -14,20 +14,20 @@ class VideoScrubByPlay implements IEffect {
   private destroyed_: boolean;
   private getForwardsVideo_: TGetVideoFunction;
   private getBackwardsVideo_: TGetVideoFunction;
-  private playableTime_: Range;
+  private playableTime_: NumericRange;
   private scroll_: Scroll;
-  private activePercentages_: Range;
+  private activePercentages_: NumericRange;
 
   constructor(
     getForwardsVideoFunction: TGetVideoFunction,
     getBackwardsVideoFunction: TGetVideoFunction,
     {
       playableTime =
-        new Range(Number.NEGATIVE_INFINITY, Number.POSITIVE_INFINITY),
-      activePercentages = new Range(0, 1),
+        new NumericRange(Number.NEGATIVE_INFINITY, Number.POSITIVE_INFINITY),
+      activePercentages = new NumericRange(0, 1),
     }: {
-      playableTime?: Range,
-      activePercentages?: Range,
+      playableTime?: NumericRange,
+      activePercentages?: NumericRange,
     } = {}
   ) {
     this.getForwardsVideo_ = getForwardsVideoFunction;
@@ -50,13 +50,17 @@ class VideoScrubByPlay implements IEffect {
   }
 
   static getTargetTime_(
-    video: HTMLMediaElement, percentage: number, playableTime: Range): number {
-    const actualRange = playableTime.getOverlap(new Range(0, video.duration));
+    video: HTMLMediaElement,
+    percentage: number,
+    playableTime: NumericRange
+  ): number {
+    const actualRange =
+      playableTime.getOverlap(new NumericRange(0, video.duration));
     return actualRange.getPercentAsValue(percentage);
   }
 
-  private getReversePlayableTime_(video: HTMLMediaElement): Range {
-      return new Range(
+  private getReversePlayableTime_(video: HTMLMediaElement): NumericRange {
+      return new NumericRange(
         Math.max(0, video.duration - this.playableTime_.max),
         Math.min(video.duration, video.duration - this.playableTime_.min));
   }
@@ -96,7 +100,8 @@ class VideoScrubByPlay implements IEffect {
                 (1 - percentage),
                 this.getReversePlayableTime_(backwardsVideo));
 
-            const backwardsGap = backwardsTargetTime - backwardsVideo.currentTime;
+            const backwardsGap =
+              backwardsTargetTime - backwardsVideo.currentTime;
 
             let playForwards = backwardsGap < -FRAME_STEP;
 
@@ -136,7 +141,8 @@ class VideoScrubByPlay implements IEffect {
             } else if (primaryVideo.readyState >= 3) {
               setStyle(primaryVideo, 'opacity', '1');
               setStyle(secondaryVideo, 'opacity', '0');
-              if (Math.abs(primaryVideo.currentTime - targetTime) < FRAME_STEP) {
+              const timeDifference = primaryVideo.currentTime - targetTime;
+              if (Math.abs(timeDifference) < FRAME_STEP) {
                 primaryVideo.currentTime = targetTime;
               } else {
                 primaryVideo.play();

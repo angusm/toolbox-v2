@@ -1,7 +1,7 @@
 import {noop} from "../../noop";
-import {ITbEvent} from "../interfaces/tb-event";
+import {IEvent} from "../interfaces/tb-event";
 
-class TbEvent implements ITbEvent{
+class TbEvent implements IEvent{
   private target_: any;
 
   constructor(target: any) {
