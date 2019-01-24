@@ -1,7 +1,7 @@
 import {DistanceFunction} from "./distance-function";
 import {IScrollEffectOptions} from "./types/scroll-effect-options";
-import {renderLoop} from "../../utils/render-loop";
-import {Range} from "../../utils/math/range";
+import {renderLoop} from "../../utils";
+import {Range} from "../../utils";
 import {IEffect} from "./effects/ieffect";
 
 // Type definition
