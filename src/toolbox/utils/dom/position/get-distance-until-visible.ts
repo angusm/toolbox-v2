@@ -1,5 +1,5 @@
 import {Vector2d} from '../../math/geometry/vector-2d';
-import {Range} from '../../math/range';
+import {NumericRange} from '../../math/numeric-range';
 import {getVisibleDistanceBetweenElements} from "./get-visible-distance-between-elements";
 import {Dimensions2d} from "../../math/geometry/dimensions-2d";
 import {getAncestorDimensions} from "./get-ancestor-dimensions";
@@ -7,7 +7,8 @@ import {getAncestorDimensions} from "./get-ancestor-dimensions";
 function getDistanceOnAxisUntilVisible_(
   rawDistance: number, ancestorDistance: number, elementDistance: number
 ): number {
-  const ancestorRange = new Range(-elementDistance + 1, ancestorDistance - 1);
+  const ancestorRange =
+    new NumericRange(-elementDistance + 1, ancestorDistance - 1);
   if (ancestorRange.contains(rawDistance)) {
     return 0;
   }

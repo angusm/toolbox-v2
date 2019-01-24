@@ -1,11 +1,11 @@
-import {Range} from '../range';
+import {NumericRange} from '../numeric-range';
 import {areArrayValuesEqual} from '../../array/are-array-values-equal';
 import {sum} from '../sum';
 import {zip} from '../../array/zip';
 
 class Vector {
   ['constructor']: typeof Vector;
-  private values: number[];
+  readonly values: number[];
 
   constructor(...values: number[]) {
     this.values = values;
@@ -31,18 +31,20 @@ class Vector {
     return <this>new this.constructor(...this.getValues().map((val) => -val));
   }
 
-  public static clamp<T extends Vector>(vector: T, ...ranges: Range[]): T {
-    const zippedValuesAndRanges: (number|Range)[][] =
-      zip<number|Range>(vector.getValues(), ranges);
+  public static clamp<T extends Vector>(
+    vector: T, ...ranges: NumericRange[]
+  ): T {
+    const zippedValuesAndRanges: (number|NumericRange)[][] =
+      zip<number|NumericRange>(vector.getValues(), ranges);
     const clampedValues: number[] =
       zippedValuesAndRanges.map(
-        ([value, range]: [number, Range]) => {
+        ([value, range]: [number, NumericRange]) => {
           return range ? range.clamp(value) : value;
         });
     return <T>new this(...clampedValues);
   }
 
-  public clamp(...ranges: Range[]): this {
+  public clamp(...ranges: NumericRange[]): this {
     return this['constructor'].clamp(this, ...ranges);
   }
 
@@ -98,9 +100,9 @@ class Vector {
       sum(...this.getValues().map((value) => Math.pow(value, 2))));
   }
 
-  public asRanges(): Range[] {
+  public asRanges(): NumericRange[] {
     return this.getValues()
-      .map((value) => new Range(Math.min(0, value), Math.max(0, value)));
+      .map((value) => new NumericRange(Math.min(0, value), Math.max(0, value)));
   }
 }
 

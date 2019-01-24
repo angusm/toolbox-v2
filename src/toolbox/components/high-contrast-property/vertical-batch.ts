@@ -1,5 +1,5 @@
 import {renderLoop} from "../../utils/render-loop";
-import {Range} from "../../utils/math/range";
+import {NumericRange} from "../../utils/math/numeric-range";
 import {Color} from "../../utils/color/color";
 import {setStyle} from "../../utils/dom/style/set-style";
 import {getVisibleCenterYPosition} from "../../utils/dom/position/vertical/get-visible-center-y-position";
@@ -97,8 +97,8 @@ class VerticalBatchHighContrastProperty {
     }
   }
 
-  private getBackgroundHeightRanges_(): Map<Range, HTMLElement> {
-    const windowRange = new Range(0, window.innerHeight);
+  private getBackgroundHeightRanges_(): Map<NumericRange, HTMLElement> {
+    const windowRange = new NumericRange(0, window.innerHeight);
     return this.backgrounds_
       .reduce(
         (mapping, background) => {
@@ -113,7 +113,7 @@ class VerticalBatchHighContrastProperty {
   }
 
   private getTargetYPositions_(): ArrayMap<number, ITarget> {
-    const windowRange = new Range(0, window.innerHeight);
+    const windowRange = new NumericRange(0, window.innerHeight);
     return this.targets_
       .reduce(
         (mapping, target) => {

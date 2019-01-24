@@ -2,12 +2,10 @@ import {DistanceFunction} from "./distance-function";
 import {IScrollEffectOptions} from "./types/scroll-effect-options";
 import {renderLoop} from "../../utils/render-loop";
 import {ArrayMap} from "../../utils/map/array";
-import {Range} from "../../utils/math/range";
+import {NumericRange} from "../../utils/math/numeric-range";
 import {IEffect} from "./effects/ieffect";
 import {removeFirstInstance} from "../../utils/array/remove-first-instance";
-
-// Type definition
-type GetDistanceFn = (a: HTMLElement, b?: HTMLElement) => number;
+import {GetDistanceFn} from "./types/get-distance-fn";
 
 const defaultOptions: IScrollEffectOptions =
   {
@@ -20,10 +18,10 @@ const defaultOptions: IScrollEffectOptions =
 const ActiveEffects: ArrayMap<IEffect, ScrollEffect> = new ArrayMap();
 
 class ScrollEffect {
-  private target_: HTMLElement;
-  private getDistanceFunction_: GetDistanceFn;
-  private distanceRange_: Range;
-  private effects_: Array<IEffect>;
+  readonly target_: HTMLElement;
+  readonly getDistanceFunction_: GetDistanceFn;
+  readonly distanceRange_: NumericRange;
+  readonly effects_: Array<IEffect>;
   private lastRunDistance_: number;
   private destroyed_: boolean;
 
@@ -38,7 +36,7 @@ class ScrollEffect {
   ) {
     this.target_ = target;
     this.getDistanceFunction_ = getDistanceFunction;
-    this.distanceRange_ = new Range(startDistance, endDistance);
+    this.distanceRange_ = new NumericRange(startDistance, endDistance);
     this.effects_ = effects;
     this.lastRunDistance_ = null;
     this.destroyed_ = false;

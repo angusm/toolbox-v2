@@ -2,6 +2,6 @@
   "extends": "../../config/base",
   "compilerOptions": {
     "module": "es6",
-    "outDir": "toolbox",
+    "outDir": "toolbox"
   }
 }
