@@ -1,8 +1,10 @@
 import {DistanceFunction} from "./distance-function";
 import {IScrollEffectOptions} from "./types/scroll-effect-options";
-import {renderLoop} from "../../utils";
-import {Range} from "../../utils";
+import {renderLoop} from "../../utils/render-loop";
+import {ArrayMap} from "../../utils/map/array";
+import {Range} from "../../utils/math/range";
 import {IEffect} from "./effects/ieffect";
+import {removeFirstInstance} from "../../utils/array/remove-first-instance";
 
 // Type definition
 type GetDistanceFn = (a: HTMLElement, b?: HTMLElement) => number;
@@ -14,6 +16,8 @@ const defaultOptions: IScrollEffectOptions =
     endDistance: Number.POSITIVE_INFINITY,
     effects: [],
   };
+
+const ActiveEffects: ArrayMap<IEffect, ScrollEffect> = new ArrayMap();
 
 class ScrollEffect {
   private target_: HTMLElement;
@@ -42,6 +46,8 @@ class ScrollEffect {
   }
 
   private init_(): void {
+    this.effects_.forEach(
+        (effect: IEffect) => ActiveEffects.get(effect).push(this));
     renderLoop.measure(() => this.runEffect_());
     renderLoop.scrollMeasure(() => this.handleScroll_());
   }
@@ -79,7 +85,15 @@ class ScrollEffect {
 
   public destroy() {
     this.destroyed_ = true;
-    this.effects_.forEach((effect) => effect.destroy());
+    this.effects_
+      .forEach(
+        (effect) => {
+            removeFirstInstance(ActiveEffects.get(effect), this);
+            if (ActiveEffects.get(effect).length === 0) {
+              ActiveEffects.delete(effect);
+              effect.destroy();
+            }
+        });
   }
 }
 
