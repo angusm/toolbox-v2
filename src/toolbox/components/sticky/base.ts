@@ -16,12 +16,14 @@ class ContainerPosition {
 class Sticky {
   readonly container_: HTMLElement;
   readonly target_: HTMLElement;
+  private destroyed_: boolean;
   private lastPosition_: Symbol;
 
   constructor (target: HTMLElement, container: HTMLElement) {
     this.container_ = container;
     this.target_ = target;
     this.lastPosition_ = null;
+    this.destroyed_ = false;
     this.init_();
   }
 
@@ -31,6 +33,10 @@ class Sticky {
   }
 
   private renderLoop_(): void {
+    if (this.destroyed_) {
+      return;
+    }
+
     renderLoop.scrollMeasure(() => this.measure_());
   }
 
@@ -46,6 +52,10 @@ class Sticky {
 
   // Split out so it can be run on initial load
   private measure_(): void {
+    if (this.destroyed_) {
+      return;
+    }
+
     renderLoop.scrollCleanup(() => this.renderLoop_());
 
     const yPosition: number = getVisibleYPosition(this.container_);
@@ -104,6 +114,10 @@ class Sticky {
 
   private unpin_(): void {
     this.target_.style.position = 'absolute';
+  }
+
+  public destroy() {
+    this.destroyed_ = true;
   }
 }
 
