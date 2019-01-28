@@ -68,15 +68,7 @@ class RenderLoop {
           (unused: symbol) => new Map<RenderFunctionID, RenderFunction>());
     this.msPerFrame_ = 33; // Default to 30fps
     this.scrolledSinceLastFrame_ = false;
-    [
-      'mousewheel',
-      'wheel',
-      'touchstart',
-      'touchmove',
-      'scroll',
-    ].forEach((e) => {
-      window.addEventListener(<string>e, () => this.runScrollLoop_());
-    });
+    window.addEventListener('scroll', () => this.runScrollLoop_());
     this.runScrollFns_();
     this.runLoop_();
   }
