@@ -9,7 +9,7 @@ import {renderLoop} from "../../../utils/render-loop";
 // header will be displayed.
 
 class RemoveTransformOnScrollDown implements IEffect {
-  private minimumScrollDistance_: number;
+  readonly minimumScrollDistance_: number;
 
   constructor(minimumScrollDistance: number = 0) {
     this.minimumScrollDistance_ = minimumScrollDistance;
