@@ -12,9 +12,9 @@ const defaultTransition: ITransition = new FadeTransition();
 const INTERACTION: symbol = Symbol('interaction');
 
 class Carousel implements ICarousel {
-  private container_: HTMLElement;
-  private factorInOpacity_: boolean;
-  private slides_: HTMLElement[];
+  readonly container_: HTMLElement;
+  readonly factorInOpacity_: boolean;
+  readonly slides_: HTMLElement[];
   private transition_: ITransition;
   private transitionTargets_: HTMLElement[];
   private interactions_: symbol[];
