@@ -1,5 +1,5 @@
-import {getDistanceBetweenCenters} from './get-distance-between-centers';
 import {min} from '../../array/min';
+import {getVisibleDistanceBetweenElementCenters} from "./get-visible-distance-between-element-centers";
 
 function getClosestToCenter(
   elements: NodeList|HTMLElement[], container: HTMLElement = null
@@ -8,7 +8,8 @@ function getClosestToCenter(
     Array.from(elements),
     (el) => {
       return Math.abs(
-        getDistanceBetweenCenters(<HTMLElement>el, container).getLength());
+        getVisibleDistanceBetweenElementCenters(<HTMLElement>el, container)
+          .getLength());
     });
 }
 
