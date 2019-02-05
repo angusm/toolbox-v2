@@ -10,12 +10,16 @@ import {toBool} from "../../utils/to-bool";
 
 const defaultTransition: ITransition = new FadeTransition();
 const INTERACTION: symbol = Symbol('interaction');
+const CssClass = Object.freeze({
+  ACTIVE_SLIDE: 'active',
+});
 
 class Carousel implements ICarousel {
+  readonly activeClass_: string;
   readonly container_: HTMLElement;
   readonly factorInOpacity_: boolean;
   readonly slides_: HTMLElement[];
-  private transition_: ITransition;
+  readonly transition_: ITransition;
   private transitionTargets_: HTMLElement[];
   private interactions_: symbol[];
 
@@ -23,13 +27,16 @@ class Carousel implements ICarousel {
     container: HTMLElement,
     slides: HTMLElement[],
     {
-      transition = defaultTransition,
+      activeCssClass = CssClass.ACTIVE_SLIDE,
       factorInOpacity = true,
+      transition = defaultTransition,
     }: {
+      activeCssClass?: string,
       transition?: ITransition,
       factorInOpacity?: boolean,
     } = {}
   ) {
+    this.activeClass_ = activeCssClass;
     this.container_ = container;
     this.factorInOpacity_ = factorInOpacity;
     this.slides_ = slides;

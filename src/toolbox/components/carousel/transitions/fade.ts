@@ -1,13 +1,11 @@
-import {ICarousel} from '../interfaces';
-import {Transition} from './base';
+import {ICarousel, ITransition} from '../interfaces';
 import {getOpacity} from '../../../utils/dom/style/get-opacity';
 import {renderLoop} from '../../../utils/render-loop';
 
-class Fade extends Transition {
-  private step_: number;
+class Fade implements ITransition {
+  readonly step_: number;
 
   constructor(step: number = 0.1) {
-    super();
     this.step_ = step;
   }
 

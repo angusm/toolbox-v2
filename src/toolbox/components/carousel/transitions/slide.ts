@@ -3,7 +3,6 @@ import {DragEnd}  from '../../draggable/events/drag-end';
 import {DragStart}  from '../../draggable/events/drag-start';
 import {Draggable}  from '../../draggable/base';
 import {FixedYConstraint}  from '../../draggable/constraints/fixed-y';
-import {Transition}  from './base';
 import {Vector2d}  from '../../../utils/math/geometry/vector-2d';
 import {cursor}  from '../../../utils/cached-vectors/cursor';
 import {eventHandler}  from '../../../utils/event/event-handler';
@@ -14,16 +13,15 @@ import {min}  from '../../../utils/iterable/min';
 import {renderLoop}  from '../../../utils/render-loop';
 import {sum}  from '../../../utils/math/sum';
 import {translate2d}  from '../../../utils/dom/position/translate-2d';
-import {ICarousel} from "../interfaces";
+import {ICarousel, ITransition} from "../interfaces";
 
 const SLIDE_INTERACTION = Symbol('Slide Interaction');
 const GESTURE_MOVEMENT_THRESHOLD = 20;
 
-class Slide extends Transition {
-  private step_: number;
+class Slide implements ITransition {
+  readonly step_: number;
 
   constructor(step: number = 50) {
-    super();
     this.step_ = step;
   }
 
