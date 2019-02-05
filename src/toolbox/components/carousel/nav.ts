@@ -12,6 +12,7 @@ class CacheKey {
 }
 
 class CarouselNav {
+  readonly activeCssClass_: string;
   private carousel_: Carousel;
   private navElement_: HTMLElement;
   private navItems_: DynamicDefaultMap<HTMLElement, HTMLElement>;
@@ -21,11 +22,14 @@ class CarouselNav {
     carousel: Carousel,
     navElement: HTMLElement,
     {
-      createNavItemFn = CarouselNav.createDefaultNavItem
+      activeCssClass = DefaultClass.ACTIVE_NAV_ITEM,
+      createNavItemFn = CarouselNav.createDefaultNavItem,
     }: {
+      activeCssClass?: string,
       createNavItemFn?: (slide: HTMLElement, carousel: Carousel) => HTMLElement,
     } = {}
   ) {
+    this.activeCssClass_ = activeCssClass;
     this.carousel_ = carousel;
     this.navElement_ = navElement;
     this.navItems_ =
@@ -62,7 +66,7 @@ class CarouselNav {
   private resetNavItemForSlide_(slide: HTMLElement): void {
     const navItem: HTMLElement = this.navItems_.get(slide);
     this.navElement_.appendChild(navItem);
-    navItem.classList.remove(DefaultClass.ACTIVE_NAV_ITEM);
+    navItem.classList.remove(this.activeCssClass_);
   }
 
   public markActiveNavItem(activeSlide: HTMLElement): void {
@@ -72,9 +76,9 @@ class CarouselNav {
           const navClassList: DOMTokenList =
             this.navItems_.get(slide).classList;
           if (slide === activeSlide) {
-            navClassList.add(DefaultClass.ACTIVE_NAV_ITEM);
+            navClassList.add(this.activeCssClass_);
           } else {
-            navClassList.remove(DefaultClass.ACTIVE_NAV_ITEM);
+            navClassList.remove(this.activeCssClass_);
           }
         });
   }
