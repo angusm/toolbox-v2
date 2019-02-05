@@ -7,7 +7,7 @@ import {Vector2d}  from '../../../utils/math/geometry/vector-2d';
 import {cursor}  from '../../../utils/cached-vectors/cursor';
 import {eventHandler}  from '../../../utils/event/event-handler';
 import {getSign}  from '../../../utils/math/get-sign';
-import {getVisibleDistanceBetweenElements}  from '../../../utils/dom/position/get-visible-distance-between-elements';
+import {getVisibleDistanceBetweenElementCenters}  from '../../../utils/dom/position/get-visible-distance-between-element-centers';
 import {max}  from '../../../utils/iterable/max';
 import {min}  from '../../../utils/iterable/min';
 import {renderLoop}  from '../../../utils/render-loop';
@@ -63,8 +63,12 @@ class Slide implements ITransition {
     } else {
       const filterFn = gestureDistance > 0 ? min : max;
       const slideDistance =
-        (slide: HTMLElement) =>
-          getVisibleDistanceBetweenElements(slide, carousel.getContainer()).x;
+        (slide: HTMLElement) => {
+          const distance =
+            getVisibleDistanceBetweenElementCenters(
+              slide, carousel.getContainer());
+          return distance.x;
+        };
       carousel.transitionToSlide(
         filterFn(carousel.getVisibleSlides(), slideDistance));
     }
@@ -81,7 +85,8 @@ class Slide implements ITransition {
     renderLoop.measure(() => {
       const translation =
         Slide
-          .getTransitionTranslation_(target, carousel, Number.POSITIVE_INFINITY);
+          .getTransitionTranslation_(
+            target, carousel, Number.POSITIVE_INFINITY);
       Slide.transition_(target, carousel, translation);
     });
   }
@@ -89,8 +94,9 @@ class Slide implements ITransition {
   private static getTransitionTranslation_(
     target: HTMLElement, carousel: ICarousel, step: number
   ): Vector2d {
-    const xDistance =
-      -getVisibleDistanceBetweenElements(target, carousel.getContainer()).x;
+    const distance =
+      getVisibleDistanceBetweenElementCenters(target, carousel.getContainer());
+    const xDistance = -distance.x;
     const translateX = Math.min(step, Math.abs(xDistance)) * getSign(xDistance);
     return new Vector2d(translateX, 0);
   }
@@ -146,7 +152,7 @@ class Slide implements ITransition {
     translation: Vector2d
   ): void {
     const currentOffset =
-      getVisibleDistanceBetweenElements(slideToTransition, activeSlide);
+      getVisibleDistanceBetweenElementCenters(slideToTransition, activeSlide);
     const desiredDistance =
       -Slide.sumSlideWidths(slideToTransition, ...previousSlides);
     const desiredOffset = new Vector2d(desiredDistance, 0);
@@ -162,7 +168,7 @@ class Slide implements ITransition {
     translation: Vector2d
   ): void {
     const currentOffset =
-      getVisibleDistanceBetweenElements(slideToTransition, activeSlide);
+      getVisibleDistanceBetweenElementCenters(slideToTransition, activeSlide);
     const desiredDistance =
       Slide.sumSlideWidths(activeSlide, ...previousSlides);
     const desiredOffset = new Vector2d(desiredDistance, 0);
@@ -191,7 +197,8 @@ class Slide implements ITransition {
     carousel: ICarousel, activeSlide: HTMLElement, direction: number
   ): HTMLElement[] {
     const slides: HTMLElement[] = carousel.getSlides();
-    const length: number = Slide.getLengthOfHalfOfCarousel_(carousel, direction);
+    const length: number =
+      Slide.getLengthOfHalfOfCarousel_(carousel, direction);
     let indexToAdd: number = carousel.getSlideIndex(activeSlide);
     const result: HTMLElement[] = [];
     while (result.length < length) {
