@@ -7,6 +7,8 @@ import {isVisible} from '../../utils/dom/position/is-visible';
 import {removeFirstInstance} from '../../utils/array/remove-first-instance';
 import {renderLoop} from '../../utils/render-loop';
 import {toBool} from "../../utils/to-bool";
+import {addClassIfMissing} from "../../utils/dom/class/add-class-if-missing";
+import {removeClassIfPresent} from "../../utils/dom/class/remove-class-if-present";
 
 const defaultTransition: ITransition = new FadeTransition();
 const INTERACTION: symbol = Symbol('interaction');
@@ -83,11 +85,19 @@ class Carousel implements ICarousel {
 
   private render_(): void {
     renderLoop.measure(() => {
+      renderLoop.cleanup(() => this.render_());
       this.removeCurrentlyActiveTransitionTargets_();
       if (this.getNextTransitionTarget_()) {
         this.transition_.transition(this.getNextTransitionTarget_(), this);
       }
-      renderLoop.mutate(() => this.render_());
+      const activeSlide = this.getActiveSlide();
+      const inactiveSlides =
+        this.getSlides().filter((slide) => slide !== activeSlide);
+      renderLoop.mutate(() => {
+        addClassIfMissing(activeSlide, this.activeClass_);
+        inactiveSlides
+          .forEach((slide) => removeClassIfPresent(slide, this.activeClass_));
+      });
     });
   }
 
