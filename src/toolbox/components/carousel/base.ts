@@ -166,10 +166,10 @@ class Carousel implements ICarousel {
 
   public transitionSlidesBy(value: number): void {
     const nextIndex = this.getSlides().indexOf(this.getActiveSlide()) + value;
-    this.transitionToIndex_(nextIndex);
+    this.transitionToIndex(nextIndex);
   }
 
-  private transitionToIndex_(index: number): void {
+  public transitionToIndex(index: number): void {
     const clampedIndex = index % this.getSlides().length;
     this.transitionToSlide(this.getSlides()[clampedIndex]);
   }
