@@ -3,7 +3,7 @@ import {EventType} from './event-type';
 const eventGroups: Map<symbol, symbol[]> = new Map([
   [
     EventType.INTERACT,
-    [EventType.CLICK, EventType.ENTER_KEYPRESS, EventType.TOUCH]],
+    [EventType.CLICK, EventType.TOUCH]],
   [
     EventType.CURSOR_DOWN,
     [EventType.MOUSEDOWN, EventType.TOUCHSTART]],

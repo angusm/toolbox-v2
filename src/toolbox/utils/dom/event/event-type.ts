@@ -1,5 +1,4 @@
 class EventType {
-  public static ENTER_KEYPRESS: symbol = Symbol('enter keypress');
   public static INTERACT: symbol = Symbol('interact');
   public static TOUCH: symbol = Symbol('touch');
   public static CURSOR_DOWN: symbol = Symbol('cursor down');
