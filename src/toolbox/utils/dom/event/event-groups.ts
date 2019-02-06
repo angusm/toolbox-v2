@@ -6,13 +6,13 @@ const eventGroups: Map<symbol, symbol[]> = new Map([
     [EventType.CLICK, EventType.ENTER_KEYPRESS, EventType.TOUCH]],
   [
     EventType.CURSOR_DOWN,
-    [EventType.MOUSE_DOWN, EventType.TOUCH_START]],
+    [EventType.MOUSEDOWN, EventType.TOUCHSTART]],
   [
     EventType.CURSOR_MOVE,
-    [EventType.MOUSE_MOVE, EventType.TOUCH_MOVE]],
+    [EventType.MOUSEMOVE, EventType.TOUCHMOVE]],
   [
     EventType.CURSOR_UP,
-    [EventType.MOUSE_UP, EventType.TOUCH_END]],
+    [EventType.MOUSEUP, EventType.TOUCHEND]],
 ]);
 
 export {eventGroups};
