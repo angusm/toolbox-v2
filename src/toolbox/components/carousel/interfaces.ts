@@ -7,7 +7,6 @@ interface ITransition {
 
 interface ICarousel {
   transitionToSlide(targetSlide: HTMLElement): void;
-  transitionToSlideImmediately(targetSlide: HTMLElement): void;
   isTransitioning(): boolean;
   isBeingInteractedWith(interaction: symbol): boolean;
   isIdle(): boolean;

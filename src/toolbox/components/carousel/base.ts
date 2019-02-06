@@ -1,15 +1,11 @@
 import {Fade as FadeTransition} from './transitions/fade';
 import {ICarousel, ITransition} from './interfaces';
-import {getMostVisibleElement} from '../../utils/dom/position/get-most-visible-element';
-import {getVisibleArea} from '../../utils/dom/position/get-visible-area';
-import {isFullyVisible} from '../../utils/dom/position/is-fully-visible';
 import {isVisible} from '../../utils/dom/position/is-visible';
 import {removeFirstInstance} from '../../utils/array/remove-first-instance';
 import {renderLoop} from '../../utils/render-loop';
 import {toBool} from "../../utils/to-bool";
 import {addClassIfMissing} from "../../utils/dom/class/add-class-if-missing";
 import {removeClassIfPresent} from "../../utils/dom/class/remove-class-if-present";
-import HTML = Mocha.reporters.HTML;
 
 const defaultTransition: ITransition = new FadeTransition();
 const INTERACTION: symbol = Symbol('interaction');
@@ -22,7 +18,7 @@ class Carousel implements ICarousel {
   readonly container_: HTMLElement;
   readonly slides_: HTMLElement[];
   readonly transition_: ITransition;
-  private transitionTargets_: HTMLElement[];
+  private transitionTarget_: HTMLElement;
   private interactions_: symbol[];
 
   constructor(
@@ -40,26 +36,21 @@ class Carousel implements ICarousel {
     this.container_ = container;
     this.slides_ = slides;
     this.transition_ = transition;
-    this.transitionTargets_ = [];
+    this.transitionTarget_ = null;
     this.interactions_ = [];
 
     this.init_();
   }
 
-  private clearTransitionTargets_(): void {
-    this.transitionTargets_ = [];
+  private clearTransitionTarget_(): void {
+    this.transitionTarget_ = null;
   }
 
   public transitionToSlide(targetSlide: HTMLElement): void {
     if (this.isBeingInteractedWith()) {
       return;
     }
-    this.transitionTargets_ = [...this.transitionTargets_, targetSlide];
-  }
-
-  public transitionToSlideImmediately(targetSlide: HTMLElement): void {
-    this.clearTransitionTargets_();
-    this.transitionToSlide(targetSlide);
+    this.transitionTarget_ = targetSlide;
   }
 
   private init_(): void {
@@ -68,7 +59,7 @@ class Carousel implements ICarousel {
   }
 
   public isTransitioning(): boolean {
-    return this.transitionTargets_.length > 0;
+    return this.transitionTarget_ !== null;
   }
 
   public isBeingInteractedWith(interaction: symbol = null): boolean {
@@ -83,9 +74,9 @@ class Carousel implements ICarousel {
   private render_(): void {
     renderLoop.measure(() => {
       renderLoop.cleanup(() => this.render_());
-      this.removeCurrentlyActiveTransitionTargets_();
-      if (this.getNextTransitionTarget_()) {
-        this.transition_.transition(this.getNextTransitionTarget_(), this);
+      this.clearCompletedTransitionTarget_();
+      if (this.transitionTarget_) {
+        this.transition_.transition(this.transitionTarget_, this);
       }
       const activeSlide = this.getActiveSlide();
       const inactiveSlides =
@@ -136,16 +127,9 @@ class Carousel implements ICarousel {
     return this.getSlides().slice(this.getSlides().indexOf(slide) + 1);
   }
 
-  private getNextTransitionTarget_(): HTMLElement {
-    return this.transitionTargets_[0];
-  }
-
-  private removeCurrentlyActiveTransitionTargets_(): void {
-    while (
-      this.getNextTransitionTarget_() &&
-      this.transition_.hasTransitionedTo(this.getNextTransitionTarget_(), this)
-    ) {
-      this.transitionTargets_ = this.transitionTargets_.slice(1);
+  private clearCompletedTransitionTarget_(): void {
+    if (this.transition_.hasTransitionedTo(this.transitionTarget_, this)) {
+      this.transitionTarget_ = null;
     }
   }
 
@@ -158,7 +142,7 @@ class Carousel implements ICarousel {
   }
 
   public startInteraction(interaction: symbol = INTERACTION): void {
-    this.clearTransitionTargets_();
+    this.clearTransitionTarget_();
     this.interactions_.push(interaction);
   }
 
@@ -168,7 +152,7 @@ class Carousel implements ICarousel {
 
   private getCurrentTransitionTarget_(): HTMLElement {
     return this.isTransitioning() ?
-      this.transitionTargets_.slice(-1)[0] :
+      this.transitionTarget_ :
       this.getActiveSlide();
   }
 
