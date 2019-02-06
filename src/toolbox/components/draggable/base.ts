@@ -11,7 +11,7 @@ import {translate2d} from '../../utils/dom/position/translate-2d';
 import {Vector2d} from "../../utils/math/geometry/vector-2d";
 
 class Draggable implements IDraggable {
-  private element_: HTMLElement;
+  readonly element_: HTMLElement;
   private interacting_: boolean;
   private constraints_: IConstraint[];
 
