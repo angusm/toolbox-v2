@@ -8,17 +8,33 @@ import {cursor}  from '../../../utils/cached-vectors/cursor';
 import {eventHandler}  from '../../../utils/event/event-handler';
 import {getSign}  from '../../../utils/math/get-sign';
 import {getVisibleDistanceBetweenElementCenters}  from '../../../utils/dom/position/get-visible-distance-between-element-centers';
-import {max}  from '../../../utils/iterable/max';
-import {min}  from '../../../utils/iterable/min';
 import {renderLoop}  from '../../../utils/render-loop';
 import {sum}  from '../../../utils/math/sum';
 import {translate2d}  from '../../../utils/dom/position/translate-2d';
 import {ICarousel, ITransition} from "../interfaces";
 import {getClosestToCenter} from "../../../utils/dom/position/get-closest-to-center";
-import HTML = Mocha.reporters.HTML;
+import {min} from "../../../utils/array/min";
 
 const SLIDE_INTERACTION = Symbol('Slide Interaction');
 const GESTURE_MOVEMENT_THRESHOLD = 20;
+
+class SlideDistancePair {
+  readonly slide_: HTMLElement;
+  readonly distance_: number;
+
+  constructor(slide: HTMLElement, distance: number) {
+    this.slide_ = slide;
+    this.distance_ = distance;
+  }
+
+  getSlide() {
+    return this.slide_;
+  }
+
+  getDistance() {
+    return this.distance_;
+  }
+}
 
 class Slide implements ITransition {
   readonly step_: number;
@@ -65,15 +81,17 @@ class Slide implements ITransition {
     } else {
       const candidateSlides =
         carousel.getSlides()
-          .filter((slide) => {
+          .map((slide) => {
             const distance =
               getVisibleDistanceBetweenElementCenters(
                 slide, carousel.getContainer());
-            return getSign(distance.x) === getSign(gestureDistance);
-          });
-      carousel.transitionToSlide(
-        <HTMLElement>getClosestToCenter(
-          candidateSlides, carousel.getContainer()));
+            return new SlideDistancePair(slide, distance.x);
+          })
+          .filter(
+            (pair) => getSign(pair.getDistance()) === getSign(gestureDistance));
+      const pairToTransitionTo =
+        min(candidateSlides, (pair) => Math.abs(pair.getDistance()));
+      carousel.transitionToSlide(pairToTransitionTo.getSlide());
     }
   }
 

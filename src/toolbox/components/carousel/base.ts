@@ -9,6 +9,7 @@ import {renderLoop} from '../../utils/render-loop';
 import {toBool} from "../../utils/to-bool";
 import {addClassIfMissing} from "../../utils/dom/class/add-class-if-missing";
 import {removeClassIfPresent} from "../../utils/dom/class/remove-class-if-present";
+import HTML = Mocha.reporters.HTML;
 
 const defaultTransition: ITransition = new FadeTransition();
 const INTERACTION: symbol = Symbol('interaction');
@@ -165,8 +166,15 @@ class Carousel implements ICarousel {
     this.interactions_ = removeFirstInstance(this.interactions_, interaction);
   }
 
+  private getCurrentTransitionTarget_(): HTMLElement {
+    return this.isTransitioning() ?
+      this.transitionTargets_.slice(-1)[0] :
+      this.getActiveSlide();
+  }
+
   public transitionSlidesBy(value: number): void {
-    const nextIndex = this.getSlides().indexOf(this.getActiveSlide()) + value;
+    const nextIndex =
+      this.getSlides().indexOf(this.getCurrentTransitionTarget_()) + value;
     this.transitionToIndex(nextIndex);
   }
 
