@@ -67,7 +67,7 @@ class Slide implements ITransition {
           const distance =
             getVisibleDistanceBetweenElementCenters(
               slide, carousel.getContainer());
-          return distance.x;
+          return -distance.x;
         };
       carousel.transitionToSlide(
         filterFn(carousel.getVisibleSlides(), slideDistance));
