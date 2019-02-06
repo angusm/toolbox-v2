@@ -222,6 +222,12 @@ class Slide implements ITransition {
     return <HTMLElement>getClosestToCenter(
       carousel.getSlides(), carousel.getContainer());
   }
+
+  public hasTransitionedTo(slide: HTMLElement, carousel: ICarousel): boolean {
+    const distance =
+      getVisibleDistanceBetweenElementCenters(slide, carousel.getContainer());
+    return distance.x === 0
+  }
 }
 
 export {Slide};

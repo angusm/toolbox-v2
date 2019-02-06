@@ -2,6 +2,7 @@ import {ICarousel, ITransition} from '../interfaces';
 import {getOpacity} from '../../../utils/dom/style/get-opacity';
 import {renderLoop} from '../../../utils/render-loop';
 import {getMostVisibleElement} from "../../../utils/dom/position/get-most-visible-element";
+import {getVisibleDistanceBetweenElementCenters} from "../../../utils/dom/position/get-visible-distance-between-element-centers";
 
 class Fade implements ITransition {
   readonly step_: number;
@@ -36,6 +37,10 @@ class Fade implements ITransition {
           () => slide.style.opacity = '' + Math.max(0, opacity));
       });
     });
+  }
+
+  public hasTransitionedTo(slide: HTMLElement, carousel: ICarousel): boolean {
+    return slide.style.opacity === '1';
   }
 }
 

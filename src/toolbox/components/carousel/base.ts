@@ -142,7 +142,7 @@ class Carousel implements ICarousel {
   private removeCurrentlyActiveTransitionTargets_(): void {
     while (
       this.getNextTransitionTarget_() &&
-      this.getActiveSlide() === this.getNextTransitionTarget_()
+      this.transition_.hasTransitionedTo(this.getNextTransitionTarget_(), this)
     ) {
       this.transitionTargets_ = this.transitionTargets_.slice(1);
     }
