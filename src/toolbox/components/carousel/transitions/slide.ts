@@ -15,6 +15,7 @@ import {sum}  from '../../../utils/math/sum';
 import {translate2d}  from '../../../utils/dom/position/translate-2d';
 import {ICarousel, ITransition} from "../interfaces";
 import {getClosestToCenter} from "../../../utils/dom/position/get-closest-to-center";
+import HTML = Mocha.reporters.HTML;
 
 const SLIDE_INTERACTION = Symbol('Slide Interaction');
 const GESTURE_MOVEMENT_THRESHOLD = 20;
@@ -62,16 +63,17 @@ class Slide implements ITransition {
     if (Math.abs(gestureDistance) < GESTURE_MOVEMENT_THRESHOLD) {
       carousel.transitionToSlide(carousel.getActiveSlide());
     } else {
-      const filterFn = gestureDistance > 0 ? min : max;
-      const slideDistance =
-        (slide: HTMLElement) => {
-          const distance =
-            getVisibleDistanceBetweenElementCenters(
-              slide, carousel.getContainer());
-          return -distance.x;
-        };
+      const candidateSlides =
+        carousel.getSlides()
+          .filter((slide) => {
+            const distance =
+              getVisibleDistanceBetweenElementCenters(
+                slide, carousel.getContainer());
+            return getSign(distance.x) === getSign(gestureDistance);
+          });
       carousel.transitionToSlide(
-        filterFn(carousel.getVisibleSlides(), slideDistance));
+        <HTMLElement>getClosestToCenter(
+          candidateSlides, carousel.getContainer()));
     }
   }
 
