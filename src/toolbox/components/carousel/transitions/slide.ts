@@ -89,9 +89,15 @@ class Slide implements ITransition {
           })
           .filter(
             (pair) => getSign(pair.getDistance()) === getSign(gestureDistance));
-      const pairToTransitionTo =
-        min(candidateSlides, (pair) => Math.abs(pair.getDistance()));
-      carousel.transitionToSlide(pairToTransitionTo.getSlide());
+      if (candidateSlides.length > 0) {
+        const pairToTransitionTo =
+          min(candidateSlides, (pair) => Math.abs(pair.getDistance()));
+        carousel.transitionToSlide(pairToTransitionTo.getSlide());
+      } else {
+        carousel.transitionToSlide(
+          <HTMLElement>getClosestToCenter(
+            carousel.getSlides(), carousel.getContainer()));
+      }
     }
   }
 
