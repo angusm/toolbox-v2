@@ -14,6 +14,7 @@ import {renderLoop}  from '../../../utils/render-loop';
 import {sum}  from '../../../utils/math/sum';
 import {translate2d}  from '../../../utils/dom/position/translate-2d';
 import {ICarousel, ITransition} from "../interfaces";
+import {getClosestToCenter} from "../../../utils/dom/position/get-closest-to-center";
 
 const SLIDE_INTERACTION = Symbol('Slide Interaction');
 const GESTURE_MOVEMENT_THRESHOLD = 20;
@@ -215,6 +216,11 @@ class Slide implements ITransition {
     // to split along the carousel, it will always be on the right, the typical
     // direction of travel.
     return Math.floor((carousel.getSlides().length + direction / 2) / 2);
+  }
+
+  public getActiveSlide(carousel: ICarousel): HTMLElement {
+    return <HTMLElement>getClosestToCenter(
+      carousel.getSlides(), carousel.getContainer());
   }
 }
 

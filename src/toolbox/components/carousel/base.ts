@@ -19,7 +19,6 @@ const CssClass = Object.freeze({
 class Carousel implements ICarousel {
   readonly activeClass_: string;
   readonly container_: HTMLElement;
-  readonly factorInOpacity_: boolean;
   readonly slides_: HTMLElement[];
   readonly transition_: ITransition;
   private transitionTargets_: HTMLElement[];
@@ -30,17 +29,14 @@ class Carousel implements ICarousel {
     slides: HTMLElement[],
     {
       activeCssClass = CssClass.ACTIVE_SLIDE,
-      factorInOpacity = true,
       transition = defaultTransition,
     }: {
       activeCssClass?: string,
       transition?: ITransition,
-      factorInOpacity?: boolean,
     } = {}
   ) {
     this.activeClass_ = activeCssClass;
     this.container_ = container;
-    this.factorInOpacity_ = factorInOpacity;
     this.slides_ = slides;
     this.transition_ = transition;
     this.transitionTargets_ = [];
@@ -102,8 +98,7 @@ class Carousel implements ICarousel {
   }
 
   public getActiveSlide(): HTMLElement {
-    return getMostVisibleElement(
-      this.slides_, this.container_, this.factorInOpacity_);
+    return this.transition_.getActiveSlide(this);
   }
 
   public getActiveSlideIndex(): number {
@@ -117,17 +112,6 @@ class Carousel implements ICarousel {
   public getSlidesBetween(a: HTMLElement, b: HTMLElement): HTMLElement[] {
     return this.getSlides()
       .slice(this.getSlideIndex(a) + 1, this.getSlideIndex(b));
-  }
-
-  public isSlideFullyVisible_(slide: HTMLElement): boolean {
-    const otherSlides =
-      this.getSlides().filter((otherSlide) => otherSlide !== slide);
-    return isFullyVisible(slide, this.container_, this.factorInOpacity_) &&
-      otherSlides.every(
-        (otherSlide) => {
-          return !getVisibleArea(
-            otherSlide, this.container_, this.factorInOpacity_);
-        });
   }
 
   public getContainer(): HTMLElement {
@@ -158,7 +142,7 @@ class Carousel implements ICarousel {
   private removeCurrentlyActiveTransitionTargets_(): void {
     while (
       this.getNextTransitionTarget_() &&
-      this.isSlideFullyVisible_(this.getNextTransitionTarget_())
+      this.getActiveSlide() === this.getNextTransitionTarget_()
     ) {
       this.transitionTargets_ = this.transitionTargets_.slice(1);
     }

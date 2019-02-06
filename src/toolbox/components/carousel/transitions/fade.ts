@@ -1,15 +1,16 @@
 import {ICarousel, ITransition} from '../interfaces';
 import {getOpacity} from '../../../utils/dom/style/get-opacity';
 import {renderLoop} from '../../../utils/render-loop';
+import {getMostVisibleElement} from "../../../utils/dom/position/get-most-visible-element";
 
 class Fade implements ITransition {
   readonly step_: number;
 
-  constructor(step: number = 0.1) {
+  constructor(step = 0.1) {
     this.step_ = step;
   }
 
-  init(targetSlide: HTMLElement, carousel: ICarousel) {
+  public init(targetSlide: HTMLElement, carousel: ICarousel) {
     renderLoop.mutate(() => {
       carousel.getSlides()
         .forEach((slide: HTMLElement) => slide.style.opacity = '0');
@@ -17,7 +18,12 @@ class Fade implements ITransition {
     });
   }
 
-  transition(targetSlide: HTMLElement, carousel: ICarousel) {
+  public getActiveSlide(carousel: ICarousel): HTMLElement {
+    return getMostVisibleElement(
+      carousel.getSlides(), carousel.getContainer(), true);
+  }
+
+  public transition(targetSlide: HTMLElement, carousel: ICarousel) {
     const slidesToFade =
       carousel.getSlides().filter((slide) => slide !== targetSlide);
     renderLoop.measure(() => {

@@ -1,6 +1,7 @@
 interface ITransition {
   transition(targetSlide: Element, carousel: ICarousel): void;
   init(initialSlide: Element, carousel: ICarousel): void;
+  getActiveSlide(carousel: ICarousel): HTMLElement;
 }
 
 interface ICarousel {
@@ -13,7 +14,6 @@ interface ICarousel {
   getActiveSlideIndex(): number;
   getSlideIndex(slide: HTMLElement): number;
   getSlidesBetween(a: HTMLElement, b: HTMLElement): HTMLElement[];
-  isSlideFullyVisible_(slide: HTMLElement): boolean;
   getContainer(): HTMLElement;
   getSlides(): HTMLElement[];
   getVisibleSlides(): HTMLElement[];
