@@ -35,11 +35,14 @@ class VideoScrub implements IEffect {
   private updateVideo_(video: HTMLMediaElement, distanceAsPercent: number) {
     this.clearDelayedUpdate_(video);
     if (isVideoReady(video)) {
-      renderLoop.mutate(() => {
-        video.pause();
-        video.currentTime =
-          Math.round(video.duration * distanceAsPercent * 100) / 100;
-      })
+      renderLoop
+        .mutate(
+          () => {
+            video.pause();
+            video.currentTime =
+              Math.round(video.duration * distanceAsPercent * 100) / 100;
+          }
+        );
     } else {
       const delayedUpdateFn =
         () => this.updateVideo_(video, distanceAsPercent);
