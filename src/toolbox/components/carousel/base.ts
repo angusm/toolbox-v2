@@ -74,10 +74,9 @@ class Carousel implements ICarousel {
   private render_(): void {
     renderLoop.measure(() => {
       renderLoop.cleanup(() => this.render_());
-      this.clearCompletedTransitionTarget_();
-      if (this.transitionTarget_) {
-        this.transition_.transition(this.transitionTarget_, this);
-      }
+
+      this.handleTransition_();
+
       const activeSlide = this.getActiveSlide();
       const inactiveSlides =
         this.getSlides().filter((slide) => slide !== activeSlide);
@@ -87,6 +86,16 @@ class Carousel implements ICarousel {
           .forEach((slide) => removeClassIfPresent(slide, this.activeClass_));
       });
     });
+  }
+
+  private handleTransition_() {
+    if (this.isTransitioning()) {
+      if (this.transition_.hasTransitionedTo(this.transitionTarget_, this)) {
+        this.transitionTarget_ = null;
+      } else {
+        this.transition_.transition(this.transitionTarget_, this);
+      }
+    }
   }
 
   public getActiveSlide(): HTMLElement {
@@ -125,15 +134,6 @@ class Carousel implements ICarousel {
 
   public getSlidesAfter(slide: HTMLElement): HTMLElement[] {
     return this.getSlides().slice(this.getSlides().indexOf(slide) + 1);
-  }
-
-  private clearCompletedTransitionTarget_(): void {
-    if (
-      this.isTransitioning() &&
-      this.transition_.hasTransitionedTo(this.transitionTarget_, this)
-    ) {
-      this.transitionTarget_ = null;
-    }
   }
 
   public next(): void {

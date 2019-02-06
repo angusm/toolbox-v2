@@ -39,7 +39,7 @@ class Fade implements ITransition {
   }
 
   public hasTransitionedTo(slide: HTMLElement, carousel: ICarousel): boolean {
-    return slide.style.opacity === '1';
+    return slide === null || slide.style.opacity === '1';
   }
 }
 
