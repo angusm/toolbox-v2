@@ -1,6 +1,4 @@
-import {Matrix} from "../../../utils/dom/position/matrix";
 import {renderLoop} from "../../../utils/render-loop";
-import {Vector2d} from "../../../utils/math/geometry/vector-2d";
 import {IEffect} from "./ieffect";
 import {setStyle} from "../../../utils/dom/style/set-style";
 import {percentToIndex} from "../../../utils/array/percent-to-index";
