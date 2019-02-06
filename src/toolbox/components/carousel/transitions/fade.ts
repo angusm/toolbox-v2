@@ -2,7 +2,6 @@ import {ICarousel, ITransition} from '../interfaces';
 import {getOpacity} from '../../../utils/dom/style/get-opacity';
 import {renderLoop} from '../../../utils/render-loop';
 import {getMostVisibleElement} from "../../../utils/dom/position/get-most-visible-element";
-import {getVisibleDistanceBetweenElementCenters} from "../../../utils/dom/position/get-visible-distance-between-element-centers";
 
 class Fade implements ITransition {
   readonly step_: number;

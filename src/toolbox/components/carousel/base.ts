@@ -128,7 +128,10 @@ class Carousel implements ICarousel {
   }
 
   private clearCompletedTransitionTarget_(): void {
-    if (this.transition_.hasTransitionedTo(this.transitionTarget_, this)) {
+    if (
+      this.isTransitioning() &&
+      this.transition_.hasTransitionedTo(this.transitionTarget_, this)
+    ) {
       this.transitionTarget_ = null;
     }
   }
