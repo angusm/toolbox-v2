@@ -35,6 +35,8 @@ class Draggable implements IDraggable {
       this.element_, EventType.CURSOR_DOWN, () => this.startInteraction_());
     addDomEventListener(
       window, EventType.CURSOR_UP, () => this.endInteraction_());
+    addDomEventListener(
+      window, EventType.MOUSEOUT, () => this.endInteraction_());
   }
 
   private startInteraction_(): void {
