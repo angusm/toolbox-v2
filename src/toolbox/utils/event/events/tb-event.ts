@@ -2,7 +2,7 @@ import {noop} from "../../noop";
 import {IEvent} from "../interfaces/tb-event";
 
 class TbEvent implements IEvent{
-  private target_: any;
+  readonly target_: any;
 
   constructor(target: any) {
     this.target_ = target;

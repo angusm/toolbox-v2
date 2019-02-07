@@ -7,8 +7,8 @@ import {frame} from '../frame';
 import {renderLoop} from '../render-loop';
 
 const ZERO_VECTOR: Vector2d = new Vector2d();
-const GESTURE_LIMIT: number = 30;
-const POSITION_LIMIT: number = GESTURE_LIMIT;
+const GESTURE_TIME_LIMIT: number = 1000; // Time limit in ms
+const POSITION_LIMIT: number = 100;
 
 interface ICursorEvent {
   clientX: number;
@@ -20,14 +20,16 @@ interface ICursorEvent {
 }
 
 class CursorPosition {
-  private position: Vector2d;
-  private pressed: boolean;
-  private frame: number;
+  readonly position_: Vector2d;
+  readonly pressed_: boolean;
+  readonly frame_: number;
+  readonly time_: Date;
 
   constructor(position: Vector2d, pressed: boolean) {
-    this.position = position;
-    this.pressed = pressed;
-    this.frame = frame.getFrame();
+    this.position_ = position;
+    this.pressed_ = pressed;
+    this.frame_ = frame.getFrame();
+    this.time_ = new Date();
   }
 
   static fromXY(x: number, y: number, pressed: boolean): CursorPosition {
@@ -35,7 +37,7 @@ class CursorPosition {
   }
 
   getFrame(): number {
-    return this.frame;
+    return this.frame_;
   }
 
   isForFrame(...frames: number[]): boolean {
@@ -43,17 +45,21 @@ class CursorPosition {
   }
 
   isPressed(): boolean {
-    return this.pressed;
+    return this.pressed_;
   }
 
   getPosition(): Vector2d {
-    return this.position;
+    return this.position_;
+  }
+
+  getTime(): Date {
+    return this.time_;
   }
 }
 
 const ZERO_POSITION: CursorPosition = new CursorPosition(ZERO_VECTOR, false);
 class CursorData {
-  private positions: CursorPosition[];
+  readonly positions: CursorPosition[];
 
   constructor(
     currentPosition: CursorPosition = ZERO_POSITION,
@@ -126,16 +132,38 @@ class CursorData {
       ...this.getPressedGesturePositions_());
   }
 
+  public getPressedGestureVelocity(): Vector2d {
+    const positions = this.getPressedGesturePositions_();
+    const delta = this.getPressedGestureDelta();
+    const gestureTimeInMilliseconds =
+      positions.slice(-1)[0].getTime().valueOf() -
+      positions[0].getTime().valueOf();
+    const gestureTimeInSeconds = gestureTimeInMilliseconds / 1000;
+
+    return delta.scale(1/gestureTimeInSeconds);
+  }
+
+  public getLastFrameVelocity(): Vector2d {
+    const lastFrame = this.positions.slice(-1)[0];
+    const secondLastFrame = this.positions.slice(-2)[0];
+    const frameDeltaInSeconds =
+      lastFrame.getTime().valueOf() - secondLastFrame.getTime().valueOf();
+    return CursorData.getGestureDeltaFromPositions_(...this.positions.slice(-2))
+      .scale(1/frameDeltaInSeconds);
+  }
+
   private getPressedGesturePositions_(): CursorPosition[] {
+    const currentTime: number = new Date().valueOf();
     const conditionFn =
-      (position: CursorPosition, index: number) => {
-        return index < GESTURE_LIMIT - 1 && position.isPressed();
+      (position: CursorPosition) => {
+        const timeDiff = currentTime - position.getTime().valueOf();
+        return timeDiff < GESTURE_TIME_LIMIT && position.isPressed();
       };
 
     return filterUntilFalse(this.positions, conditionFn);
   }
 
-  static getGestureDeltaFromPositions_(
+  public static getGestureDeltaFromPositions_(
     ...positions: CursorPosition[]
   ): Vector2d {
     const deltas: Vector2d[] =

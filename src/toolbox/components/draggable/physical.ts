@@ -89,12 +89,16 @@ class PhysicallyDraggable implements IDraggable {
       DragEnd,
       (event: DragEnd) => {
         this.physical2d_.enable();
-        eventHandler.dispatchEvent(new DragEnd(this));
+        eventHandler.dispatchEvent(new DragEnd(this, event.getEndVelocity()));
       });
   }
 
   public getElement() {
     return this.draggable_.getElement();
+  }
+
+  public setVelocity(velocity: Vector2d): void {
+    this.physical2d_.setVelocity(velocity);
   }
 }
 

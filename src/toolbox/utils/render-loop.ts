@@ -57,6 +57,7 @@ type RenderFunctionMap = Map<RenderFunctionID, RenderFunction>;
 class RenderLoop {
   private static singleton_: RenderLoop = null;
 
+  private lastRun_: Date;
   private msPerFrame_: number;
   private scheduledFns_: DynamicDefaultMap<symbol, RenderFunctionMap>;
   private scrolledSinceLastFrame_: boolean;
@@ -126,6 +127,7 @@ class RenderLoop {
   private runLoop_(): void {
     const nextRun = <number>new Date().valueOf() + this.msPerFrame_;
     this.runFns_();
+    this.lastRun_ = new Date();
     if (RenderLoop.getTimeUntilNextRun_(nextRun) > 2) {
       setTimeout(
         () => window.requestAnimationFrame(() => this.runLoop_()),
@@ -133,6 +135,17 @@ class RenderLoop {
     } else {
       window.requestAnimationFrame(() => this.runLoop_())
     }
+  }
+
+  /**
+   * Returns the time since the last render loop in milliseconds
+   */
+  public getElapsedMilliseconds(): number {
+    return new Date().valueOf() - this.lastRun_.valueOf();
+  }
+
+  public getElapsedSeconds(): number {
+    return this.getElapsedMilliseconds() / 1000;
   }
 
   private runScrollLoop_(): void {

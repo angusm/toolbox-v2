@@ -16,6 +16,8 @@ import {min} from "../../../utils/array/min";
 import {PhysicallyDraggable} from "../../draggable/physical";
 import {Move} from "../../physical/move-event";
 import {DraggableFixedYConstraint} from "../../draggable/constraints/fixed-y";
+import HTML = Mocha.reporters.HTML;
+import {DynamicDefaultMap} from "../../../utils/map/dynamic-default";
 
 const SLIDE_INTERACTION = Symbol('Physical Slide Interaction');
 const GESTURE_MOVEMENT_THRESHOLD = 20;
@@ -45,8 +47,20 @@ class SlideDistancePair {
 }
 
 class PhysicalSlide implements ITransition {
+  private static draggableBySlide_: Map<HTMLElement, PhysicallyDraggable> =
+    DynamicDefaultMap.usingFunction((slide) => {
+      return new PhysicallyDraggable(
+        slide,
+        {
+          physicalConstraints: [new FixedYConstraint()],
+          draggableConstraints: [new DraggableFixedYConstraint()]
+        }
+      );
+    });
+
   readonly acceleration_: number;
   readonly accelerationExponent_: number;
+  readonly draggableBySlide_: Map<HTMLElement, PhysicallyDraggable>;
   readonly maxVelocity_: number;
 
   constructor({
@@ -57,6 +71,7 @@ class PhysicalSlide implements ITransition {
     this.acceleration_ = acceleration;
     this.accelerationExponent_ = accelerationExponent;
     this.maxVelocity_ = maxVelocity;
+    this.draggableBySlide_ = new Map();
   }
 
   public init(activeSlide: HTMLElement, carousel: ICarousel): void {
@@ -87,14 +102,8 @@ class PhysicalSlide implements ITransition {
     carousel.getSlides()
       .forEach(
         (slide) => {
-          const draggable =
-            new PhysicallyDraggable(
-              slide,
-              {
-                physicalConstraints: [new FixedYConstraint()],
-                draggableConstraints: [new DraggableFixedYConstraint()],
-              }
-            );
+          const draggable = this.draggableBySlide_.get(slide);
+
           eventHandler.addListener(
             draggable,
             DragStart,
@@ -115,7 +124,7 @@ class PhysicalSlide implements ITransition {
           eventHandler.addListener(
             draggable,
             DragEnd,
-            (event: DragEnd) => PhysicalSlide.endInteraction_(carousel));
+            (event: DragEnd) => PhysicalSlide.endInteraction_(event, carousel));
         });
   }
 
@@ -123,9 +132,14 @@ class PhysicalSlide implements ITransition {
     carousel.startInteraction(SLIDE_INTERACTION);
   }
 
-  private static endInteraction_(carousel: ICarousel): void {
+  private static endInteraction_(event: DragEnd, carousel: ICarousel): void {
     carousel.endInteraction(SLIDE_INTERACTION);
-    const gestureDistance = cursor.getClient().getPressedGestureDelta().x;
+    const velocity = event.getEndVelocity();
+    const draggable =
+      this.draggableBySlide_.get(event.getTarget().getElement());
+    draggable.setVelocity(velocity);
+
+    // const gestureDistance = cursor.getClient().getPressedGestureDelta().x;
     // if (Math.abs(gestureDistance) < GESTURE_MOVEMENT_THRESHOLD) {
     //   carousel.transitionToSlide(carousel.getActiveSlide());
     // } else {

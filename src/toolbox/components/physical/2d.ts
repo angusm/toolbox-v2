@@ -5,6 +5,14 @@ import {Constraint2d} from "../../utils/math/geometry/2d-constraints/base";
 import {eventHandler} from "../../utils/event/event-handler";
 import {Move} from "./move-event";
 
+/**
+ * NOTE: Physical values are determined as such:
+ *  - velocity: px/s
+ *  - acceleration: px/s^2
+ */
+
+const MINIMUM_VELOCITY: number = 10;
+
 interface IPhysical2dConfig {
   acceleration?: Vector2d,
   accelerationExponent?: number,
@@ -94,23 +102,27 @@ class Physical2D {
       }
 
       const position = Vector2d.fromElementTransform(this.element_);
+      const elapsedTime = renderLoop.getElapsedSeconds();
       this.velocity_ =
         this.velocity_
-          .add(this.acceleration_)
+          .add(this.acceleration_.scale(elapsedTime))
           .toNthPower(this.accelerationExponent_)
           .clampLength(this.maxVelocity_);
-      if (this.velocity_.getLength() < 1) {
+      if (this.velocity_.getLength() < MINIMUM_VELOCITY) {
         this.velocity_ = new Vector2d(0, 0);
       }
 
-      eventHandler.dispatchEvent(new Move(this, this.element_, this.velocity_));
+      this.velocity_ =
+        Constraint2d.applyConstraints(this.velocity_, ...this.constraints_);
 
-      const newPosition = position.add(this.velocity_);
-      const constrainedPosition =
-        Constraint2d.applyConstraints(newPosition, ...this.constraints_);
+      const velocityToApply = this.velocity_.scale(elapsedTime);
+      const updatedPosition = position.add(velocityToApply);
+
+      eventHandler
+        .dispatchEvent(new Move(this, this.element_, velocityToApply));
 
       renderLoop.mutate(
-        () => constrainedPosition.positionElementByTranslation(this.element_));
+        () => updatedPosition.positionElementByTranslation(this.element_));
     });
   }
 }
