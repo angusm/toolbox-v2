@@ -1,6 +1,6 @@
 import {Draggable} from '../draggable/base';
-import {FixedXConstraint} from '../draggable/constraints/fixed-x';
-import {ContainerConstraint} from '../draggable/constraints/container';
+import {DraggableFixedXConstraint} from "../draggable/constraints/fixed-x";
+import {ContainerConstraint} from "../draggable/constraints/container";
 
 class HorizontalScroll {
   constructor(element: HTMLElement, container: HTMLElement) {
@@ -8,7 +8,7 @@ class HorizontalScroll {
       element,
       {
         constraints: [
-          new ContainerConstraint(container), new FixedXConstraint()]
+          new ContainerConstraint(container), new DraggableFixedXConstraint()]
       });
   }
 }

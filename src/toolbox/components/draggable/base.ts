@@ -1,4 +1,4 @@
-import {IConstraint, IDraggable} from './interfaces';
+import {IDraggableConstraint, IDraggable} from './interfaces';
 import {Drag} from './events/drag';
 import {DragEnd} from './events/drag-end';
 import {DragStart} from './events/drag-start';
@@ -13,11 +13,11 @@ import {Vector2d} from "../../utils/math/geometry/vector-2d";
 class Draggable implements IDraggable {
   readonly element_: HTMLElement;
   private interacting_: boolean;
-  private constraints_: IConstraint[];
+  private constraints_: IDraggableConstraint[];
 
   constructor(
     element: HTMLElement,
-    {constraints = []}: {constraints?: IConstraint[]} = {}
+    {constraints = []}: {constraints?: IDraggableConstraint[]} = {}
   ) {
     this.element_ = element;
     this.interacting_ = false;
@@ -76,7 +76,7 @@ class Draggable implements IDraggable {
 
   private getDelta_(): Vector2d {
     return this.constraints_.reduce(
-      (delta, constraint) => constraint.constrainDelta(this, delta),
+      (delta, constraint) => constraint.constrain(this, delta),
       cursor.getClient().getPressedFrameDelta());
   }
 

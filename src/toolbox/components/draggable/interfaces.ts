@@ -1,7 +1,7 @@
 import {Vector2d} from "../../utils/math/geometry/vector-2d";
 
-interface IConstraint {
-  constrainDelta(draggable: IDraggable, delta: Vector2d): Vector2d;
+interface IDraggableConstraint {
+  constrain(draggable: IDraggable, delta: Vector2d): Vector2d;
 }
 
 interface IDraggable {
@@ -9,6 +9,6 @@ interface IDraggable {
 }
 
 export {
-  IConstraint,
+  IDraggableConstraint,
   IDraggable,
 };

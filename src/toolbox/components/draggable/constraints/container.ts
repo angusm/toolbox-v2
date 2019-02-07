@@ -1,11 +1,11 @@
-import {Constraint} from './base';
-import {Dimensions as CachedDimensions} from '../../../utils/cached-vectors/dimensions';
-import {Dimensions2d} from '../../../utils/math/geometry/dimensions-2d';
-import {VisibleDistance as CachedVisibleDistance} from '../../../utils/cached-vectors/visible-distance';
+import {DraggableConstraint} from './base';
 import {IDraggable} from "../interfaces";
+import {Dimensions as CachedDimensions} from "../../../utils/cached-vectors/dimensions";
+import {VisibleDistance as CachedVisibleDistance} from "../../../utils/cached-vectors/visible-distance";
 import {Vector2d} from "../../../utils/math/geometry/vector-2d";
+import {Dimensions2d} from "../../../utils/math/geometry/dimensions-2d";
 
-class ContainerConstraint extends Constraint {
+class ContainerConstraint extends DraggableConstraint {
   private constrainingDimensions_: CachedDimensions;
   private container_: HTMLElement;
 
@@ -15,7 +15,7 @@ class ContainerConstraint extends Constraint {
     this.container_ = container;
   }
 
-  constrainDelta(draggable: IDraggable, delta: Vector2d) {
+  constrain(draggable: IDraggable, delta: Vector2d) {
     const draggableDimensions: Dimensions2d =
       CachedDimensions.getForElement(draggable.getElement()).getDimensions();
     const containerDimensions: Dimensions2d =

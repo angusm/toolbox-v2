@@ -1,11 +1,14 @@
-import {Constraint} from './base';
+import {DraggableConstraint} from './base';
 import {IDraggable} from "../interfaces";
-import {Vector2d} from '../../../utils/math/geometry/vector-2d';
+import {Vector2d} from "../../../utils/math/geometry/vector-2d";
+import {FixedXConstraint} from "../../../utils/math/geometry/2d-constraints/fixed-x";
 
-class FixedXConstraint extends Constraint {
-  constrainDelta(draggable: IDraggable, delta: Vector2d) {
-    return new Vector2d(0, delta.y);
+const fixedXConstraint = new FixedXConstraint();
+
+class DraggableFixedXConstraint extends DraggableConstraint {
+  constrain(draggable: IDraggable, delta: Vector2d) {
+    return fixedXConstraint.constrain(delta);
   }
 }
 
-export {FixedXConstraint};
+export {DraggableFixedXConstraint};

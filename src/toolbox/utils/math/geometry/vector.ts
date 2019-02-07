@@ -100,9 +100,33 @@ class Vector {
       sum(...this.getValues().map((value) => Math.pow(value, 2))));
   }
 
+  public setLength(value: number): this {
+    const currentLength = this.getLength();
+    const scale = value / currentLength;
+    return this.scale(scale);
+  }
+
+  public clampLength(length: number): this {
+    const currentLength = this.getLength();
+    if (currentLength > length) {
+      return this.setLength(length);
+    } else {
+      return this;
+    }
+  }
+
   public asRanges(): NumericRange[] {
     return this.getValues()
       .map((value) => new NumericRange(Math.min(0, value), Math.max(0, value)));
+  }
+
+  public static toNthPower<T extends Vector>(vector: T, power: number): T {
+    return <T> new this(
+      ...vector.getValues().map((value) => Math.pow(value, power)));
+  }
+
+  public toNthPower(power: number): this {
+    return this['constructor'].toNthPower(this, power);
   }
 }
 
