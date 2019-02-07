@@ -126,29 +126,29 @@ class PhysicalSlide implements ITransition {
   private static endInteraction_(carousel: ICarousel): void {
     carousel.endInteraction(SLIDE_INTERACTION);
     const gestureDistance = cursor.getClient().getPressedGestureDelta().x;
-    if (Math.abs(gestureDistance) < GESTURE_MOVEMENT_THRESHOLD) {
-      carousel.transitionToSlide(carousel.getActiveSlide());
-    } else {
-      const candidateSlides =
-        carousel.getSlides()
-          .map((slide) => {
-            const distance =
-              getVisibleDistanceBetweenElementCenters(
-                slide, carousel.getContainer());
-            return new SlideDistancePair(slide, distance.x);
-          })
-          .filter(
-            (pair) => getSign(pair.getDistance()) === getSign(gestureDistance));
-      if (candidateSlides.length > 0) {
-        const pairToTransitionTo =
-          min(candidateSlides, (pair) => Math.abs(pair.getDistance()));
-        carousel.transitionToSlide(pairToTransitionTo.getSlide());
-      } else {
-        carousel.transitionToSlide(
-          <HTMLElement>getClosestToCenter(
-            carousel.getSlides(), carousel.getContainer()));
-      }
-    }
+    // if (Math.abs(gestureDistance) < GESTURE_MOVEMENT_THRESHOLD) {
+    //   carousel.transitionToSlide(carousel.getActiveSlide());
+    // } else {
+    //   const candidateSlides =
+    //     carousel.getSlides()
+    //       .map((slide) => {
+    //         const distance =
+    //           getVisibleDistanceBetweenElementCenters(
+    //             slide, carousel.getContainer());
+    //         return new SlideDistancePair(slide, distance.x);
+    //       })
+    //       .filter(
+    //         (pair) => getSign(pair.getDistance()) === getSign(gestureDistance));
+    //   if (candidateSlides.length > 0) {
+    //     const pairToTransitionTo =
+    //       min(candidateSlides, (pair) => Math.abs(pair.getDistance()));
+    //     carousel.transitionToSlide(pairToTransitionTo.getSlide());
+    //   } else {
+    //     carousel.transitionToSlide(
+    //       <HTMLElement>getClosestToCenter(
+    //         carousel.getSlides(), carousel.getContainer()));
+    //   }
+    // }
   }
 
   private static handleDrag_(dragEvent: Drag, carousel: ICarousel): void {
