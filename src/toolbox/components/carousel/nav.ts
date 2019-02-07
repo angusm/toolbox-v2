@@ -2,6 +2,8 @@ import {Carousel} from './base';
 import {DynamicDefaultMap} from '../../utils/map/dynamic-default';
 import {areArrayValuesEqual} from '../../utils/array/are-array-values-equal';
 import {renderLoop} from '../../utils/render-loop';
+import {addDomEventListener} from "../../utils/dom/event/add-dom-event-listener";
+import {EventType} from "../../utils/dom/event/event-type";
 
 class DefaultClass {
   public static ACTIVE_NAV_ITEM = 'active';
@@ -87,8 +89,8 @@ class CarouselNav {
     slide: HTMLElement, carousel: Carousel
   ): HTMLElement   {
     const element = document.createElement('li');
-    element.addEventListener(
-      'click', () => carousel.transitionToSlide(slide));
+    addDomEventListener(
+      element, EventType.CLICK, () => carousel.transitionToSlide(slide));
     return element;
   }
 }
