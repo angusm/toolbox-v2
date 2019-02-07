@@ -24,6 +24,7 @@ interface ICarousel {
   startInteraction(interaction: symbol): void;
   endInteraction(interaction: symbol): void;
   transitionSlidesBy(value: number): void;
+  transitionToIndex(index: number, skipSync: boolean): void;
 }
 
 export {

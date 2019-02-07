@@ -6,6 +6,7 @@ import {renderLoop} from '../../utils/render-loop';
 import {toBool} from "../../utils/to-bool";
 import {addClassIfMissing} from "../../utils/dom/class/add-class-if-missing";
 import {removeClassIfPresent} from "../../utils/dom/class/remove-class-if-present";
+import {CarouselSyncManager} from './sync-manager';
 
 const defaultTransition: ITransition = new FadeTransition();
 const INTERACTION: symbol = Symbol('interaction');
@@ -165,7 +166,11 @@ class Carousel implements ICarousel {
     this.transitionToIndex(nextIndex);
   }
 
-  public transitionToIndex(index: number): void {
+  public transitionToIndex(index: number, skipSync: boolean = false): void {
+    if (!skipSync) {
+      CarouselSyncManager.getSingleton().transitionToIndex(this, index);
+    }
+
     const slidesLength = this.getSlides().length;
     const clampedIndex = index % slidesLength;
     const positiveIndex = (clampedIndex + slidesLength) % slidesLength;
