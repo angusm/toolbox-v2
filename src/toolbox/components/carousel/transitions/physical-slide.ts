@@ -15,16 +15,15 @@ import {getClosestToCenter} from "../../../utils/dom/position/get-closest-to-cen
 import {min} from "../../../utils/array/min";
 import {PhysicallyDraggable} from "../../draggable/physical";
 import {Move} from "../../physical/move-event";
+import {DraggableFixedYConstraint} from "../../draggable/constraints/fixed-y";
 
 const SLIDE_INTERACTION = Symbol('Physical Slide Interaction');
 const GESTURE_MOVEMENT_THRESHOLD = 20;
 
 interface IPhysicalSlideConfig {
   acceleration?: number;
-  deceleration?: number;
-  maxVelocity?: number;
-  breakExponent?: number;
   accelerationExponent?: number;
+  maxVelocity?: number;
 }
 
 class SlideDistancePair {
@@ -47,25 +46,17 @@ class SlideDistancePair {
 
 class PhysicalSlide implements ITransition {
   readonly acceleration_: number;
-  readonly deceleration_: number;
-  readonly maxVelocity_: number;
-  readonly breakExponent_: number;
   readonly accelerationExponent_: number;
-  readonly slideXVelocities_: Map<HTMLElement, number>;
+  readonly maxVelocity_: number;
 
   constructor({
     acceleration = 1,
-    deceleration = .5,
-    maxVelocity = 10,
-    breakExponent = .9,
     accelerationExponent = 1,
+    maxVelocity = 10,
   }: IPhysicalSlideConfig = {}) {
     this.acceleration_ = acceleration;
-    this.deceleration_ = deceleration;
-    this.maxVelocity_ = maxVelocity;
-    this.breakExponent_ = breakExponent;
     this.accelerationExponent_ = accelerationExponent;
-    this.slideXVelocities_ = new Map();
+    this.maxVelocity_ = maxVelocity;
   }
 
   public init(activeSlide: HTMLElement, carousel: ICarousel): void {
@@ -98,7 +89,12 @@ class PhysicalSlide implements ITransition {
         (slide) => {
           const draggable =
             new PhysicallyDraggable(
-              slide, {physicalConstraints: [new FixedYConstraint()]});
+              slide,
+              {
+                physicalConstraints: [new FixedYConstraint()],
+                draggableConstraints: [new DraggableFixedYConstraint()],
+              }
+            );
           eventHandler.addListener(
             draggable,
             DragStart,
