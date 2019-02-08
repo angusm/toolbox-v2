@@ -32,7 +32,7 @@ const defaultPhysical2dConfig = {
   maxVelocity: 6000,
 };
 
-class Physical2D {
+class Physical2d {
   readonly element_: HTMLElement;
   readonly constraints_: IConstraint2d[];
 
@@ -119,5 +119,5 @@ class Physical2D {
 
 export {
   defaultPhysical2dConfig,
-  Physical2D
+  Physical2d
 };

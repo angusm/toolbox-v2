@@ -3,7 +3,7 @@
  */
 import {IDraggable, IDraggableConstraint} from "./interfaces";
 import {Draggable} from "./base";
-import {defaultPhysical2dConfig, Physical2D} from "../physical/2d";
+import {defaultPhysical2dConfig, Physical2d} from "../physical/2d";
 import {Vector2d} from "../../utils/math/geometry/vector-2d";
 import {IConstraint2d} from "../../utils/math/geometry/2d-constraints/interface";
 import {eventHandler} from "../../utils/event/event-handler";
@@ -29,7 +29,7 @@ const defaultPhysicallyDraggableConfig: IPhysicallyDraggableConfig =
 
 class PhysicallyDraggable implements IDraggable {
   readonly draggable_: Draggable;
-  readonly physical2d_: Physical2D;
+  readonly physical2d_: Physical2d;
 
   constructor(
     target: HTMLElement,
@@ -42,7 +42,7 @@ class PhysicallyDraggable implements IDraggable {
     }: IPhysicallyDraggableConfig = {},
   ) {
     this.physical2d_ =
-      new Physical2D(
+      new Physical2d(
         target,
         {
           acceleration: acceleration,
