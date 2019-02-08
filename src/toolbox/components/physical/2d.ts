@@ -4,6 +4,7 @@ import {IConstraint2d} from "../../utils/math/geometry/2d-constraints/interface"
 import {Constraint2d} from "../../utils/math/geometry/2d-constraints/base";
 import {eventHandler} from "../../utils/event/event-handler";
 import {Move} from "./move-event";
+import {translate2d} from "../../utils/dom/position/translate-2d";
 
 /**
  * NOTE: Physical values are determined as such:
@@ -116,13 +117,13 @@ class Physical2D {
         Constraint2d.applyConstraints(this.velocity_, ...this.constraints_);
 
       const velocityToApply = this.velocity_.scale(elapsedTime);
-      const updatedPosition = position.add(velocityToApply);
 
       eventHandler
-        .dispatchEvent(new Move(this, this.element_, velocityToApply));
+        .dispatchEvent(
+          new Move(this, this.element_, velocityToApply, this.velocity_));
 
       renderLoop.mutate(
-        () => updatedPosition.positionElementByTranslation(this.element_));
+        () => translate2d(this.element_, velocityToApply));
     });
   }
 }

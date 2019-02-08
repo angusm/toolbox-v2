@@ -81,9 +81,13 @@ class PhysicallyDraggable implements IDraggable {
       Move,
       (event: Move) => {
         return eventHandler
-          .dispatchEvent(new Move(this, this.getElement(), event.getVector()));
-      }
-    );
+          .dispatchEvent(
+            new Move(
+              this,
+              this.getElement(),
+              event.getDistanceMoved(),
+              event.getVelocity()));
+      });
     eventHandler.addListener(
       this.draggable_,
       DragEnd,
@@ -93,7 +97,11 @@ class PhysicallyDraggable implements IDraggable {
       });
   }
 
-  public getElement() {
+  public disablePhysicality(): void {
+    this.physical2d_.disable();
+  }
+
+  public getElement(): HTMLElement {
     return this.draggable_.getElement();
   }
 

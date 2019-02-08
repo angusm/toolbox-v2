@@ -3,20 +3,31 @@ import {TbEvent} from "../../utils/event/events/tb-event";
 
 class Move extends TbEvent {
   readonly element_: HTMLElement;
-  readonly vector_: Vector2d;
+  readonly distanceMoved_: Vector2d;
+  readonly velocity_: Vector2d;
 
-  constructor(target: any, element: HTMLElement, vector: Vector2d) {
+  constructor(
+    target: any,
+    element: HTMLElement,
+    distanceMoved: Vector2d,
+    velocity: Vector2d,
+  ) {
     super(target);
     this.element_ = element;
-    this.vector_ = vector;
+    this.distanceMoved_ = distanceMoved;
+    this.velocity_ = velocity;
   }
 
   getElement(): HTMLElement {
     return this.element_;
   }
 
-  getVector(): Vector2d {
-    return this.vector_;
+  getDistanceMoved(): Vector2d {
+    return this.distanceMoved_;
+  }
+
+  getVelocity(): Vector2d {
+    return this.velocity_;
   }
 }
 
