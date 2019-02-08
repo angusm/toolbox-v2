@@ -43,7 +43,7 @@ class PhysicallyDraggable implements IDraggable {
         defaultPhysicallyDraggableConfig.draggableConstraints,
       maxVelocity = defaultPhysicallyDraggableConfig.maxVelocity,
       physicalConstraints = defaultPhysicallyDraggableConfig.physicalConstraints,
-    }: IPhysicallyDraggableConfig,
+    }: IPhysicallyDraggableConfig = {},
   ) {
     this.physical2d_ =
       new Physical2D(
