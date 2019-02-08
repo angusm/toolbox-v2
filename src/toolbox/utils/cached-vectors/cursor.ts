@@ -59,22 +59,22 @@ class CursorPosition {
 
 const ZERO_POSITION: CursorPosition = new CursorPosition(ZERO_VECTOR, false);
 class CursorData {
-  readonly positions: CursorPosition[];
+  readonly positions_: CursorPosition[];
 
   constructor(
     currentPosition: CursorPosition = ZERO_POSITION,
     ...pastPositions: CursorPosition[]
   ) {
-    this.positions = [currentPosition, ...pastPositions];
+    this.positions_ = [currentPosition, ...pastPositions];
   }
 
   public update(position: CursorPosition): CursorData {
     return new CursorData(
-      position, ...this.positions.slice(0, POSITION_LIMIT - 1));
+      position, ...this.positions_.slice(0, POSITION_LIMIT - 1));
   }
 
   private getLatestPosition(): CursorPosition {
-    return this.positions[0];
+    return this.positions_[0];
   }
 
   public getPosition(): Vector2d {
@@ -112,7 +112,7 @@ class CursorData {
     const isPreviousFrame =
       (position: CursorPosition) => !position.isForFrame(currentFrame);
     const positionsToConsider =
-      filterUntilFirst(this.positions, isPreviousFrame);
+      filterUntilFirst(this.positions_, isPreviousFrame);
 
     if (usePressedPositionsOnly) {
       const isPressed = (position: CursorPosition) => position.isPressed();
@@ -124,7 +124,7 @@ class CursorData {
   }
 
   public getGestureDelta(): Vector2d {
-    return CursorData.getGestureDeltaFromPositions_(...this.positions);
+    return CursorData.getGestureDeltaFromPositions_(...this.positions_);
   }
 
   public getPressedGestureDelta(): Vector2d {
@@ -144,13 +144,27 @@ class CursorData {
   }
 
   public getLastFrameVelocity(): Vector2d {
-    const lastFrame = this.positions[0];
-    const secondLastFrame = this.positions[1];
+    const framesWithTimeDifference = this.getFramesWithTimeDifference_();
+    const firstFrame = framesWithTimeDifference[0];
+    const lastFrame = framesWithTimeDifference.slice(-1)[0];
     const frameDeltaInSeconds =
-      (lastFrame.getTime().valueOf() - secondLastFrame.getTime().valueOf()) /
+      (firstFrame.getTime().valueOf() - lastFrame.getTime().valueOf()) /
       1000;
-    return CursorData.getGestureDeltaFromPositions_(lastFrame, secondLastFrame)
+    return CursorData.getGestureDeltaFromPositions_(firstFrame, lastFrame)
       .scale(1/frameDeltaInSeconds);
+  }
+
+  private getFramesWithTimeDifference_(): CursorPosition[] {
+    const firstPosition = this.positions_[0];
+    const positionWithDifference =
+      this.positions_
+        .find(
+          (position) => {
+            return position.getTime().valueOf() !==
+              firstPosition.getTime().valueOf();
+          });
+    return this.positions_
+      .slice(0, this.positions_.indexOf(positionWithDifference) + 1);
   }
 
   private getPressedGesturePositions_(): CursorPosition[] {
@@ -161,7 +175,7 @@ class CursorData {
         return timeDiff < GESTURE_TIME_LIMIT && position.isPressed();
       };
 
-    return filterUntilFalse(this.positions, conditionFn);
+    return filterUntilFalse(this.positions_, conditionFn);
   }
 
   public static getGestureDeltaFromPositions_(
