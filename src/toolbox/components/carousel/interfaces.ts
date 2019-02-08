@@ -3,6 +3,7 @@ interface ITransition {
   init(initialSlide: Element, carousel: ICarousel): void;
   getActiveSlide(carousel: ICarousel): HTMLElement;
   hasTransitionedTo(slide: HTMLElement, carousel: ICarousel): boolean;
+  renderLoop(carousel: ICarousel): void;
 }
 
 interface ICarousel {

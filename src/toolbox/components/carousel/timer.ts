@@ -1,5 +1,5 @@
 import {renderLoop} from '../../utils/render-loop';
-import {Carousel} from "./base";
+import {Carousel} from "./carousel";
 
 const DEFAULT_INTERVAL: number = 5000;
 

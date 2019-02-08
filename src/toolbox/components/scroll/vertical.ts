@@ -1,4 +1,4 @@
-import {Draggable} from '../draggable/base';
+import {Draggable} from '../draggable/draggable';
 import {DraggableFixedXConstraint} from "../draggable/constraints/fixed-x";
 import {ContainerConstraint} from "../draggable/constraints/container";
 

@@ -47,12 +47,12 @@ class NumericRange implements IRange<number>{
   }
 
   get min() {
-    console.log('WARNING: Please use getMin() and getMax() in place of getter properties min and max');
+    console.warn('WARNING: Please use getMin() and getMax() in place of getter properties min and max');
     return this.min_;
   }
 
   get max() {
-    console.log('WARNING: Please use getMin() and getMax() in place of getter properties min and max');
+    console.warn('WARNING: Please use getMin() and getMax() in place of getter properties min and max');
     return this.max_;
   }
 

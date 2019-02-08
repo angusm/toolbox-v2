@@ -69,9 +69,12 @@ class Draggable implements IDraggable {
     }
 
     this.interacting_ = false;
-    eventHandler
-      .dispatchEvent(
-        new DragEnd(this, cursor.getClient().getLastFrameVelocity()));
+    renderLoop.measure(() => {
+      eventHandler
+        .dispatchEvent(
+          new DragEnd(
+            this, this.getDelta_(), cursor.getClient().getLastFrameVelocity()));
+    });
   }
 
   private isInteracting_(): boolean {

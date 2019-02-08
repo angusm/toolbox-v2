@@ -4,6 +4,7 @@ class RenderStep {
   public static readonly CLEANUP = Symbol('Cleanup');
   public static readonly FRAME_COUNT = Symbol('Frame Count');
   public static readonly MEASURE = Symbol('Measure');
+  public static readonly PHYSICS = Symbol('Physics');
   public static readonly MUTATE = Symbol('Mutate');
   public static readonly PRE_MEASURE = Symbol('Pre-measure');
   public static readonly SCROLL_PRE_MEASURE = Symbol('Scroll-measure');
@@ -28,6 +29,7 @@ const ANIMATION_FRAME_STEP_ORDER: Array<symbol> = [
   RenderStep.FRAME_COUNT,
   RenderStep.PRE_MEASURE,
   RenderStep.MEASURE,
+  RenderStep.PHYSICS,
   RenderStep.MUTATE,
   RenderStep.CLEANUP,
 ];
@@ -58,6 +60,7 @@ class RenderLoop {
   private static singleton_: RenderLoop = null;
 
   private lastRun_: Date;
+  private currentRun_: Date;
   private msPerFrame_: number;
   private scheduledFns_: DynamicDefaultMap<symbol, RenderFunctionMap>;
   private scrolledSinceLastFrame_: boolean;
@@ -69,6 +72,7 @@ class RenderLoop {
           (unused: symbol) => new Map<RenderFunctionID, RenderFunction>());
     this.msPerFrame_ = 33; // Default to 30fps
     this.scrolledSinceLastFrame_ = false;
+    this.lastRun_ = new Date();
     window.addEventListener('scroll', () => this.runScrollLoop_());
     this.runScrollFns_();
     this.runLoop_();
@@ -84,6 +88,10 @@ class RenderLoop {
 
   public measure(fn: RenderFunction): RenderFunctionID {
     return this.addFnToStep_(fn, RenderStep.MEASURE);
+  }
+
+  public physics(fn: RenderFunction): RenderFunctionID {
+    return this.addFnToStep_(fn, RenderStep.PHYSICS);
   }
 
   public mutate(fn: RenderFunction): RenderFunctionID {
@@ -114,6 +122,10 @@ class RenderLoop {
     this.msPerFrame_ = 1000 / fps;
   }
 
+  public getTargetFrameLength() {
+    return this.msPerFrame_;
+  }
+
   private addFnToStep_(fn: RenderFunction, step: symbol): RenderFunctionID {
     const renderFn = new RenderFunctionID(step);
     this.scheduledFns_.get(step).set(renderFn, fn);
@@ -125,9 +137,10 @@ class RenderLoop {
   }
 
   private runLoop_(): void {
-    const nextRun = <number>new Date().valueOf() + this.msPerFrame_;
+    this.currentRun_ = new Date();
+    const nextRun = <number>this.currentRun_.valueOf() + this.msPerFrame_;
     this.runFns_();
-    this.lastRun_ = new Date();
+    this.lastRun_ = this.currentRun_;
     if (RenderLoop.getTimeUntilNextRun_(nextRun) > 2) {
       setTimeout(
         () => window.requestAnimationFrame(() => this.runLoop_()),
@@ -141,7 +154,7 @@ class RenderLoop {
    * Returns the time since the last render loop in milliseconds
    */
   public getElapsedMilliseconds(): number {
-    return new Date().valueOf() - this.lastRun_.valueOf();
+    return this.currentRun_.valueOf() - this.lastRun_.valueOf();
   }
 
   public getElapsedSeconds(): number {

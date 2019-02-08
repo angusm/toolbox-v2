@@ -1,7 +1,7 @@
 import {Drag}  from '../../draggable/events/drag';
 import {DragEnd}  from '../../draggable/events/drag-end';
 import {DragStart}  from '../../draggable/events/drag-start';
-import {Draggable}  from '../../draggable/base';
+import {Draggable}  from '../../draggable/draggable';
 import {Vector2d}  from '../../../utils/math/geometry/vector-2d';
 import {cursor}  from '../../../utils/cached-vectors/cursor';
 import {eventHandler}  from '../../../utils/event/event-handler';
@@ -14,6 +14,7 @@ import {getClosestToCenter} from "../../../utils/dom/position/get-closest-to-cen
 import {min} from "../../../utils/array/min";
 import {DraggableFixedYConstraint} from "../../draggable/constraints/fixed-y";
 import {sumOffsetWidths} from "../../../utils/dom/position/sum-offset-widths";
+import {splitEvenlyOnItem} from "../../../utils/array/split-evenly-on-item";
 
 const SLIDE_INTERACTION = Symbol('Slide Interaction');
 const GESTURE_MOVEMENT_THRESHOLD = 20;
@@ -62,7 +63,7 @@ class Slide implements ITransition {
           eventHandler.addListener(
             draggable,
             Drag,
-            (event: Drag) => Slide.handleDrag_(event, carousel));
+            (event: Drag) => Slide.handleDrag(event, carousel));
           eventHandler.addListener(
             draggable,
             DragEnd,
@@ -102,10 +103,8 @@ class Slide implements ITransition {
     }
   }
 
-  private static handleDrag_(dragEvent: Drag, carousel: ICarousel): void {
-    Slide.transitionBeforeSlides_(
-      dragEvent.getElement(), carousel, dragEvent.getDelta());
-    Slide.transitionAfterSlides_(
+  public static handleDrag(dragEvent: Drag, carousel: ICarousel): void {
+    Slide.transitionAroundActiveSlide(
       dragEvent.getElement(), carousel, dragEvent.getDelta());
   }
 
@@ -139,14 +138,24 @@ class Slide implements ITransition {
     activeSlide: HTMLElement, carousel: ICarousel, translation: Vector2d
   ): void {
     Slide.transitionActiveSlide_(activeSlide, translation);
-    Slide.transitionBeforeSlides_(activeSlide, carousel, translation);
-    Slide.transitionAfterSlides_(activeSlide, carousel, translation);
+    Slide.transitionAroundActiveSlide(activeSlide, carousel, translation);
+  }
+
+  public static transitionAroundActiveSlide(
+    activeSlide: HTMLElement, carousel: ICarousel, translation: Vector2d
+  ): void {
+    const halves = splitEvenlyOnItem(carousel.getSlides(), activeSlide);
+    const slidesBefore = halves[0];
+    const slidesAfter = halves[1];
+    this.transitionBeforeSlides_(activeSlide, slidesBefore, translation);
+    this.transitionAfterSlides_(activeSlide, slidesAfter, translation);
   }
 
   private static transitionBeforeSlides_(
-    activeSlide: HTMLElement, carousel: ICarousel, translation: Vector2d
+    activeSlide: HTMLElement, slidesBefore: HTMLElement[], translation: Vector2d
   ): void {
-    this.getHalfBeforeActiveSlide_(carousel, activeSlide)
+    slidesBefore
+      .reverse()
       .reduce(
         (previousSlides, slide) => {
           Slide.transitionBeforeSlide_(
@@ -156,9 +165,9 @@ class Slide implements ITransition {
   }
 
   private static transitionAfterSlides_(
-    activeSlide: HTMLElement, carousel: ICarousel, translation: Vector2d
+    activeSlide: HTMLElement, slidesAfter: HTMLElement[], translation: Vector2d
   ): void {
-    this.getHalfAfterActiveSlide_(carousel, activeSlide)
+    slidesAfter
       .reduce(
         (previousSlides, slide) => {
           Slide.transitionAfterSlide_(
@@ -182,7 +191,7 @@ class Slide implements ITransition {
     const currentOffset =
       getVisibleDistanceBetweenElementCenters(slideToTransition, activeSlide);
     const desiredDistance =
-      sumOffsetWidths(slideToTransition, ...previousSlides);
+      -sumOffsetWidths(slideToTransition, ...previousSlides);
     const desiredOffset = new Vector2d(desiredDistance, 0);
     translate2d(
       slideToTransition,
@@ -197,48 +206,11 @@ class Slide implements ITransition {
   ): void {
     const currentOffset =
       getVisibleDistanceBetweenElementCenters(slideToTransition, activeSlide);
-    const desiredDistance =
-      sumOffsetWidths(activeSlide, ...previousSlides);
+    const desiredDistance = sumOffsetWidths(activeSlide, ...previousSlides);
     const desiredOffset = new Vector2d(desiredDistance, 0);
     translate2d(
       slideToTransition,
       desiredOffset.subtract(currentOffset).add(translation));
-  }
-
-  private static getHalfBeforeActiveSlide_(
-    carousel: ICarousel, activeSlide: HTMLElement
-  ): HTMLElement[] {
-    return Slide.getHalfOfCarouselFromActive_(carousel, activeSlide, -1);
-  }
-
-  static getHalfAfterActiveSlide_(
-    carousel: ICarousel, activeSlide: HTMLElement
-  ): HTMLElement[] {
-    return Slide.getHalfOfCarouselFromActive_(carousel, activeSlide, 1);
-  }
-
-  static getHalfOfCarouselFromActive_(
-    carousel: ICarousel, activeSlide: HTMLElement, direction: number
-  ): HTMLElement[] {
-    const slides: HTMLElement[] = carousel.getSlides();
-    const length: number =
-      Slide.getLengthOfHalfOfCarousel_(carousel, direction);
-    let indexToAdd: number = carousel.getSlideIndex(activeSlide);
-    const result: HTMLElement[] = [];
-    while (result.length < length) {
-      indexToAdd = (indexToAdd + direction + slides.length) % slides.length;
-      result.push(slides[indexToAdd]);
-    }
-    return result;
-  }
-
-  static getLengthOfHalfOfCarousel_(
-    carousel: ICarousel, direction: number
-  ): number {
-    // Adding half of the direction ensures that if there is an uneven number
-    // to split along the carousel, it will always be on the right, the typical
-    // direction of travel.
-    return Math.floor((carousel.getSlides().length + direction / 2) / 2);
   }
 
   public getActiveSlide(carousel: ICarousel): HTMLElement {
@@ -251,6 +223,8 @@ class Slide implements ITransition {
       getVisibleDistanceBetweenElementCenters(slide, carousel.getContainer());
     return distance.x === 0
   }
+
+  public renderLoop(carousel: ICarousel) {}
 }
 
 export {Slide};

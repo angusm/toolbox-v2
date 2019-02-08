@@ -2,54 +2,41 @@
  * Version of draggable that accommodates velocity, sliding, breaking.
  */
 import {IDraggable, IDraggableConstraint} from "./interfaces";
-import {Draggable} from "./base";
-import {defaultPhysical2dConfig, Physical2d} from "../physical/2d";
+import {Draggable} from "./draggable";
+import {Physical2d} from "../physical/physical-2d";
 import {Vector2d} from "../../utils/math/geometry/vector-2d";
-import {IConstraint2d} from "../../utils/math/geometry/2d-constraints/interface";
 import {eventHandler} from "../../utils/event/event-handler";
 import {DragStart} from "./events/drag-start";
 import {DragEnd} from "./events/drag-end";
 import {Drag} from "./events/drag";
-import {Move} from "../physical/move-event";
+import {PhysicallyPositionedElement2d} from "../physical/positioned/physically-positioned-element-2d";
 
 interface IPhysicallyDraggableConfig {
-  acceleration?: Vector2d,
   draggableConstraints?: IDraggableConstraint[],
-  maxVelocity?: number,
-  physicalConstraints?: IConstraint2d[],
+  physical2d?: Physical2d,
 }
 
 const defaultPhysicallyDraggableConfig: IPhysicallyDraggableConfig =
   {
-    acceleration: defaultPhysical2dConfig.acceleration,
     draggableConstraints: [],
-    maxVelocity: defaultPhysical2dConfig.maxVelocity,
-    physicalConstraints: defaultPhysical2dConfig.constraints,
+    physical2d: null,
   };
 
 class PhysicallyDraggable implements IDraggable {
   readonly draggable_: Draggable;
-  readonly physical2d_: Physical2d;
+  private positioned2d_: PhysicallyPositionedElement2d;
 
   constructor(
     target: HTMLElement,
     {
-      acceleration = defaultPhysicallyDraggableConfig.acceleration,
       draggableConstraints =
         defaultPhysicallyDraggableConfig.draggableConstraints,
-      maxVelocity = defaultPhysicallyDraggableConfig.maxVelocity,
-      physicalConstraints = defaultPhysicallyDraggableConfig.physicalConstraints,
+      physical2d = defaultPhysicallyDraggableConfig.physical2d,
     }: IPhysicallyDraggableConfig = {},
   ) {
-    this.physical2d_ =
-      new Physical2d(
-        target,
-        {
-          acceleration: acceleration,
-          constraints: physicalConstraints,
-          maxVelocity: maxVelocity,
-        }
-      );
+    const finalPhysical2d = physical2d === null ? new Physical2d() : physical2d;
+    this.positioned2d_ =
+      new PhysicallyPositionedElement2d(target, finalPhysical2d);
     this.draggable_ =
       new Draggable(target, {constraints: draggableConstraints});
     this.init_();
@@ -60,7 +47,7 @@ class PhysicallyDraggable implements IDraggable {
       this.draggable_,
       DragStart,
       (event: DragStart) => {
-        this.physical2d_.disable();
+        this.disablePhysics();
         eventHandler.dispatchEvent(new DragStart(this));
       });
     eventHandler.addListener(
@@ -71,40 +58,55 @@ class PhysicallyDraggable implements IDraggable {
           .dispatchEvent(new Drag(this, this.getElement(), event.getDelta()));
       });
     eventHandler.addListener(
-      this.physical2d_,
-      Move,
-      (event: Move) => {
-        return eventHandler
-          .dispatchEvent(
-            new Move(
-              this,
-              this.getElement(),
-              event.getDistanceMoved(),
-              event.getVelocity()
-            )
-          );
-      });
-    eventHandler.addListener(
       this.draggable_,
       DragEnd,
       (event: DragEnd) => {
-        this.physical2d_.enable();
+        this.enablePhysics();
         this.setVelocity(event.getEndVelocity());
-        eventHandler.dispatchEvent(new DragEnd(this, event.getEndVelocity()));
+        eventHandler
+          .dispatchEvent(
+            new DragEnd(this, event.getDelta(), event.getEndVelocity()));
       });
   }
 
-  public disablePhysicality(): void {
-    this.physical2d_.disable();
+  public disablePhysics(): void {
+    this.positioned2d_.disablePhysics();
+  }
+
+  public enablePhysics(): void {
+    this.positioned2d_.enablePhysics();
   }
 
   public getElement(): HTMLElement {
     return this.draggable_.getElement();
   }
 
+  public setAcceleration(acceleration: Vector2d): void {
+    this.positioned2d_.setAcceleration(acceleration);
+  }
+
+  public getVelocity(): Vector2d {
+    return this.positioned2d_.getVelocity();
+  }
+
+  public getBreakForce(): number {
+    return this.positioned2d_.getBreakForce();
+  }
+
   public setVelocity(velocity: Vector2d): void {
-    this.physical2d_.setVelocity(velocity);
+    this.positioned2d_.setVelocity(velocity);
+  }
+
+  public adjustNextFrame(adjustment: Vector2d): void {
+    this.positioned2d_.adjustNextFrame(adjustment);
+  }
+
+  public getPhysical2d(): Physical2d {
+    return this.positioned2d_.getPhysical2d();
   }
 }
 
-export {PhysicallyDraggable};
+export {
+  defaultPhysicallyDraggableConfig,
+  PhysicallyDraggable
+};

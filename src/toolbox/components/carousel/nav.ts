@@ -1,4 +1,4 @@
-import {Carousel} from './base';
+import {Carousel} from './carousel';
 import {DynamicDefaultMap} from '../../utils/map/dynamic-default';
 import {areArrayValuesEqual} from '../../utils/array/are-array-values-equal';
 import {renderLoop} from '../../utils/render-loop';

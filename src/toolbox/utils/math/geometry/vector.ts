@@ -2,6 +2,7 @@ import {NumericRange} from '../numeric-range';
 import {areArrayValuesEqual} from '../../array/are-array-values-equal';
 import {sum} from '../sum';
 import {zip} from '../../array/zip';
+import {getSign} from "../get-sign";
 
 class Vector {
   ['constructor']: typeof Vector;
@@ -17,6 +18,24 @@ class Vector {
     const summedValues: number[] =
       zip<number>(...values).map((zippedVals: number[]) => sum(...zippedVals));
     return <T>new this(...summedValues);
+  }
+
+  /**
+   * Returns new vector with same scale, pointing in the same direction as the
+   * provided vector. Ensuring that signs of numeric values match between the
+   * returned vector and the provided vector.
+   */
+  public alignTo(vector: this): this {
+    const zippedValues: number[][] =
+      zip<number>(this.getValues(), vector.getValues());
+    const alignedValues =
+      zippedValues
+        .map(
+          ([originalValue, valueToAlignWith]) => {
+            return Math.abs(originalValue) * getSign(valueToAlignWith);
+          }
+        );
+    return <this>new this.constructor(...alignedValues);
   }
 
   public add(...vectors: this[]): this {
@@ -113,6 +132,23 @@ class Vector {
     } else {
       return this;
     }
+  }
+
+  public multiply(vector: this): this {
+    return <this>new this.constructor(
+      ...zip<number>(this.getValues(), vector.getValues())
+        .map(([a, b]) => a * b));
+  }
+
+  public divide(vector: this): this {
+    return <this>new this.constructor(
+      ...zip<number>(this.getValues(), vector.getValues())
+        .map(([a, b]) => a / b));
+  }
+
+  public toExponent(pow: number): this {
+    return <this>new this.constructor(
+      ...this.getValues().map((value) => Math.pow(value, pow)));
   }
 
   public asRanges(): NumericRange[] {

@@ -76,6 +76,7 @@ class Carousel implements ICarousel {
     renderLoop.measure(() => {
       renderLoop.cleanup(() => this.render_());
 
+      this.transition_.renderLoop(this); // Run the transition's render loop
       this.handleTransition_();
 
       const activeSlide = this.getActiveSlide();

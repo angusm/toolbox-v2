@@ -132,17 +132,6 @@ class CursorData {
       ...this.getPressedGesturePositions_());
   }
 
-  public getPressedGestureVelocity(): Vector2d {
-    const positions = this.getPressedGesturePositions_();
-    const delta = this.getPressedGestureDelta();
-    const gestureTimeInMilliseconds =
-      positions[0].getTime().valueOf() -
-      positions.slice(-1)[0].getTime().valueOf();
-    const gestureTimeInSeconds = gestureTimeInMilliseconds / 1000;
-
-    return delta.scale(1/gestureTimeInSeconds);
-  }
-
   public getLastFrameVelocity(): Vector2d {
     const framesWithTimeDifference = this.getFramesWithTimeDifference_();
     const firstFrame = framesWithTimeDifference[0];
@@ -150,9 +139,14 @@ class CursorData {
     const frameDeltaInSeconds =
       (firstFrame.getTime().valueOf() - lastFrame.getTime().valueOf()) /
       1000;
-    return firstFrame.getPosition()
-      .subtract(lastFrame.getPosition())
-      .scale(1/frameDeltaInSeconds);
+    return this.getLastFrameDelta().scale(1/frameDeltaInSeconds);
+  }
+
+  public getLastFrameDelta(): Vector2d {
+    const framesWithTimeDifference = this.getFramesWithTimeDifference_();
+    const firstFrame = framesWithTimeDifference[0];
+    const lastFrame = framesWithTimeDifference.slice(-1)[0];
+    return firstFrame.getPosition().subtract(lastFrame.getPosition());
   }
 
   private getFramesWithTimeDifference_(): CursorPosition[] {
