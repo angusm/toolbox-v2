@@ -136,19 +136,19 @@ class CursorData {
     const positions = this.getPressedGesturePositions_();
     const delta = this.getPressedGestureDelta();
     const gestureTimeInMilliseconds =
-      positions.slice(-1)[0].getTime().valueOf() -
-      positions[0].getTime().valueOf();
+      positions[0].getTime().valueOf() -
+      positions.slice(-1)[0].getTime().valueOf();
     const gestureTimeInSeconds = gestureTimeInMilliseconds / 1000;
 
     return delta.scale(1/gestureTimeInSeconds);
   }
 
   public getLastFrameVelocity(): Vector2d {
-    const lastFrame = this.positions.slice(-1)[0];
-    const secondLastFrame = this.positions.slice(-2)[0];
+    const lastFrame = this.positions[0];
+    const secondLastFrame = this.positions[1];
     const frameDeltaInSeconds =
       lastFrame.getTime().valueOf() - secondLastFrame.getTime().valueOf();
-    return CursorData.getGestureDeltaFromPositions_(...this.positions.slice(-2))
+    return CursorData.getGestureDeltaFromPositions_(lastFrame, secondLastFrame)
       .scale(1/frameDeltaInSeconds);
   }
 
