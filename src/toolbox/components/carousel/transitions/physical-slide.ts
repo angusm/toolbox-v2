@@ -3,28 +3,22 @@ import {DragEnd}  from '../../draggable/events/drag-end';
 import {DragStart}  from '../../draggable/events/drag-start';
 import {FixedYConstraint}  from '../../../utils/math/geometry/2d-constraints/fixed-y';
 import {Vector2d}  from '../../../utils/math/geometry/vector-2d';
-import {cursor}  from '../../../utils/cached-vectors/cursor';
 import {eventHandler}  from '../../../utils/event/event-handler';
-import {getSign}  from '../../../utils/math/get-sign';
 import {getVisibleDistanceBetweenElementCenters}  from '../../../utils/dom/position/get-visible-distance-between-element-centers';
 import {renderLoop}  from '../../../utils/render-loop';
 import {sum}  from '../../../utils/math/sum';
 import {translate2d}  from '../../../utils/dom/position/translate-2d';
 import {ICarousel, ITransition} from "../interfaces";
 import {getClosestToCenter} from "../../../utils/dom/position/get-closest-to-center";
-import {min} from "../../../utils/array/min";
 import {PhysicallyDraggable} from "../../draggable/physical";
 import {Move} from "../../physical/move-event";
 import {DraggableFixedYConstraint} from "../../draggable/constraints/fixed-y";
-import HTML = Mocha.reporters.HTML;
 import {DynamicDefaultMap} from "../../../utils/map/dynamic-default";
 
 const SLIDE_INTERACTION = Symbol('Physical Slide Interaction');
-const GESTURE_MOVEMENT_THRESHOLD = 20;
 
 interface IPhysicalSlideConfig {
   acceleration?: number;
-  accelerationExponent?: number;
   maxVelocity?: number;
 }
 
@@ -59,17 +53,14 @@ class PhysicalSlide implements ITransition {
     });
 
   readonly acceleration_: number;
-  readonly accelerationExponent_: number;
   readonly draggableBySlide_: Map<HTMLElement, PhysicallyDraggable>;
   readonly maxVelocity_: number;
 
   constructor({
     acceleration = 1,
-    accelerationExponent = 1,
     maxVelocity = 10,
   }: IPhysicalSlideConfig = {}) {
     this.acceleration_ = acceleration;
-    this.accelerationExponent_ = accelerationExponent;
     this.maxVelocity_ = maxVelocity;
     this.draggableBySlide_ = new Map();
   }

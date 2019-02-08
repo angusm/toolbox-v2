@@ -14,7 +14,6 @@ import {Move} from "../physical/move-event";
 
 interface IPhysicallyDraggableConfig {
   acceleration?: Vector2d,
-  accelerationExponent?: number,
   draggableConstraints?: IDraggableConstraint[],
   maxVelocity?: number,
   physicalConstraints?: IConstraint2d[],
@@ -23,7 +22,6 @@ interface IPhysicallyDraggableConfig {
 const defaultPhysicallyDraggableConfig: IPhysicallyDraggableConfig =
   {
     acceleration: new Vector2d(0, 0),
-    accelerationExponent: .5,
     draggableConstraints: [],
     maxVelocity: 10,
     physicalConstraints: [],
@@ -37,8 +35,6 @@ class PhysicallyDraggable implements IDraggable {
     target: HTMLElement,
     {
       acceleration = defaultPhysicallyDraggableConfig.acceleration,
-      accelerationExponent =
-        defaultPhysicallyDraggableConfig.accelerationExponent,
       draggableConstraints =
         defaultPhysicallyDraggableConfig.draggableConstraints,
       maxVelocity = defaultPhysicallyDraggableConfig.maxVelocity,
@@ -50,7 +46,6 @@ class PhysicallyDraggable implements IDraggable {
         target,
         {
           acceleration: acceleration,
-          accelerationExponent: accelerationExponent,
           constraints: physicalConstraints,
           maxVelocity: maxVelocity,
         }
@@ -93,7 +88,7 @@ class PhysicallyDraggable implements IDraggable {
       DragEnd,
       (event: DragEnd) => {
         this.physical2d_.enable();
-        this.physical2d_.setVelocity(event.getEndVelocity());
+        this.setVelocity(event.getEndVelocity());
         eventHandler.dispatchEvent(new DragEnd(this, event.getEndVelocity()));
       });
   }

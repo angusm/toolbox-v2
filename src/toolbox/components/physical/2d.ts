@@ -16,7 +16,6 @@ const MINIMUM_VELOCITY: number = 10;
 
 interface IPhysical2dConfig {
   acceleration?: Vector2d,
-  accelerationExponent?: number,
   constraints?: IConstraint2d[],
   enabled?: boolean,
   initialVelocity?: Vector2d,
@@ -25,7 +24,6 @@ interface IPhysical2dConfig {
 
 const defaultPhysical2dConfig = {
   acceleration: new Vector2d(0, 0),
-  accelerationExponent: 1,
   constraints: <IConstraint2d[]>[],
   decelerationExponent: .9,
   deceleration: new Vector2d(0, 0),
@@ -39,7 +37,6 @@ class Physical2D {
   readonly constraints_: IConstraint2d[];
 
   private acceleration_: Vector2d;
-  private accelerationExponent_: number;
   private enabled_: boolean;
   private maxVelocity_: number;
   private velocity_: Vector2d;
@@ -48,7 +45,6 @@ class Physical2D {
     element: HTMLElement,
     {
       acceleration = defaultPhysical2dConfig.acceleration,
-      accelerationExponent = defaultPhysical2dConfig.accelerationExponent,
       constraints = defaultPhysical2dConfig.constraints,
       enabled = defaultPhysical2dConfig.enabled,
       initialVelocity = defaultPhysical2dConfig.initialVelocity,
@@ -59,15 +55,10 @@ class Physical2D {
     this.constraints_ = constraints;
 
     this.acceleration_ = acceleration;
-    this.accelerationExponent_ = accelerationExponent;
     this.enabled_ = enabled;
     this.maxVelocity_ = maxVelocity;
     this.velocity_ = initialVelocity;
     this.render_();
-  }
-
-  public setAccelerationExponent(accelerationExponent: number) {
-    this.accelerationExponent_ = accelerationExponent;
   }
 
   public accelerate(acceleration: Vector2d) {
@@ -102,12 +93,10 @@ class Physical2D {
         return;
       }
 
-      const position = Vector2d.fromElementTransform(this.element_);
       const elapsedTime = renderLoop.getElapsedSeconds();
       this.velocity_ =
         this.velocity_
           .add(this.acceleration_.scale(elapsedTime))
-          .toNthPower(this.accelerationExponent_)
           .clampLength(this.maxVelocity_);
       if (this.velocity_.getLength() < MINIMUM_VELOCITY) {
         this.velocity_ = new Vector2d(0, 0);
