@@ -150,7 +150,8 @@ class CursorData {
     const frameDeltaInSeconds =
       (firstFrame.getTime().valueOf() - lastFrame.getTime().valueOf()) /
       1000;
-    return CursorData.getGestureDeltaFromPositions_(firstFrame, lastFrame)
+    return firstFrame.getPosition()
+      .subtract(lastFrame.getPosition())
       .scale(1/frameDeltaInSeconds);
   }
 
