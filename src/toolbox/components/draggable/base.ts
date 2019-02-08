@@ -60,6 +60,14 @@ class Draggable implements IDraggable {
   }
 
   private endInteraction_(): void {
+    /**
+     * Since global events are being listened to in order to end the interaction
+     * then we must first verify we are in fact interacting.
+     */
+    if (!this.interacting_) {
+      return;
+    }
+
     this.interacting_ = false;
     eventHandler
       .dispatchEvent(
