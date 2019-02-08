@@ -33,12 +33,25 @@ class Draggable implements IDraggable {
   private initInteraction_(): void {
     addDomEventListener(
       this.element_, EventType.CURSOR_DOWN, () => this.startInteraction_());
+    const endInteractionEventTypes = [
+      EventType.CONTEXTMENU,
+      EventType.DRAGSTART,
+      EventType.CURSOR_DOWN,
+    ];
+    endInteractionEventTypes
+      .forEach(
+        (eventType) => {
+          addDomEventListener(window, eventType, () => this.endInteraction_());
+        });
     addDomEventListener(
-      window, EventType.CURSOR_UP, () => this.endInteraction_());
-    addDomEventListener(
-      window, EventType.DRAGSTART, () => this.endInteraction_());
-    addDomEventListener(
-      window, EventType.MOUSEOUT, () => this.endInteraction_());
+      this.element_,
+      EventType.MOUSEOUT,
+      (event) => {
+        if (event.target !== this.element_) {
+          return;
+        }
+        this.endInteraction_()
+      });
   }
 
   private startInteraction_(): void {
