@@ -53,7 +53,6 @@ class PhysicalSlide implements ITransition {
     });
 
   readonly acceleration_: number;
-  readonly draggableBySlide_: Map<HTMLElement, PhysicallyDraggable>;
   readonly maxVelocity_: number;
 
   constructor({
@@ -62,7 +61,6 @@ class PhysicalSlide implements ITransition {
   }: IPhysicalSlideConfig = {}) {
     this.acceleration_ = acceleration;
     this.maxVelocity_ = maxVelocity;
-    this.draggableBySlide_ = new Map();
   }
 
   public init(activeSlide: HTMLElement, carousel: ICarousel): void {

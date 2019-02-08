@@ -67,7 +67,6 @@ class PhysicallyDraggable implements IDraggable {
       this.draggable_,
       Drag,
       (event: Drag) => {
-        this.physical2d_.setVelocity(event.getDelta());
         eventHandler
           .dispatchEvent(new Drag(this, this.getElement(), event.getDelta()));
       });
@@ -81,7 +80,9 @@ class PhysicallyDraggable implements IDraggable {
               this,
               this.getElement(),
               event.getDistanceMoved(),
-              event.getVelocity()));
+              event.getVelocity()
+            )
+          );
       });
     eventHandler.addListener(
       this.draggable_,
