@@ -3,7 +3,7 @@
  */
 import {IDraggable, IDraggableConstraint} from "./interfaces";
 import {Draggable} from "./base";
-import {Physical2D} from "../physical/2d";
+import {defaultPhysical2dConfig, Physical2D} from "../physical/2d";
 import {Vector2d} from "../../utils/math/geometry/vector-2d";
 import {IConstraint2d} from "../../utils/math/geometry/2d-constraints/interface";
 import {eventHandler} from "../../utils/event/event-handler";
@@ -21,10 +21,10 @@ interface IPhysicallyDraggableConfig {
 
 const defaultPhysicallyDraggableConfig: IPhysicallyDraggableConfig =
   {
-    acceleration: new Vector2d(0, 0),
+    acceleration: defaultPhysical2dConfig.acceleration,
     draggableConstraints: [],
-    maxVelocity: 10,
-    physicalConstraints: [],
+    maxVelocity: defaultPhysical2dConfig.maxVelocity,
+    physicalConstraints: defaultPhysical2dConfig.constraints,
   };
 
 class PhysicallyDraggable implements IDraggable {

@@ -29,7 +29,7 @@ const defaultPhysical2dConfig = {
   deceleration: new Vector2d(0, 0),
   enabled: true,
   initialVelocity: new Vector2d(0, 0),
-  maxVelocity: 10,
+  maxVelocity: 6000,
 };
 
 class Physical2D {
@@ -117,4 +117,7 @@ class Physical2D {
   }
 }
 
-export {Physical2D};
+export {
+  defaultPhysical2dConfig,
+  Physical2D
+};
