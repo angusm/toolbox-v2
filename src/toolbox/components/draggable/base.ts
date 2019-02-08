@@ -36,7 +36,7 @@ class Draggable implements IDraggable {
     const endInteractionEventTypes = [
       EventType.CONTEXTMENU,
       EventType.DRAGSTART,
-      EventType.CURSOR_DOWN,
+      EventType.CURSOR_UP,
     ];
     endInteractionEventTypes
       .forEach(
