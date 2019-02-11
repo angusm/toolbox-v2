@@ -6,7 +6,7 @@ import {zip} from "../../array/zip";
 import {Formula, FormulaPiece} from "../../math/algebra/formula";
 import {contains} from "../../array/contains";
 
-const ALLOWED_UNITS = [
+const CSS_CALC_FORMULA_ALLOWED_UNITS = [
   'px',
   '%',
   'vh',
@@ -32,7 +32,8 @@ class CssCalcFormula implements IMeasurableInstance, ICssStyleValueInstance {
         Map,
         () => 0);
     return new CssCalcFormula(
-      ...ALLOWED_UNITS.map((allowedUnit) => mappedValues.get(allowedUnit)));
+      ...CSS_CALC_FORMULA_ALLOWED_UNITS
+        .map((allowedUnit) => mappedValues.get(allowedUnit)));
   }
 
   private static mapValuesBySymbol_(...values: Variable[]): [string, number][] {
@@ -52,10 +53,14 @@ class CssCalcFormula implements IMeasurableInstance, ICssStyleValueInstance {
     const formulaPieces = Formula.fromString(formula).reduce().getPieces();
     const variables: FormulaPiece[] =
       formulaPieces
-        .filter((value) => contains(ALLOWED_UNITS, (<Variable>value).symbol))
+        .filter(
+          (value) => {
+            return contains(
+              CSS_CALC_FORMULA_ALLOWED_UNITS, (<Variable>value).symbol);
+          })
         .filter((value) => value instanceof Variable);
     const orderedVariables: Variable[] =
-      ALLOWED_UNITS.map(
+      CSS_CALC_FORMULA_ALLOWED_UNITS.map(
         (allowedUnit) => {
           const matchingVariable =
             <Variable>(
@@ -75,7 +80,7 @@ class CssCalcFormula implements IMeasurableInstance, ICssStyleValueInstance {
 
   public toStyleString(): string {
     const values: string[] =
-      zip<string|number>(this.values_, ALLOWED_UNITS)
+      zip<string|number>(this.values_, CSS_CALC_FORMULA_ALLOWED_UNITS)
         .filter(([value, unit]) => value !== 0)
         .map((pair) => pair.join(''));
     if (values.length === 0) {
@@ -86,4 +91,7 @@ class CssCalcFormula implements IMeasurableInstance, ICssStyleValueInstance {
   }
 }
 
-export {CssCalcFormula}
+export {
+  CssCalcFormula,
+  CSS_CALC_FORMULA_ALLOWED_UNITS
+}

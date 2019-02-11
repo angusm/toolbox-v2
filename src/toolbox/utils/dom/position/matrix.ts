@@ -7,12 +7,12 @@ const matrixChangesByElement_: ArrayMap<HTMLElement, Matrix> = new ArrayMap();
 const preChangeMatrixByElement_: Map<HTMLElement, Matrix> = new Map();
 
 class Matrix {
-  private a: number;
-  private b: number;
-  private c: number;
-  private d: number;
-  private tx: number;
-  private ty: number;
+  readonly a: number;
+  readonly b: number;
+  readonly c: number;
+  readonly d: number;
+  readonly tx: number;
+  readonly ty: number;
 
   constructor(
     a: Numeric = 1,
