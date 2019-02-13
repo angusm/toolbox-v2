@@ -2,7 +2,6 @@
 import {isDisplayed} from "../../utils/dom/style/is-displayed";
 import {negateFunction} from "../../utils/functions/negate-function";
 import {DynamicDefaultMap} from "../../utils/map/dynamic-default";
-import HTML = Mocha.reporters.HTML;
 import {removeClassIfPresent} from "../../utils/dom/class/remove-class-if-present";
 import {addClassIfMissing} from "../../utils/dom/class/add-class-if-missing";
 import {renderLoop} from "../../utils/render-loop";

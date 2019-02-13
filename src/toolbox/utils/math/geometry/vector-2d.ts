@@ -2,7 +2,6 @@ import {Matrix} from '../../dom/position/matrix';
 import {Vector} from './vector';
 import {browserHasChrome64TableDisplayOffsetIssues} from '../../dom/style/browser-has-chrome64-table-display-offset-issues';
 import {isTableDisplayed} from '../../dom/style/is-table-displayed';
-import HTML = Mocha.reporters.HTML;
 
 class Vector2d extends Vector {
   constructor(x: number = 0, y: number = 0, ...args: number[]) {
