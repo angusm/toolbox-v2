@@ -1,5 +1,8 @@
 import {DistanceFunction} from "./distance-function";
-import {IScrollEffectOptions} from "./types/scroll-effect-options";
+import {
+  IScrollEffectOptions,
+  TScrollEffectDistanceValue
+} from "./types/scroll-effect-options";
 import {renderLoop} from "../../utils/render-loop";
 import {ArrayMap} from "../../utils/map/array";
 import {NumericRange} from "../../utils/math/numeric-range";
@@ -10,8 +13,8 @@ import {GetDistanceFn} from "./types/get-distance-fn";
 const defaultOptions: IScrollEffectOptions =
   {
     getDistanceFunction: DistanceFunction.DISTANCE_FROM_DOCUMENT_CENTER,
-    startDistance: Number.NEGATIVE_INFINITY,
-    endDistance: Number.POSITIVE_INFINITY,
+    startDistance: () => Number.NEGATIVE_INFINITY,
+    endDistance: () => Number.POSITIVE_INFINITY,
     effects: [],
   };
 
@@ -20,7 +23,8 @@ const ActiveEffects: ArrayMap<IEffect, ScrollEffect> = new ArrayMap();
 class ScrollEffect {
   readonly target_: HTMLElement;
   readonly getDistanceFunction_: GetDistanceFn;
-  readonly distanceRange_: NumericRange;
+  readonly startDistance_: TScrollEffectDistanceValue;
+  readonly endDistance_: TScrollEffectDistanceValue;
   readonly effects_: Array<IEffect>;
   private lastRunDistance_: number;
   private destroyed_: boolean;
@@ -36,7 +40,8 @@ class ScrollEffect {
   ) {
     this.target_ = target;
     this.getDistanceFunction_ = getDistanceFunction;
-    this.distanceRange_ = new NumericRange(startDistance, endDistance);
+    this.startDistance_ = startDistance;
+    this.endDistance_ = endDistance;
     this.effects_ = effects;
     this.lastRunDistance_ = null;
     this.destroyed_ = false;
@@ -65,6 +70,26 @@ class ScrollEffect {
     });
   }
 
+  private getDistanceValue_(value: TScrollEffectDistanceValue): number {
+    if (typeof value === 'number') {
+      return value;
+    } else {
+      return value(this.target_);
+    }
+  }
+
+  private getStartDistance_(): number {
+    return this.getDistanceValue_(this.startDistance_);
+  }
+
+  private getEndDistance_(): number {
+    return this.getDistanceValue_(this.endDistance_);
+  }
+
+  private getDistanceRange_(): NumericRange {
+    return new NumericRange(this.getStartDistance_(), this.getEndDistance_());
+  }
+
   private runEffect_() {
     const distance = this.getRunDistance_();
     if (distance === this.lastRunDistance_) {
@@ -72,13 +97,14 @@ class ScrollEffect {
     }
     this.lastRunDistance_ = distance;
 
-    const percent = this.distanceRange_.getValueAsPercent(distance);
+    const percent = this.getDistanceRange_().getValueAsPercent(distance);
     this.effects_
       .forEach((effect) => effect.run(this.target_, distance, percent));
   }
 
   private getRunDistance_(): number {
-    return this.distanceRange_.clamp(this.getDistanceFunction_(this.target_));
+    return this.getDistanceRange_()
+      .clamp(this.getDistanceFunction_(this.target_));
   }
 
   public destroy() {
