@@ -10,6 +10,10 @@ import {sum} from "../math/sum";
 import {RGB} from "./rgb";
 import {ICssStyleValueInstance} from "../dom/style/interfaces/css-style-value";
 import {IMeasurableInstance} from "../math/interfaces/measurable";
+import {splitEvenlyOnItem} from "../array/split-evenly-on-item";
+import {getSubarraysOfLength} from "../array/get-subarrays-of-length";
+import {Dimensions2d} from "../math/geometry/dimensions-2d";
+import {flatten} from "../array/flatten";
 
 const HEX_VALUES = '0123456789abcdefABCDEF';
 
@@ -32,6 +36,25 @@ class Color implements ICssStyleValueInstance, IMeasurableInstance {
       colorInstances.set([red, green, blue, alpha], this);
       return this;
     }
+  }
+
+  public static fromImageData(imageData: ImageData) {
+    const colorValues = imageData.data;
+    const result = [];
+    for (let i = 0; i < colorValues.length; i +=4) {
+      const red = colorValues[i];
+      const green = colorValues[i+1];
+      const blue = colorValues[i+2];
+      const alpha = colorValues[i+3];
+      result.push(new Color(red, green, blue, alpha));
+    }
+    return result;
+  }
+
+  public static toImageData(pixels: Color[], size: Dimensions2d): ImageData {
+    const colorValues = pixels.map((pixel) => pixel.toNumbers());
+    return new ImageData(
+      new Uint8ClampedArray(flatten(colorValues)), size.width, size.height);
   }
 
   public static fromStyleString(value: string): Color {
@@ -105,6 +128,24 @@ class Color implements ICssStyleValueInstance, IMeasurableInstance {
         this.alpha_
       ];
     return `rgba(${values.join(', ')})`;
+  }
+
+  public getBrightness(): number {
+    // Bit of brightness formula taken from
+    // http://html5doctor.com/video-canvas-magic/
+    return 3 * this.getRed() + 4 * this.getGreen() + this.getBlue() >>> 3;
+  }
+
+  public getRed() {
+    return this.rgb_.getRed();
+  }
+
+  public getGreen() {
+    return this.rgb_.getGreen();
+  }
+
+  public getBlue() {
+    return this.rgb_.getBlue();
   }
 
   public toNumbers(): number[] {

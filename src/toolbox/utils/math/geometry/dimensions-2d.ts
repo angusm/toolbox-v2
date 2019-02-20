@@ -1,4 +1,5 @@
 import {Vector} from './vector';
+import {areArrayValuesEqual} from "../../array/are-array-values-equal";
 
 class Dimensions2d extends Vector {
   constructor(width: number = 0, height: number = 0, ...args: number[]) {
@@ -18,6 +19,18 @@ class Dimensions2d extends Vector {
     element.style.height = `${this.height}px`;
   }
 
+  public static fromCanvas<T extends Dimensions2d>(
+    element: HTMLCanvasElement = null
+  ): T {
+    return <T>new this(element.width, element.height);
+  }
+
+  public static fromVideo<T extends Dimensions2d>(
+    element: HTMLVideoElement = null
+  ): T {
+    return <T>new this(element.videoWidth, element.videoHeight);
+  }
+
   public static fromElementOffset<T extends Dimensions2d>(
     element: HTMLElement = null
   ): T {
@@ -34,6 +47,10 @@ class Dimensions2d extends Vector {
 
   public getArea(): number{
     return this.width * this.height;
+  }
+
+  public equals(dimensions: Dimensions2d): boolean {
+    return areArrayValuesEqual(this.getValues(), dimensions.getValues());
   }
 }
 
