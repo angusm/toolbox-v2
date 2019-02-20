@@ -24,7 +24,6 @@ const MAX_DRAG_VELOCITY = 10000;
 const SLIDE_INTERACTION = Symbol('Physical Slide Interaction');
 
 interface IPhysicalSlideConfig {
-  loop?: boolean;
   physical2d?: Physical2d;
   transitionTime?: number;
 }
@@ -66,13 +65,11 @@ class SlideToDraggableMap extends DynamicDefaultMap<HTMLElement, PhysicallyDragg
 
 class PhysicalSlide implements ITransition {
   readonly draggableBySlide_: SlideToDraggableMap;
-  readonly loop_: boolean;
   readonly transitionTargets_: Map<ICarousel, TransitionTarget>;
   readonly transitionTime_: number;
 
   constructor(
     {
-      loop = true,
       physical2d = null,
       transitionTime = 500,
     }: IPhysicalSlideConfig = {}
@@ -83,7 +80,6 @@ class PhysicalSlide implements ITransition {
         physical2d;
 
     this.draggableBySlide_ = new SlideToDraggableMap(finalPhysical2d);
-    this.loop_ = loop;
     this.transitionTime_ = transitionTime;
     this.transitionTargets_ = new Map<ICarousel, TransitionTarget>();
   }
@@ -196,7 +192,7 @@ class PhysicalSlide implements ITransition {
   private getHalves_(
     carousel: ICarousel, targetSlide: HTMLElement
   ): [HTMLElement[], HTMLElement[]] {
-    if (this.loop_) {
+    if (carousel.allowsLooping()) {
       return splitEvenlyOnItem(carousel.getSlides(), targetSlide);
     } else {
       return <[HTMLElement[], HTMLElement[]]>split(

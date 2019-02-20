@@ -7,6 +7,7 @@ interface ITransition {
 }
 
 interface ICarousel {
+  allowsLooping(): boolean;
   transitionToSlide(targetSlide: HTMLElement): void;
   isTransitioning(): boolean;
   isBeingInteractedWith(interaction?: symbol): boolean;

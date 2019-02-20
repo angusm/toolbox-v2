@@ -7,6 +7,7 @@ import {toBool} from "../../utils/to-bool";
 import {addClassIfMissing} from "../../utils/dom/class/add-class-if-missing";
 import {removeClassIfPresent} from "../../utils/dom/class/remove-class-if-present";
 import {CarouselSyncManager} from './sync-manager';
+import {NumericRange} from "../../utils/math/numeric-range";
 
 const defaultTransition: ITransition = new FadeTransition();
 const INTERACTION: symbol = Symbol('interaction');
@@ -19,6 +20,7 @@ class Carousel implements ICarousel {
   readonly container_: HTMLElement;
   readonly slides_: HTMLElement[];
   readonly transition_: ITransition;
+  readonly allowLooping_: boolean;
   private transitionTarget_: HTMLElement;
   private interactions_: symbol[];
 
@@ -27,13 +29,16 @@ class Carousel implements ICarousel {
     slides: HTMLElement[],
     {
       activeCssClass = CssClass.ACTIVE_SLIDE,
+      allowLooping = true,
       transition = defaultTransition,
     }: {
       activeCssClass?: string,
+      allowLooping?: boolean,
       transition?: ITransition,
     } = {}
   ) {
     this.activeClass_ = activeCssClass;
+    this.allowLooping_ = allowLooping;
     this.container_ = container;
     this.slides_ = slides;
     this.transition_ = transition;
@@ -41,6 +46,10 @@ class Carousel implements ICarousel {
     this.interactions_ = [];
 
     this.init_();
+  }
+
+  public allowsLooping() {
+    return this.allowLooping_;
   }
 
   private clearTransitionTarget_(): void {
@@ -172,10 +181,18 @@ class Carousel implements ICarousel {
       CarouselSyncManager.getSingleton().transitionToIndex(this, index);
     }
 
+    const clampedIndex = this.getClampedIndex_(index);
+    this.transitionToSlide(this.getSlides()[clampedIndex]);
+  }
+
+  private getClampedIndex_(index: number): number {
     const slidesLength = this.getSlides().length;
-    const clampedIndex = index % slidesLength;
-    const positiveIndex = (clampedIndex + slidesLength) % slidesLength;
-    this.transitionToSlide(this.getSlides()[positiveIndex]);
+    if (this.allowsLooping()) {
+      const clampedIndex = index % slidesLength; // Can be any sign
+      return (clampedIndex + slidesLength) % slidesLength; // Make positive
+    } else {
+      return new NumericRange(0, slidesLength - 1).clamp(index);
+    }
   }
 }
 
