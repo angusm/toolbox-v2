@@ -15,6 +15,7 @@ import {min} from "../../../utils/array/min";
 import {DraggableFixedYConstraint} from "../../draggable/constraints/fixed-y";
 import {sumOffsetWidths} from "../../../utils/dom/position/sum-offset-widths";
 import {splitEvenlyOnItem} from "../../../utils/array/split-evenly-on-item";
+import {FixedYConstraint} from "../../../utils/math/geometry/2d-constraints/fixed-y";
 
 const SLIDE_INTERACTION = Symbol('Slide Interaction');
 const GESTURE_MOVEMENT_THRESHOLD = 20;
@@ -195,7 +196,9 @@ class Slide implements ITransition {
     const desiredOffset = new Vector2d(desiredDistance, 0);
     translate2d(
       slideToTransition,
-      desiredOffset.subtract(currentOffset).add(translation));
+      desiredOffset
+        .subtract(new FixedYConstraint().constrain(currentOffset))
+        .add(translation));
   }
 
   private static transitionAfterSlide_(
@@ -210,7 +213,9 @@ class Slide implements ITransition {
     const desiredOffset = new Vector2d(desiredDistance, 0);
     translate2d(
       slideToTransition,
-      desiredOffset.subtract(currentOffset).add(translation));
+      desiredOffset
+        .subtract(new FixedYConstraint().constrain(currentOffset))
+        .add(translation));
   }
 
   public getActiveSlide(carousel: ICarousel): HTMLElement {
