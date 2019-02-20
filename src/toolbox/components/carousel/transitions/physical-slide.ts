@@ -17,11 +17,14 @@ import {splitEvenlyOnItem} from "../../../utils/array/split-evenly-on-item";
 import {sumOffsetWidths} from "../../../utils/dom/position/sum-offset-widths";
 import {Physical2d} from "../../physical/physical-2d";
 import {getSign} from "../../../utils/math/get-sign";
+import {split} from "../../../utils/array/split";
 
+const ZERO_VECTOR = new Vector2d(0, 0);
 const MAX_DRAG_VELOCITY = 10000;
 const SLIDE_INTERACTION = Symbol('Physical Slide Interaction');
 
 interface IPhysicalSlideConfig {
+  loop?: boolean;
   physical2d?: Physical2d;
   transitionTime?: number;
 }
@@ -63,13 +66,15 @@ class SlideToDraggableMap extends DynamicDefaultMap<HTMLElement, PhysicallyDragg
 
 class PhysicalSlide implements ITransition {
   readonly draggableBySlide_: SlideToDraggableMap;
+  readonly loop_: boolean;
   readonly transitionTargets_: Map<ICarousel, TransitionTarget>;
   readonly transitionTime_: number;
 
   constructor(
     {
+      loop = true,
       physical2d = null,
-      transitionTime = 500
+      transitionTime = 500,
     }: IPhysicalSlideConfig = {}
   ) {
     const finalPhysical2d =
@@ -78,6 +83,7 @@ class PhysicalSlide implements ITransition {
         physical2d;
 
     this.draggableBySlide_ = new SlideToDraggableMap(finalPhysical2d);
+    this.loop_ = loop;
     this.transitionTime_ = transitionTime;
     this.transitionTargets_ = new Map<ICarousel, TransitionTarget>();
   }
@@ -119,7 +125,9 @@ class PhysicalSlide implements ITransition {
           eventHandler.addListener(
             draggable,
             Drag,
-            (event: Drag) => Slide.handleDrag(event, carousel));
+            (event: Drag) => {
+              this.adjustSplit_(carousel, event.getElement(), event.getDelta());
+            });
           eventHandler.addListener(
             draggable,
             DragEnd,
@@ -129,10 +137,12 @@ class PhysicalSlide implements ITransition {
 
   public renderLoop(carousel: ICarousel): void {
     renderLoop.measure(() => {
-      if (this.transitionTargets_.has(carousel)) {
-        this.transitionToTarget_(carousel);
-      } else {
-        this.adjustSplit_(carousel);
+      if (!carousel.isBeingInteractedWith()) {
+        if (this.transitionTargets_.has(carousel)) {
+          this.transitionToTarget_(carousel);
+        } else {
+          this.adjustSplit_(carousel);
+        }
       }
     });
   }
@@ -183,13 +193,28 @@ class PhysicalSlide implements ITransition {
     draggable.setVelocity(new Vector2d(adjustedVelocity, 0));
   }
 
-  private adjustSplit_(carousel: ICarousel): void {
-    const activeSlide = carousel.getActiveSlide();
-    const halves = splitEvenlyOnItem(carousel.getSlides(), activeSlide);
+  private getHalves_(
+    carousel: ICarousel, targetSlide: HTMLElement
+  ): [HTMLElement[], HTMLElement[]] {
+    if (this.loop_) {
+      return splitEvenlyOnItem(carousel.getSlides(), targetSlide);
+    } else {
+      return <[HTMLElement[], HTMLElement[]]>split(
+        carousel.getSlides(), targetSlide);
+    }
+  }
+
+  private adjustSplit_(
+    carousel: ICarousel,
+    target: HTMLElement = null,
+    adjustment: Vector2d = ZERO_VECTOR
+  ): void {
+    const targetSlide = target ? target : carousel.getActiveSlide();
+    const halves = this.getHalves_(carousel, targetSlide);
     const slidesBefore = halves[0];
     const slidesAfter = halves[1];
-    this.adjustSlides_(activeSlide, slidesBefore.reverse(), -1);
-    this.adjustSlides_(activeSlide, slidesAfter, 1);
+    this.adjustSlides_(targetSlide, slidesBefore.reverse(), -1, adjustment);
+    this.adjustSlides_(targetSlide, slidesAfter, 1, adjustment);
   }
 
   private getSlideAdjustments_(
@@ -228,14 +253,19 @@ class PhysicalSlide implements ITransition {
   }
 
   private adjustSlides_(
-    activeSlide: HTMLElement, slides: HTMLElement[], direction: number
+    activeSlide: HTMLElement,
+    slides: HTMLElement[],
+    direction: number,
+    additionalTranslation: Vector2d
   ): void {
     Array.from(
       this.getSlideAdjustments_(activeSlide, slides, direction).entries())
       .forEach(
         ([slide, adjustment]) => {
           this.draggableBySlide_
-            .get(slide).adjustNextFrame(new Vector2d(adjustment, 0));
+            .get(slide)
+            .adjustNextFrame(
+              new Vector2d(adjustment + additionalTranslation.x, 0));
         });
   }
 

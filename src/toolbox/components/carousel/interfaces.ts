@@ -9,7 +9,7 @@ interface ITransition {
 interface ICarousel {
   transitionToSlide(targetSlide: HTMLElement): void;
   isTransitioning(): boolean;
-  isBeingInteractedWith(interaction: symbol): boolean;
+  isBeingInteractedWith(interaction?: symbol): boolean;
   isIdle(): boolean;
   getActiveSlide(): HTMLElement;
   getActiveSlideIndex(): number;
