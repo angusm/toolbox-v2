@@ -19,7 +19,14 @@ class KeyframePair {
   }
 
   public getValueAtPosition(position: number): ITweenableValueInstance {
-    const percent: number = this.positionRange_.getValueAsPercent(position);
+    let percent :number;
+    if (this.positionRange_.getMin() === Number.NEGATIVE_INFINITY) {
+      percent = 0;
+    } else if (this.positionRange_.getMax() === Number.POSITIVE_INFINITY) {
+      percent = 100;
+    } else {
+      percent = this.positionRange_.getValueAsPercent(position);
+    }
     return <ITweenableValueInstance>this.valueRange_.getPercentAsValue(percent);
   }
 
