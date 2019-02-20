@@ -90,10 +90,9 @@ class PhysicalSlide implements ITransition {
   private static getTranslationFromCenter_(
     target: HTMLElement, carousel: ICarousel
   ): Vector2d {
-    const xDistance =
-      getVisibleDistanceBetweenElementCenters(target, carousel.getContainer())
-        .x;
-    return new Vector2d(xDistance, 0);
+    const distance =
+      getVisibleDistanceBetweenElementCenters(target, carousel.getContainer());
+    return new Vector2d(distance.x, 0);
   }
 
   private static initActiveSlide_(
