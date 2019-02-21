@@ -122,6 +122,14 @@ class RenderLoop {
     this.msPerFrame_ = 1000 / fps;
   }
 
+  public getFps(): number {
+    return 1000 / this.msPerFrame_;
+  }
+
+  public getMsPerFrame(): number {
+    return this.msPerFrame_;
+  }
+
   public getTargetFrameLength() {
     return this.msPerFrame_;
   }

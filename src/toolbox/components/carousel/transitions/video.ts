@@ -1,13 +1,16 @@
 import {ICarousel, ITransition} from '../interfaces';
-import {getOpacity} from '../../../utils/dom/style/get-opacity';
 import {renderLoop} from '../../../utils/render-loop';
 import {getMostVisibleElement} from "../../../utils/dom/position/get-most-visible-element";
 
-class Fade implements ITransition {
-  readonly step_: number;
+class Video implements ITransition {
+  readonly transitionTime_: number;
+  readonly video_: HTMLVideoElement;
+  private transitionTargets_: Map<ICarousel, HTMLElement>;
 
-  constructor(step: number = 0.1) {
-    this.step_ = step;
+  constructor(video: HTMLVideoElement, transitionPoint: number) {
+    this.transitionTargets_ = new Map();
+    this.transitionTime_ = transitionPoint;
+    this.video_ = video;
   }
 
   public init(targetSlide: HTMLElement, carousel: ICarousel) {
@@ -24,18 +27,16 @@ class Fade implements ITransition {
   }
 
   public transition(targetSlide: HTMLElement, carousel: ICarousel) {
-    const slidesToFade =
-      carousel.getSlides().filter((slide) => slide !== targetSlide);
-    renderLoop.measure(() => {
-      const opacity = getOpacity(targetSlide) + this.step_;
-      renderLoop.mutate(
-        () => targetSlide.style.opacity = '' + Math.min(1, opacity));
-      slidesToFade.forEach((slide) => {
-        const opacity = getOpacity(slide) - this.step_;
-        renderLoop.mutate(
-          () => slide.style.opacity = '' + Math.max(0, opacity));
+    const timeToTransition =
+      Math.abs(this.video_.currentTime * 1000 - this.transitionTime_);
+    this.video_.play();
+    if (timeToTransition < renderLoop.getMsPerFrame()) {
+      renderLoop.mutate(() => {
+        carousel.getSlides()
+          .forEach((slide: HTMLElement) => slide.style.opacity = '0');
+        targetSlide.style.opacity = '1';
       });
-    });
+    }
   }
 
   public hasTransitionedTo(slide: HTMLElement, carousel: ICarousel): boolean {
@@ -45,4 +46,4 @@ class Fade implements ITransition {
   public renderLoop(carousel: ICarousel) {}
 }
 
-export {Fade};
+export {Video};
