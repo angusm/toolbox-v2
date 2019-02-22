@@ -2,11 +2,19 @@ import { hexToInt } from "./hex-to-int";
 import { expect } from "chai";
 import "mocha";
 
+const tests = [
+  ["FFFFFF", 16777215],
+  ["000000", 0],
+  ["F", 15],
+  ["F0D34B2A7C231", 4236644637458993]
+];
+
 describe("hexToInt", () => {
-  it("should correctly return a large value", () => {
-    expect(hexToInt("FFFFFF")).to.equal(16777215);
-  });
-  it("should correctly return zero value", () => {
-    expect(hexToInt("000000")).to.equal(0);
+  tests.forEach(([testInput, expectedResult]) => {
+    it(`should return ${JSON.stringify(expectedResult)} for ${JSON.stringify(
+      testInput
+    )}`, () => {
+      expect(hexToInt(testInput)).to.equal(expectedResult);
+    });
   });
 });
