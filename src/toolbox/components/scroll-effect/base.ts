@@ -46,26 +46,61 @@ class ScrollEffect {
 
   /**
    *
-   * @param target The element whose position should be tracked for determining
-   *     the distance scrolled. Normally this is also the same element to which
-   *     effects are supplied, but some effects such as Tween will allow you to
-   *     provide separate targets to apply effect styles to.
-   * @param getDistanceFunction
-   * @param startDistance
-   * @param endDistance
-   * @param effects
+   * @param target The element to use for tracking distance scrolled.
+   *
+   * Normally this is also the same element to which effects are supplied,
+   * but some effects such as Tween will allow you to provide separate
+   * targets to apply effect styles to.
+   *
+   *
+   * @param getDistanceFunction Method used to determine distance scrolled.
+   *
+   * This function defaults to calculating the distance between the center
+   * of the given target element and the center of the viewport. Values are
+   * negative when the element is below the center of the viewport and
+   * positive when it is above the center of the viewport.
+   *
+   * Custom functions can be passed in here and should expect to receive the
+   * target element as the sole parameter, and return a number indicating
+   * the distance as it applies to the provided start and end distances.
+   * Default functions assumes these are pixel values, but there's nothing
+   * stopping you from getting weird with it.
+   *
+   * A small sample of default distance functions can be found in the
+   * scroll-effect distance-function.ts module. Please see that module for
+   * more details.
+   *
+   * @param startDistance Returns distance at which effects should start.
+   *
+   * This parameter accepts a function that returns the distance at which
+   * effects passed to this ScrollEffect instance should start being
+   * applied.
+   *
+   * This function should expect no parameters and return a numeric value.
+   * ScrollEffect and its supporting modules typically expect this to be a
+   * value in pixels, but I'm not your Dad so do what you want.
+   *
+   * @param endDistance Returns distance at which effects should end.
+   *
+   * This parameter accepts a function that returns the distance at which
+   * effects passed to this ScrollEffect instance should stop being
+   * applied.
+   *
+   * This function should expect no parameters and return a numeric value.
+   * ScrollEffect and its supporting modules typically expect this to be a
+   * value in pixels, but you're a grown person and I can't stop you from
+   * making bad choices.
+   *
+   * @param effects Array of effects to run when the user is scrolling.
+   *
+   * List of the effects that should run when the user is scrolling within
+   * the provided ranges, as decided by the provided target and distance
+   * function.
+   *
+   * Effects are run in order.
    */
   constructor(
-    /**
-     * HTMLElement:
-     */
     target: HTMLElement,
-    /**
-     * IScrollEffectOptions: A set of options that can help configure the effect
-     * that should be applied. Not that if no `effects` are provided,
-     * initializing a new ScrollEffect instance will do nothing but use up
-     * resources.
-     */
     {
 
       getDistanceFunction = defaultOptions.getDistanceFunction,

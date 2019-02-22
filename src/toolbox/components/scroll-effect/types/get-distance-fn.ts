@@ -1,3 +1,3 @@
-type GetDistanceFn = (a: HTMLElement, b?: HTMLElement) => number;
+type GetDistanceFn = (target: HTMLElement) => number;
 
 export {GetDistanceFn};

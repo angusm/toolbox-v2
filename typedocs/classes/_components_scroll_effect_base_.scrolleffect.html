@@ -125,39 +125,78 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/angusm/toolbox-v2/blob/483a227d/src/toolbox/components/scroll-effect/base.ts#L45">components/scroll-effect/base.ts:45</a></li>
+									<li>Defined in <a href="https://github.com/angusm/toolbox-v2/blob/ccecd691/src/toolbox/components/scroll-effect/base.ts#L45">components/scroll-effect/base.ts:45</a></li>
 								</ul>
 							</aside>
+							<div class="tsd-comment tsd-typography">
+							</div>
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
 									<h5>target: <span class="tsd-signature-type">HTMLElement</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<div class="lead">
+											<p>The element to use for tracking distance scrolled.</p>
+											<p>Normally this is also the same element to which effects are supplied,
+												but some effects such as Tween will allow you to provide separate
+											targets to apply effect styles to.</p>
+										</div>
+									</div>
 								</li>
 								<li>
 									<h5><span class="tsd-flag ts-flagDefault value">Default value</span> __namedParameters: <span class="tsd-signature-type">object</span><span class="tsd-signature-symbol"> =&nbsp;defaultOptions</span></h5>
 									<ul class="tsd-parameters">
 										<li class="tsd-parameter">
 											<h5>effects<span class="tsd-signature-symbol">: </span><a href="../interfaces/_components_scroll_effect_effects_ieffect_.ieffect.html" class="tsd-signature-type">IEffect</a><span class="tsd-signature-symbol">[]</span></h5>
+											<div class="tsd-comment tsd-typography">
+												<p>Array of effects to run when the user is scrolling.</p>
+												<p>List of the effects that should run when the user is scrolling within
+													the provided ranges, as decided by the provided target and distance
+												function.</p>
+												<p>Effects are run in order.</p>
+											</div>
 										</li>
 										<li class="tsd-parameter">
 											<h5>end<wbr>Distance<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">function</span></h5>
+											<div class="tsd-comment tsd-typography">
+												<p>Returns distance at which effects should end.</p>
+												<p>This parameter accepts a function that returns the distance at which
+													effects passed to this ScrollEffect instance should stop being
+												applied.</p>
+												<p>This function should expect no parameters and return a numeric value.
+													ScrollEffect and its supporting modules typically expect this to be a
+													value in pixels, but you&#39;re a grown person and I can&#39;t stop you from
+												making bad choices.</p>
+											</div>
 										</li>
 										<li class="tsd-parameter">
 											<h5>get<wbr>Distance<wbr>Function<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">function</span></h5>
+											<div class="tsd-comment tsd-typography">
+												<p>Method used to determine distance scrolled.</p>
+												<p>This function defaults to calculating the distance between the center
+													of the given target element and the center of the viewport. Values are
+													negative when the element is below the center of the viewport and
+												positive when it is above the center of the viewport.</p>
+												<p>Custom functions can be passed in here and should expect to receive the
+													target element as the sole parameter, and return a number indicating
+													the distance as it applies to the provided start and end distances.
+													Default functions assumes these are pixel values, but there&#39;s nothing
+												stopping you from getting weird with it.</p>
+												<p>A small sample of default distance functions can be found in the
+													scroll-effect distance-function.ts module. Please see that module for
+												more details.</p>
+											</div>
 											<ul class="tsd-parameters">
 												<li class="tsd-parameter-siganture">
 													<ul class="tsd-signatures tsd-kind-type-literal tsd-parent-kind-variable tsd-is-not-exported">
-														<li class="tsd-signature tsd-kind-icon"><span class="tsd-signature-symbol">(</span>a<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">HTMLElement</span>, b<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">HTMLElement</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span></li>
+														<li class="tsd-signature tsd-kind-icon"><span class="tsd-signature-symbol">(</span>target<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">HTMLElement</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span></li>
 													</ul>
 													<ul class="tsd-descriptions">
 														<li class="tsd-description">
 															<h4 class="tsd-parameters-title">Parameters</h4>
 															<ul class="tsd-parameters">
 																<li>
-																	<h5>a: <span class="tsd-signature-type">HTMLElement</span></h5>
-																</li>
-																<li>
-																	<h5><span class="tsd-flag ts-flagOptional">Optional</span> b: <span class="tsd-signature-type">HTMLElement</span></h5>
+																	<h5>target: <span class="tsd-signature-type">HTMLElement</span></h5>
 																</li>
 															</ul>
 															<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">number</span></h4>
@@ -168,6 +207,15 @@
 										</li>
 										<li class="tsd-parameter">
 											<h5>start<wbr>Distance<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">function</span></h5>
+											<div class="tsd-comment tsd-typography">
+												<p>Returns distance at which effects should start.</p>
+												<p>This parameter accepts a function that returns the distance at which
+													effects passed to this ScrollEffect instance should start being
+												applied.</p>
+												<p>This function should expect no parameters and return a numeric value.
+													ScrollEffect and its supporting modules typically expect this to be a
+												value in pixels, but I&#39;m not your Dad so do what you want.</p>
+											</div>
 										</li>
 									</ul>
 								</li>
@@ -185,7 +233,7 @@
 					<div class="tsd-signature tsd-kind-icon">effects_<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Array</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/_components_scroll_effect_effects_ieffect_.ieffect.html" class="tsd-signature-type">IEffect</a><span class="tsd-signature-symbol">&gt;</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/angusm/toolbox-v2/blob/483a227d/src/toolbox/components/scroll-effect/base.ts#L43">components/scroll-effect/base.ts:43</a></li>
+							<li>Defined in <a href="https://github.com/angusm/toolbox-v2/blob/ccecd691/src/toolbox/components/scroll-effect/base.ts#L43">components/scroll-effect/base.ts:43</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -195,7 +243,7 @@
 					<div class="tsd-signature tsd-kind-icon">end<wbr>Distance_<span class="tsd-signature-symbol">:</span> <a href="../modules/_components_scroll_effect_types_scroll_effect_options_.html#tscrolleffectdistancevalue" class="tsd-signature-type">TScrollEffectDistanceValue</a></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/angusm/toolbox-v2/blob/483a227d/src/toolbox/components/scroll-effect/base.ts#L42">components/scroll-effect/base.ts:42</a></li>
+							<li>Defined in <a href="https://github.com/angusm/toolbox-v2/blob/ccecd691/src/toolbox/components/scroll-effect/base.ts#L42">components/scroll-effect/base.ts:42</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -205,7 +253,7 @@
 					<div class="tsd-signature tsd-kind-icon">get<wbr>Distance<wbr>Function_<span class="tsd-signature-symbol">:</span> <a href="../modules/_components_scroll_control_types_get_distance_fn_.html#getdistancefn" class="tsd-signature-type">GetDistanceFn</a></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/angusm/toolbox-v2/blob/483a227d/src/toolbox/components/scroll-effect/base.ts#L40">components/scroll-effect/base.ts:40</a></li>
+							<li>Defined in <a href="https://github.com/angusm/toolbox-v2/blob/ccecd691/src/toolbox/components/scroll-effect/base.ts#L40">components/scroll-effect/base.ts:40</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -215,7 +263,7 @@
 					<div class="tsd-signature tsd-kind-icon">start<wbr>Distance_<span class="tsd-signature-symbol">:</span> <a href="../modules/_components_scroll_effect_types_scroll_effect_options_.html#tscrolleffectdistancevalue" class="tsd-signature-type">TScrollEffectDistanceValue</a></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/angusm/toolbox-v2/blob/483a227d/src/toolbox/components/scroll-effect/base.ts#L41">components/scroll-effect/base.ts:41</a></li>
+							<li>Defined in <a href="https://github.com/angusm/toolbox-v2/blob/ccecd691/src/toolbox/components/scroll-effect/base.ts#L41">components/scroll-effect/base.ts:41</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -225,7 +273,7 @@
 					<div class="tsd-signature tsd-kind-icon">target_<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">HTMLElement</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/angusm/toolbox-v2/blob/483a227d/src/toolbox/components/scroll-effect/base.ts#L39">components/scroll-effect/base.ts:39</a></li>
+							<li>Defined in <a href="https://github.com/angusm/toolbox-v2/blob/ccecd691/src/toolbox/components/scroll-effect/base.ts#L39">components/scroll-effect/base.ts:39</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -242,7 +290,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/angusm/toolbox-v2/blob/483a227d/src/toolbox/components/scroll-effect/base.ts#L138">components/scroll-effect/base.ts:138</a></li>
+									<li>Defined in <a href="https://github.com/angusm/toolbox-v2/blob/ccecd691/src/toolbox/components/scroll-effect/base.ts#L181">components/scroll-effect/base.ts:181</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
