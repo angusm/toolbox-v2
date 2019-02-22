@@ -41,7 +41,7 @@ class SeenBottomForDuration extends TbEvent {
         IsBottomVisible,
         () => {
           eventHandler.removeListener(uid);
-          timeoutUid = setTimeout(
+          timeoutUid = window.setTimeout(
             () => {
               eventHandler.dispatchEvent(new this(target));
             }, this.getThreshold())

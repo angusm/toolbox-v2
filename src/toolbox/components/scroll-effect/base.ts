@@ -10,6 +10,11 @@ import {IEffect} from "./effects/ieffect";
 import {removeFirstInstance} from "../../utils/array/remove-first-instance";
 import {GetDistanceFn} from "./types/get-distance-fn";
 
+/**
+ * These are the default option values provided to ScrollEffect unless otherwise
+ * overridden.
+ * @hidden
+ */
 const defaultOptions: IScrollEffectOptions =
   {
     getDistanceFunction: DistanceFunction.DISTANCE_FROM_DOCUMENT_CENTER,
@@ -18,8 +23,18 @@ const defaultOptions: IScrollEffectOptions =
     effects: [],
   };
 
+/**
+ * Tracks active effects for better garbage collection.
+ * @hidden
+ */
 const ActiveEffects: ArrayMap<IEffect, ScrollEffect> = new ArrayMap();
 
+/**
+ * Handles a scroll effect or scroll effects on a target element.
+ *
+ * Calculates the distance scrolled in pixels and as a percent of provided
+ * ranges, before calling the run function on the provided effects.
+ */
 class ScrollEffect {
   readonly target_: HTMLElement;
   readonly getDistanceFunction_: GetDistanceFn;
@@ -29,9 +44,30 @@ class ScrollEffect {
   private lastRunDistance_: number;
   private destroyed_: boolean;
 
+  /**
+   *
+   * @param target The element whose position should be tracked for determining
+   *     the distance scrolled. Normally this is also the same element to which
+   *     effects are supplied, but some effects such as Tween will allow you to
+   *     provide separate targets to apply effect styles to.
+   * @param getDistanceFunction
+   * @param startDistance
+   * @param endDistance
+   * @param effects
+   */
   constructor(
+    /**
+     * HTMLElement:
+     */
     target: HTMLElement,
+    /**
+     * IScrollEffectOptions: A set of options that can help configure the effect
+     * that should be applied. Not that if no `effects` are provided,
+     * initializing a new ScrollEffect instance will do nothing but use up
+     * resources.
+     */
     {
+
       getDistanceFunction = defaultOptions.getDistanceFunction,
       startDistance = defaultOptions.startDistance,
       endDistance = defaultOptions.endDistance,
