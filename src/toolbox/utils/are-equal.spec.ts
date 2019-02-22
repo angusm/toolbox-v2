@@ -19,7 +19,7 @@ const tests = [
 describe('areEqual', () => {
   tests.forEach(([testInput, expectedResult]) => {
     it(`should return ${JSON.stringify(expectedResult)} for ${JSON.stringify(testInput)}`, () => {
-      expect(areEqual(...testInput)).to.equal(expectedResult);
+      expect(areEqual(...<Array<any>>testInput)).to.equal(expectedResult);
     });
   });
 });
