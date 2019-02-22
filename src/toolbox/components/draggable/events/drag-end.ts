@@ -2,8 +2,8 @@ import {TbEvent} from '../../../utils/event/events/tb-event';
 import {Vector2d} from "../../../utils/math/geometry/vector-2d";
 
 class DragEnd extends TbEvent {
-  readonly delta_: Vector2d;
-  readonly endVelocity_: Vector2d;
+  private readonly delta_: Vector2d;
+  private readonly endVelocity_: Vector2d;
 
   constructor(target: any, delta: Vector2d, endVelocity: Vector2d) {
     super(target);

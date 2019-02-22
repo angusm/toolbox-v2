@@ -36,11 +36,11 @@ const ActiveEffects: ArrayMap<IEffect, ScrollEffect> = new ArrayMap();
  * ranges, before calling the run function on the provided effects.
  */
 class ScrollEffect {
-  readonly target_: HTMLElement;
-  readonly getDistanceFunction_: GetDistanceFn;
-  readonly startDistance_: TScrollEffectDistanceValue;
-  readonly endDistance_: TScrollEffectDistanceValue;
-  readonly effects_: Array<IEffect>;
+  private readonly target_: HTMLElement;
+  private readonly getDistanceFunction_: GetDistanceFn;
+  private readonly startDistance_: TScrollEffectDistanceValue;
+  private readonly endDistance_: TScrollEffectDistanceValue;
+  private readonly effects_: Array<IEffect>;
   private lastRunDistance_: number;
   private destroyed_: boolean;
 

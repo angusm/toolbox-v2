@@ -3,7 +3,7 @@ import {ICssStyleValueInstance} from "./interfaces/css-style-value";
 
 class CssNumber implements IMeasurableInstance, ICssStyleValueInstance {
   ['constructor']: typeof CssNumber;
-  readonly value_: number;
+  private readonly value_: number;
 
   constructor(value: number) {
     this.value_ = value;

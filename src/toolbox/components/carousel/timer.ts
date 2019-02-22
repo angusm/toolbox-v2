@@ -4,8 +4,8 @@ import {Carousel} from "./carousel";
 const DEFAULT_INTERVAL: number = 5000;
 
 class CarouselTimer {
-  readonly interval_: number;
-  readonly carousel_: Carousel;
+  private readonly interval_: number;
+  private readonly carousel_: Carousel;
   private lastActionTime_: number;
 
   constructor(carousel: Carousel, interval: number = DEFAULT_INTERVAL) {

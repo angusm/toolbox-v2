@@ -14,8 +14,8 @@ class ContainerPosition {
  * `overflow: hidden` on parent elements.
  */
 class Sticky {
-  readonly container_: HTMLElement;
-  readonly target_: HTMLElement;
+  private readonly container_: HTMLElement;
+  private readonly target_: HTMLElement;
   private destroyed_: boolean;
   private lastPosition_: Symbol;
 

@@ -4,22 +4,22 @@ import {IVideoFilterOptions} from "./i-video-filter-options";
 
 class VideoFilter {
   // Off-screen canvas to render video to so that its pixel data can be grabbed
-  readonly backingCanvas_: HTMLCanvasElement;
+  private readonly backingCanvas_: HTMLCanvasElement;
 
   // Filter instance that will perform actual changes to the pixel data
-  readonly filter_: IFilter;
+  private readonly filter_: IFilter;
 
   // Where the filtered pixels will be rendered
-  readonly primaryCanvas_: HTMLCanvasElement;
+  private readonly primaryCanvas_: HTMLCanvasElement;
 
   // Video element to pull frames from
-  readonly video_: HTMLVideoElement;
+  private readonly video_: HTMLVideoElement;
 
   // Factor to grow/shrink the video dimensions by before filtering
   // Scaling is useful to reduce the run-time of the filter by shrinking the
   // number of pixels to be processed. This does of course reduce the resolution
   // of the final output.
-  readonly scale_: number;
+  private readonly scale_: number;
 
   // True if we're done with this and it can be de-allocated
   private destroyed_: boolean = false;

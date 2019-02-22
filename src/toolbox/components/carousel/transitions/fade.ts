@@ -4,7 +4,7 @@ import {renderLoop} from '../../../utils/render-loop';
 import {getMostVisibleElement} from "../../../utils/dom/position/get-most-visible-element";
 
 class Fade implements ITransition {
-  readonly step_: number;
+  private readonly step_: number;
 
   constructor(step: number = 0.1) {
     this.step_ = step;

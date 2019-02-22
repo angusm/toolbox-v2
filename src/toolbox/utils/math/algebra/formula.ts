@@ -17,7 +17,7 @@ type InterstitialFormulaPiece = IOperation | Symbol | string
 type InterstitialFormula = Array<InterstitialFormulaPiece>
 
 class Formula {
-  readonly pieces_: FormulaPiece[];
+  private readonly pieces_: FormulaPiece[];
 
   constructor(pieces: FormulaPiece[]) {
     if (Formula.hasImplicitMultiplication_(pieces)) {

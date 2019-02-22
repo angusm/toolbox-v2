@@ -10,10 +10,10 @@ import {zip} from "../array/zip";
 import {getSharedClass} from "../inheritance/get-shared-class";
 
 class MeasurableRange implements IRange<IMeasurableInstance> {
-  readonly class_: IMeasurableStatic;
-  readonly min_: IMeasurableInstance;
-  readonly max_: IMeasurableInstance;
-  readonly ranges_: NumericRange[];
+  private readonly class_: IMeasurableStatic;
+  private readonly min_: IMeasurableInstance;
+  private readonly max_: IMeasurableInstance;
+  private readonly ranges_: NumericRange[];
 
   constructor(min: IMeasurableInstance, max: IMeasurableInstance) {
     this.class_ =

@@ -12,9 +12,9 @@ const defaultOptions: ITweenOptions = {
 };
 
 class Tween implements IEffect {
-  readonly animation_: Animation;
-  readonly keyframeStyle_: KeyframeStyle;
-  readonly styleTarget_: HTMLElement;
+  private readonly animation_: Animation;
+  private readonly keyframeStyle_: KeyframeStyle;
+  private readonly styleTarget_: HTMLElement;
 
   constructor(
     keyframes: TKeyframesConfig,

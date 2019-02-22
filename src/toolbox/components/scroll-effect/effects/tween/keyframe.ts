@@ -21,9 +21,9 @@ type TPositionPropertyStyleMapPair = [number, TPropertyStyleMap];
 type TSortedPropertyStyleMaps = TPositionPropertyStyleMapPair[];
 
 class Keyframe {
-  readonly position_: number;
-  readonly property_: string;
-  readonly value_: ITweenableValueInstance;
+  private readonly position_: number;
+  private readonly property_: string;
+  private readonly value_: ITweenableValueInstance;
 
   constructor(
     position: number,

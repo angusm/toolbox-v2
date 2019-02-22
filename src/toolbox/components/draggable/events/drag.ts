@@ -3,8 +3,8 @@ import {TbEvent} from '../../../utils/event/events/tb-event';
 import {Vector2d} from "../../../utils/math/geometry/vector-2d";
 
 class Drag extends TbEvent {
-  readonly element_: HTMLElement;
-  readonly delta_: Vector2d;
+  private readonly element_: HTMLElement;
+  private readonly delta_: Vector2d;
 
   constructor(target: IDraggable, element: HTMLElement, delta: Vector2d) {
     super(target);

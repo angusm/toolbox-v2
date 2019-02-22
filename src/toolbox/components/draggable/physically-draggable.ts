@@ -23,7 +23,7 @@ const defaultPhysicallyDraggableConfig: IPhysicallyDraggableConfig =
   };
 
 class PhysicallyDraggable implements IDraggable {
-  readonly draggable_: Draggable;
+  private readonly draggable_: Draggable;
   private positioned2d_: PhysicallyPositionedElement2d;
 
   constructor(

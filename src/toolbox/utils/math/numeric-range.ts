@@ -2,8 +2,8 @@ import {IRange} from "../interfaces/range";
 import {getSign} from "./get-sign";
 
 class NumericRange implements IRange<number>{
-  readonly min_: number;
-  readonly max_: number;
+  private readonly min_: number;
+  private readonly max_: number;
 
   constructor(min: number, max: number) {
     this.min_ = min;

@@ -14,7 +14,7 @@ class CacheKey {
 }
 
 class CarouselNav {
-  readonly activeCssClass_: string;
+  private readonly activeCssClass_: string;
   private carousel_: Carousel;
   private navElement_: HTMLElement;
   private navItems_: DynamicDefaultMap<HTMLElement, HTMLElement>;

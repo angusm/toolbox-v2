@@ -21,8 +21,8 @@ const SLIDE_INTERACTION = Symbol('Slide Interaction');
 const GESTURE_MOVEMENT_THRESHOLD = 20;
 
 class SlideDistancePair {
-  readonly slide_: HTMLElement;
-  readonly distance_: number;
+  private readonly slide_: HTMLElement;
+  private readonly distance_: number;
 
   constructor(slide: HTMLElement, distance: number) {
     this.slide_ = slide;
@@ -39,7 +39,7 @@ class SlideDistancePair {
 }
 
 class Slide implements ITransition {
-  readonly step_: number;
+  private readonly step_: number;
 
   constructor(step: number = 50) {
     this.step_ = step;

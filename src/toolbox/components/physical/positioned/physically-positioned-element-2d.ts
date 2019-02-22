@@ -4,8 +4,8 @@ import {Vector2d} from "../../../utils/math/geometry/vector-2d";
 import {Matrix} from "../../../utils/dom/position/matrix";
 
 class PhysicallyPositionedElement2d {
-  readonly target_: HTMLElement;
-  readonly physical2d_: Physical2d;
+  private readonly target_: HTMLElement;
+  private readonly physical2d_: Physical2d;
 
   private nextFrameAdjustment_: Vector2d;
 

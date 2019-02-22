@@ -25,10 +25,10 @@ const INTERACTION_END_EVENTS = [
 ];
 
 class ScrollControl {
-  readonly control_: HTMLInputElement;
-  readonly frame_: HTMLElement;
-  readonly getDistanceFunction_: GetDistanceFn;
-  readonly distanceRange_: NumericRange;
+  private readonly control_: HTMLInputElement;
+  private readonly frame_: HTMLElement;
+  private readonly getDistanceFunction_: GetDistanceFn;
+  private readonly distanceRange_: NumericRange;
   private lastValue_: number;
   private interacting_: boolean;
   private destroyed_: boolean;

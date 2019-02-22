@@ -20,10 +20,10 @@ interface ICursorEvent {
 }
 
 class CursorPosition {
-  readonly position_: Vector2d;
-  readonly pressed_: boolean;
-  readonly frame_: number;
-  readonly time_: Date;
+  private readonly position_: Vector2d;
+  private readonly pressed_: boolean;
+  private readonly frame_: number;
+  private readonly time_: Date;
 
   constructor(position: Vector2d, pressed: boolean) {
     this.position_ = position;
@@ -59,7 +59,7 @@ class CursorPosition {
 
 const ZERO_POSITION: CursorPosition = new CursorPosition(ZERO_VECTOR, false);
 class CursorData {
-  readonly positions_: CursorPosition[];
+  private readonly positions_: CursorPosition[];
 
   constructor(
     currentPosition: CursorPosition = ZERO_POSITION,

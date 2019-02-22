@@ -16,11 +16,11 @@ const CssClass = Object.freeze({
 });
 
 class Carousel implements ICarousel {
-  readonly activeClass_: string;
-  readonly container_: HTMLElement;
-  readonly slides_: HTMLElement[];
-  readonly transition_: ITransition;
-  readonly allowLooping_: boolean;
+  private readonly activeClass_: string;
+  private readonly container_: HTMLElement;
+  private readonly slides_: HTMLElement[];
+  private readonly transition_: ITransition;
+  private readonly allowLooping_: boolean;
   private transitionTarget_: HTMLElement;
   private interactions_: symbol[];
 

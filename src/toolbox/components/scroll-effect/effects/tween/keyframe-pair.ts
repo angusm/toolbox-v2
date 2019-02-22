@@ -4,8 +4,8 @@ import {MeasurableRange} from "../../../../utils/math/measurable-range";
 import {ITweenableValueInstance} from "./interfaces/tweenable-value";
 
 class KeyframePair {
-  readonly positionRange_: NumericRange;
-  readonly valueRange_: MeasurableRange;
+  private readonly positionRange_: NumericRange;
+  private readonly valueRange_: MeasurableRange;
 
   constructor(keyframeA: Keyframe, keyframeB: Keyframe) {
     this.positionRange_

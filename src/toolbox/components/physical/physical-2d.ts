@@ -31,8 +31,8 @@ const defaultPhysical2dConfig = {
 };
 
 class PredictedPhysical2dState {
-  readonly distanceTraveled_: Vector2d;
-  readonly velocity_: Vector2d;
+  private readonly distanceTraveled_: Vector2d;
+  private readonly velocity_: Vector2d;
 
   constructor(distanceTraveled: Vector2d, velocity: Vector2d) {
     this.distanceTraveled_ = distanceTraveled;
@@ -49,7 +49,7 @@ class PredictedPhysical2dState {
 }
 
 class Physical2d {
-  readonly constraints_: IConstraint2d[];
+  private readonly constraints_: IConstraint2d[];
 
   private acceleration_: Vector2d;
   private breakForce_: number;

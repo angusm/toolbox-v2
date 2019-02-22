@@ -22,7 +22,7 @@ function generateTweenableTransformClass(
   class TweenableTransformClass implements ITweenableValueInstance {
     ['constructor']: typeof TweenableTransformClass;
     public static valuesLength: number = totalValuesLength;
-    readonly values_: number[];
+    private readonly values_: number[];
 
     constructor(...values: number[]) {
       this.values_ = values;

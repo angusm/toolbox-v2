@@ -1,16 +1,16 @@
 import {DynamicDefaultMap} from './map/dynamic-default';
 
 class RenderStep {
-  public static readonly CLEANUP = Symbol('Cleanup');
-  public static readonly FRAME_COUNT = Symbol('Frame Count');
-  public static readonly MEASURE = Symbol('Measure');
-  public static readonly PHYSICS = Symbol('Physics');
-  public static readonly MUTATE = Symbol('Mutate');
-  public static readonly PRE_MEASURE = Symbol('Pre-measure');
-  public static readonly SCROLL_PRE_MEASURE = Symbol('Scroll-measure');
-  public static readonly SCROLL_MEASURE = Symbol('Scroll-measure');
-  public static readonly SCROLL_MUTATE = Symbol('Scroll-mutate');
-  public static readonly SCROLL_CLEANUP = Symbol('Scroll-cleanup');
+  public static private readonly CLEANUP = Symbol('Cleanup');
+  public static private readonly FRAME_COUNT = Symbol('Frame Count');
+  public static private readonly MEASURE = Symbol('Measure');
+  public static private readonly PHYSICS = Symbol('Physics');
+  public static private readonly MUTATE = Symbol('Mutate');
+  public static private readonly PRE_MEASURE = Symbol('Pre-measure');
+  public static private readonly SCROLL_PRE_MEASURE = Symbol('Scroll-measure');
+  public static private readonly SCROLL_MEASURE = Symbol('Scroll-measure');
+  public static private readonly SCROLL_MUTATE = Symbol('Scroll-mutate');
+  public static private readonly SCROLL_CLEANUP = Symbol('Scroll-cleanup');
 }
 
 const ALL_STEP_ORDER: Array<symbol> = [

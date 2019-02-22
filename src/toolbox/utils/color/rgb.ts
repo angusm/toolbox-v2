@@ -6,9 +6,9 @@ const rgbInstances = new MultiValueMap<number, RGB>();
 
 class RGB extends Vector implements IMeasurableInstance {
   ['constructor']: typeof RGB; // For checking interface static methods
-  readonly red_: number;
-  readonly green_: number;
-  readonly blue_: number;
+  private readonly red_: number;
+  private readonly green_: number;
+  private readonly blue_: number;
 
   constructor(red: number = 0, green: number = 0, blue: number = 0) {
     super(red, green, blue);

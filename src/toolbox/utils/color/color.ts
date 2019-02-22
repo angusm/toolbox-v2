@@ -22,8 +22,8 @@ const colorInstances = new MultiValueMap<number, Color>();
 
 class Color implements ICssStyleValueInstance, IMeasurableInstance {
   ['constructor']: typeof Color; // For checking interface static methods
-  readonly rgb_: RGB;
-  readonly alpha_: number;
+  private readonly rgb_: RGB;
+  private readonly alpha_: number;
 
   constructor(
     red: number = 0, green: number = 0, blue: number = 0, alpha: number = 1

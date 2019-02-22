@@ -29,8 +29,8 @@ interface IPhysicalSlideConfig {
 }
 
 class TransitionTarget {
-  readonly target_: HTMLElement;
-  readonly targetTime_: Date;
+  private readonly target_: HTMLElement;
+  private readonly targetTime_: Date;
 
   constructor(target: HTMLElement, targetTime: Date) {
     this.target_ = target;
@@ -64,9 +64,9 @@ class SlideToDraggableMap extends DynamicDefaultMap<HTMLElement, PhysicallyDragg
 }
 
 class PhysicalSlide implements ITransition {
-  readonly draggableBySlide_: SlideToDraggableMap;
-  readonly transitionTargets_: Map<ICarousel, TransitionTarget>;
-  readonly transitionTime_: number;
+  private readonly draggableBySlide_: SlideToDraggableMap;
+  private readonly transitionTargets_: Map<ICarousel, TransitionTarget>;
+  private readonly transitionTime_: number;
 
   constructor(
     {

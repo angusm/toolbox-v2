@@ -3,8 +3,8 @@ import {renderLoop} from '../../../utils/render-loop';
 import {getMostVisibleElement} from "../../../utils/dom/position/get-most-visible-element";
 
 class Video implements ITransition {
-  readonly transitionTime_: number;
-  readonly video_: HTMLVideoElement;
+  private readonly transitionTime_: number;
+  private readonly video_: HTMLVideoElement;
   private transitionTargets_: Map<ICarousel, HTMLElement>;
 
   constructor(video: HTMLVideoElement, transitionPoint: number) {

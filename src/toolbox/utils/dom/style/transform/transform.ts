@@ -11,7 +11,7 @@ import {trim} from "../../../string/trim";
 class Transform implements ICssStyleValueInstance {
   ['constructor']: typeof Transform;
 
-  readonly transformValues_: ITransformValueInstance[];
+  private readonly transformValues_: ITransformValueInstance[];
 
   constructor(transforms: ITransformValueInstance[]) {
     this.transformValues_ = transforms;

@@ -6,7 +6,7 @@ import {getSign} from "../get-sign";
 
 class Vector {
   ['constructor']: typeof Vector;
-  readonly values: number[];
+  private readonly values: number[];
 
   constructor(...values: number[]) {
     this.values = values;
