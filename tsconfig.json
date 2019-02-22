@@ -6,5 +6,23 @@
     "removeComments": true,
     "sourceMap": true,
     "target": "es5"
+  },
+  "typedocOptions": {
+    "src": [
+      "./src/toolbox/**/*.ts"
+    ],
+    "exclude": "./src/**/*.spec.ts",
+    "mode": "modules",
+    "includeDeclarations": true,
+    "tsconfig": "tsconfig.json",
+    "out": "./typedocs",
+    "excludePrivate": true,
+    "excludeProtected": true,
+    "excludeExternals": true,
+    "readme": "README.md",
+    "name": "Toolbox",
+    "ignoreCompilerErrors": true,
+    "plugin": "none",
+    "listInvalidSymbolLinks": true,
   }
 }
