@@ -18,5 +18,6 @@ targets.forEach((target) => {
 
 gulp.task('clear', targets.map((target) => `clear-${target}`));
 gulp.task('compile', targets.map((target) => `compile-${target}`));
+gulp.task('doc', () => exec(`typedoc`));
 
-gulp.task('default', ['clear', 'compile']);
+gulp.task('default', ['clear', 'compile', 'doc']);
