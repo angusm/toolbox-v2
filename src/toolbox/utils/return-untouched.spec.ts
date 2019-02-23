@@ -3,12 +3,17 @@ import { expect } from "chai";
 import "mocha";
 import { areArrayValuesEqual } from "./array/are-array-values-equal";
 
+const testArray = [1, 2, 3];
+const testObj = { a: 1, b: 2 };
+
 const tests = [
   [54321, 54321],
   ["abc", "abc"],
   [true, true],
   [null, null],
-  [undefined, undefined]
+  [undefined, undefined],
+  [testArray, testArray],
+  [testObj, testObj]
 ];
 
 describe("returnUntouched", () => {
@@ -18,15 +23,5 @@ describe("returnUntouched", () => {
     )}`, () => {
       expect(returnUntouched(testInput)).to.equal(expectedResult);
     });
-  });
-  it("should return identical arrays", () => {
-    const array = [1, 2, 3];
-    const array2 = [1, 2, 3];
-    expect(areArrayValuesEqual(array, array2)).to.equal(true);
-  });
-  it("should return identical objects", () => {
-    const obj = { a: 1, b: 2 };
-    const obj2 = { a: 1, b: 2 };
-    expect(JSON.stringify(obj)).to.equal(JSON.stringify(obj2));
   });
 });
