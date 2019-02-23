@@ -20,7 +20,7 @@ abstract class CachedElementVector<T extends Vector> {
   protected element: HTMLElement;
   private values: T[];
 
-  constructor(element: any = null, ...args: any[]) {
+  protected constructor(element: any = null, ...args: any[]) {
     const instanceByElement = caches.get(this.constructor);
 
     if (instanceByElement.has([element, ...args])) {
@@ -44,7 +44,7 @@ abstract class CachedElementVector<T extends Vector> {
   private init(): void {
     // Init values so that instances can be created during a measure step if
     // necessary.
-    renderLoop.measure(() => this.measureValues());
+    renderLoop.premeasure(() => this.measureValues());
     this.render();
   }
 

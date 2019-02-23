@@ -9,12 +9,13 @@ type TGetVideoFunction = (target: HTMLElement) => HTMLMediaElement;
 const FRAME_STEP: number = 0.1;
 
 class VideoScrubByPlay implements IEffect {
+  private readonly getForwardsVideo_: TGetVideoFunction;
+  private readonly getBackwardsVideo_: TGetVideoFunction;
+  private readonly playableTime_: NumericRange;
+
   private targetPercentages_: Map<HTMLElement, number>;
   private wasPlayingForwards_: boolean;
   private destroyed_: boolean;
-  private getForwardsVideo_: TGetVideoFunction;
-  private getBackwardsVideo_: TGetVideoFunction;
-  private playableTime_: NumericRange;
   private scroll_: Scroll;
   private activePercentages_: NumericRange;
 

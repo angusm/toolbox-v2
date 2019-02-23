@@ -3,9 +3,28 @@ import {renderLoop} from "../../../utils/render-loop";
 import {Vector2d} from "../../../utils/math/geometry/vector-2d";
 import {IEffect} from "./ieffect";
 
+/**
+ * Handles basic parallax by applying a portion of scroll as a translate.
+ *
+ * Parallax effect is applied to the target given to ScrollEffect.
+ *
+ * Works best with the distance function
+ * DistanceFunction.DISTANCE_FROM_DOCUMENT_CENTER. In that case the translation
+ * on the target element will be 0 when the element is centered.
+ */
 class Parallax implements IEffect {
-  private ratio_: number;
+  private readonly ratio_: number;
 
+  /**
+   * Initializes a new Parallax effect.
+   *
+   * As with most (if not all) classes that implement IEffect it must be passed
+   * as a parameter to a ScrollEffect to have an effect on the DOM.
+   *
+   * @param ratio Amount of the scroll that should be applied as a translate.
+   *
+   * A value of 0 has no effect on the target element.
+   */
   constructor(ratio: number) {
     this.ratio_ = ratio;
   }
