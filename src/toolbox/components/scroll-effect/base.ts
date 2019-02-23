@@ -178,6 +178,11 @@ class ScrollEffect {
       .clamp(this.getDistanceFunction_(this.target_));
   }
 
+  /**
+   * Destroy the instance.
+   * Stops running the effects and calls the destroy on the effects if they are
+   * not being used in any other ScrollEffect instances.
+   */
   public destroy() {
     this.destroyed_ = true;
     this.effects_

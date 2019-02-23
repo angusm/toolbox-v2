@@ -6,11 +6,15 @@ import {negateNumericFunction} from "../../utils/functions/negate-numeric-functi
 
 const scroll = Scroll.getSingleton();
 
+/**
+ * Collection of static functions that can be used to determine scrolled
+ * distances for Scroll Effects
+ */
 class DistanceFunction {
   public static DISTANCE_FROM_DOCUMENT_TOP = negateNumericFunction(getVisibleDistanceBetweenElements);
   public static DISTANCE_FROM_DOCUMENT_CENTER = negateNumericFunction(getVisibleDistanceBetweenElementCenters);
   public static DISTANCE_FROM_DOCUMENT_BOTTOM = negateNumericFunction(getVisibleDistanceBetweenElementBottoms);
-  public static DOCUMENT_SCROLL = (unused_a: HTMLElement, unused_b:HTMLElement) => scroll.getPosition().y;
+  public static DOCUMENT_SCROLL = (unused_a: HTMLElement) => scroll.getPosition().y;
 }
 
 export {DistanceFunction}

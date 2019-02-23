@@ -2,8 +2,8 @@ import {getContentInFirstSetOfParentheses} from "../../../../string/get-content-
 import {trim} from "../../../../string/trim";
 
 abstract class TransformValueBase {
-  private readonly keyword_: string;
-  private readonly values_: number[];
+  protected readonly keyword_: string;
+  protected readonly values_: number[];
 
   protected constructor(keyword: string, values: number[]) {
     this.keyword_ = keyword;
