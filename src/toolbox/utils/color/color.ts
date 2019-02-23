@@ -83,7 +83,15 @@ class Color implements ICssStyleValueInstance, IMeasurableInstance {
     }
     const valueLength = hexValue.length / 3;
     const colorValues: string[] = getSubstringsOfLength(hexValue, valueLength);
-    return new Color(...colorValues.map((colorValue: string) => hexToInt(colorValue)));
+    const paddedColorValues: string[] =
+      colorValues
+        .map((colorValue) => {
+          return colorValue.length === 2 ?
+            colorValue : `${colorValue}${colorValue}`;
+        });
+    const numericColorValues =
+      paddedColorValues.map((colorValue: string) => hexToInt(colorValue));
+    return new Color(...numericColorValues);
   }
 
   public static fromHexes(...values: string[]): Color[] {
