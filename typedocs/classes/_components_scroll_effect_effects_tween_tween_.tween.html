@@ -67,6 +67,15 @@
 <div class="container container-main">
 	<div class="row">
 		<div class="col-8 col-content">
+			<section class="tsd-panel tsd-comment">
+				<div class="tsd-comment tsd-typography">
+					<div class="lead">
+						<p>Effect for ScrollEffect that tweens CSS properties as the user scrolls.</p>
+					</div>
+					<p>The intent is to create an effect that can replicate a CSS animation that
+					plays according to the scroll position rather than according to time.</p>
+				</div>
+			</section>
 			<section class="tsd-panel tsd-hierarchy">
 				<h3>Hierarchy</h3>
 				<ul class="tsd-hierarchy">
@@ -107,28 +116,63 @@
 					<a name="constructor" class="tsd-anchor"></a>
 					<h3>constructor</h3>
 					<ul class="tsd-signatures tsd-kind-constructor tsd-parent-kind-class tsd-is-not-exported">
-						<li class="tsd-signature tsd-kind-icon">new <wbr>Tween<span class="tsd-signature-symbol">(</span>keyframes<span class="tsd-signature-symbol">: </span><a href="../modules/_components_scroll_effect_effects_tween_keyframes_config_.html#tkeyframesconfig" class="tsd-signature-type">TKeyframesConfig</a>, __namedParameters<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">object</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="_components_scroll_effect_effects_tween_tween_.tween.html" class="tsd-signature-type">Tween</a></li>
+						<li class="tsd-signature tsd-kind-icon">new <wbr>Tween<span class="tsd-signature-symbol">(</span>keyframes<span class="tsd-signature-symbol">: </span><a href="../modules/_components_scroll_effect_effects_tween_t_keyframes_config_.html#tkeyframesconfig" class="tsd-signature-type">TKeyframesConfig</a>, __namedParameters<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">object</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="_components_scroll_effect_effects_tween_tween_.tween.html" class="tsd-signature-type">Tween</a></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/angusm/toolbox-v2/blob/aaa103aa/src/toolbox/components/scroll-effect/effects/tween/tween.ts#L17">components/scroll-effect/effects/tween/tween.ts:17</a></li>
+									<li>Defined in <a href="https://github.com/angusm/toolbox-v2/blob/205955fb/src/toolbox/components/scroll-effect/effects/tween/tween.ts#L27">components/scroll-effect/effects/tween/tween.ts:27</a></li>
 								</ul>
 							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Creates a new instance of the tween effect.</p>
+								</div>
+							</div>
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
-									<h5>keyframes: <a href="../modules/_components_scroll_effect_effects_tween_keyframes_config_.html#tkeyframesconfig" class="tsd-signature-type">TKeyframesConfig</a></h5>
+									<h5>keyframes: <a href="../modules/_components_scroll_effect_effects_tween_t_keyframes_config_.html#tkeyframesconfig" class="tsd-signature-type">TKeyframesConfig</a></h5>
+									<div class="tsd-comment tsd-typography">
+										<div class="lead">
+											<p>The frames which should be tweened between.</p>
+											<p>Values are provided as an array of tuples containing a number and string
+											defining CSS styles.</p>
+											<p>Ex.
+												[
+												[0, &quot;opacity: 0&quot;],
+												[.5, &quot;opacity: 0.5; background: blue&quot;],
+												[1, &quot;opacity: 1; background: red&quot;],
+											]</p>
+										</div>
+									</div>
 								</li>
 								<li>
 									<h5><span class="tsd-flag ts-flagDefault value">Default value</span> __namedParameters: <span class="tsd-signature-type">object</span><span class="tsd-signature-symbol"> =&nbsp;defaultOptions</span></h5>
 									<ul class="tsd-parameters">
 										<li class="tsd-parameter">
 											<h5>keyframe<wbr>Style<span class="tsd-signature-symbol">: </span><a href="../enums/_components_scroll_effect_effects_tween_keyframe_style_.keyframestyle.html" class="tsd-signature-type">KeyframeStyle</a></h5>
+											<div class="tsd-comment tsd-typography">
+												<p>Defines how keyframe positions should be treated.</p>
+												<p>Receives values from KeyFrameStyle, can be either PIXEL or PERCENT.</p>
+												<p>If the value is PIXEL then keyframe positions are treated as referring to
+												absolute scroll values at which they should take place.</p>
+												<p>If the value is PERCENT then keyframe positions are treated as referring to
+												the scroll distance at that percentage of the valid scroll range.</p>
+												<p>Assuming a standard GetDistanceFn that returns pixels, and the ScrollEffect
+													set to apply to a range between 0 and 200. A keyframe at position 15 would
+													apply after scrolling 15 pixels using the PIXEL key frame style, and at
+												30 pixels using the PERCENT key frame style.</p>
+												<p>If no value is provided, this defaults to KeyframeStyle.PERCENT</p>
+											</div>
 										</li>
 										<li class="tsd-parameter">
 											<h5>style<wbr>Target<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">HTMLElement</span></h5>
+											<div class="tsd-comment tsd-typography">
+												<p>The HTML element to apply tween styles to.</p>
+												<p>If no value is provided this defaults to the ScrollEffect target.</p>
+											</div>
 										</li>
 									</ul>
 								</li>
@@ -151,9 +195,14 @@
 							<aside class="tsd-sources">
 								<p>Implementation of <a href="../interfaces/_components_scroll_effect_effects_i_effect_.ieffect.html">IEffect</a>.<a href="../interfaces/_components_scroll_effect_effects_i_effect_.ieffect.html#destroy">destroy</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/angusm/toolbox-v2/blob/aaa103aa/src/toolbox/components/scroll-effect/effects/tween/tween.ts#L61">components/scroll-effect/effects/tween/tween.ts:61</a></li>
+									<li>Defined in <a href="https://github.com/angusm/toolbox-v2/blob/205955fb/src/toolbox/components/scroll-effect/effects/tween/tween.ts#L126">components/scroll-effect/effects/tween/tween.ts:126</a></li>
 								</ul>
 							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Destroy the effect.</p>
+								</div>
+							</div>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
 						</li>
 					</ul>
@@ -162,26 +211,42 @@
 					<a name="run" class="tsd-anchor"></a>
 					<h3>run</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-not-exported">
-						<li class="tsd-signature tsd-kind-icon">run<span class="tsd-signature-symbol">(</span>target<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">HTMLElement</span>, distanceAsPx<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span>, distanceAsPercent<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+						<li class="tsd-signature tsd-kind-icon">run<span class="tsd-signature-symbol">(</span>target<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">HTMLElement</span>, rawDistance<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span>, distanceAsPercent<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<p>Implementation of <a href="../interfaces/_components_scroll_effect_effects_i_effect_.ieffect.html">IEffect</a>.<a href="../interfaces/_components_scroll_effect_effects_i_effect_.ieffect.html#run">run</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/angusm/toolbox-v2/blob/aaa103aa/src/toolbox/components/scroll-effect/effects/tween/tween.ts#L42">components/scroll-effect/effects/tween/tween.ts:42</a></li>
+									<li>Defined in <a href="https://github.com/angusm/toolbox-v2/blob/205955fb/src/toolbox/components/scroll-effect/effects/tween/tween.ts#L104">components/scroll-effect/effects/tween/tween.ts:104</a></li>
 								</ul>
 							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Applies the tween effect to an element.</p>
+								</div>
+							</div>
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
 									<h5>target: <span class="tsd-signature-type">HTMLElement</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>Element to apply tweened styles to if no style target is set.</p>
+										<p>If a style target has been set that element will receive the style values
+										instead.</p>
+									</div>
 								</li>
 								<li>
-									<h5>distanceAsPx: <span class="tsd-signature-type">number</span></h5>
+									<h5>rawDistance: <span class="tsd-signature-type">number</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>Numeric distance scrolled, typically as pixels.</p>
+									</div>
 								</li>
 								<li>
 									<h5>distanceAsPercent: <span class="tsd-signature-type">number</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>Distance scrolled as percent of valid range.</p>
+									</div>
 								</li>
 							</ul>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
@@ -221,9 +286,6 @@
 					</li>
 				</ul>
 				<ul class="after-current">
-					<li class=" tsd-kind-object-literal tsd-parent-kind-external-module tsd-is-not-exported">
-						<a href="../modules/_components_scroll_effect_effects_tween_tween_.html#defaultoptions" class="tsd-kind-icon">default<wbr>Options</a>
-					</li>
 				</ul>
 			</nav>
 		</div>

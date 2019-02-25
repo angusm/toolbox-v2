@@ -1,5 +1,5 @@
 import {Keyframe} from "./keyframe";
-import {TKeyframesConfig} from "./keyframes-config";
+import {TKeyframesConfig} from "./t-keyframes-config";
 import {KeyframePair} from "./keyframe-pair";
 import {ITweenableValueInstance} from "./interfaces/tweenable-value";
 import {ArrayMap} from "../../../../utils/map/array";

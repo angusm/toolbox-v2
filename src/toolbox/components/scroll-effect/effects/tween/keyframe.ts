@@ -1,7 +1,7 @@
 /**
  * A keyframe for a single property in a scroll based animation
  */
-import {TKeyframesConfig} from "./keyframes-config";
+import {TKeyframesConfig} from "./t-keyframes-config";
 import {styleStringToMap} from "../../../../utils/dom/style/style-string-to-map";
 import {flatten} from "../../../../utils/array/flatten";
 import {

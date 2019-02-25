@@ -40,6 +40,9 @@ class Parallax implements IEffect {
     renderLoop.scrollMutate(() => translation.applyToElementTransform(target));
   }
 
+  /**
+   * Destroys the effect.
+   */
   destroy() {}
 }
 
