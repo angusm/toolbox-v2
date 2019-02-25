@@ -20,6 +20,9 @@ type TPropertyStyleMap = Map<string, string>;
 type TPositionPropertyStyleMapPair = [number, TPropertyStyleMap];
 type TSortedPropertyStyleMaps = TPositionPropertyStyleMapPair[];
 
+/**
+ * Stores information on a Keyframe in a Tweenable animation.
+ */
 class Keyframe {
   private readonly position_: number;
   private readonly property_: string;
