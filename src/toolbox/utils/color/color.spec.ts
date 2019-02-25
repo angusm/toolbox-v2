@@ -100,4 +100,21 @@ describe("Color", () => {
       });
     });
   });
+
+  describe("getRGB", () => {
+    const tests = [
+      [[255, 255, 255, 1], [255, 255, 255]],
+      [[0, 0, 0, 0], [0, 0, 0]],
+      [[12, 234, 123, 0.4], [12, 234, 123]]
+    ];
+    tests.forEach(([testInput, expectedResult]) => {
+      it(`should return ${JSON.stringify(
+        expectedResult
+      )} with Color.getRGB(${JSON.stringify(testInput)})`, () => {
+        const res = new Color(...testInput);
+        const rgb = res.getRGB().toNumbers();
+        expect(areArrayValuesEqual(rgb, expectedResult)).to.equal(true);
+      });
+    });
+  });
 });
