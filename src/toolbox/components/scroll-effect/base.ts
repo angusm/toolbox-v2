@@ -106,6 +106,7 @@ class ScrollEffect {
    * scroll-effect distance-function.ts module. Please see that module for
    * more details.
    *
+   *
    * @param startDistance Returns distance at which effects should start.
    *
    * This parameter accepts a function that returns the distance at which
@@ -115,6 +116,7 @@ class ScrollEffect {
    * This function should expect no parameters and return a numeric value.
    * ScrollEffect and its supporting modules typically expect this to be a
    * value in pixels, but I'm not your Dad so do what you want.
+   *
    *
    * @param endDistance Returns distance at which effects should end.
    *
@@ -126,6 +128,7 @@ class ScrollEffect {
    * ScrollEffect and its supporting modules typically expect this to be a
    * value in pixels, but you're a grown person and I can't stop you from
    * making bad choices.
+   *
    *
    * @param effects Array of effects to run when the user is scrolling.
    *

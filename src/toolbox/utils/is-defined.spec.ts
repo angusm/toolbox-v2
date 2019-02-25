@@ -2,7 +2,7 @@ import { isDefined } from './is-defined';
 import { expect } from 'chai';
 import 'mocha';
 
-const tests = [
+const tests: any[] = [
   [1, true],
   [0, true],
   [-1, true],

@@ -1,5 +1,6 @@
 const gulp = require('gulp');
 const exec = require('child_process').exec;
+const Server = require('karma').Server;
 
 const targets = ['closure', 'commonjs', 'es6'];
 
@@ -19,5 +20,11 @@ targets.forEach((target) => {
 gulp.task('clear', targets.map((target) => `clear-${target}`));
 gulp.task('compile', targets.map((target) => `compile-${target}`));
 gulp.task('doc', () => exec(`typedoc; touch docs/.nojekyll`));
+gulp.task('test', (done) => {
+  new Server({
+    configFile: __dirname + '/karma.conf.js',
+    singleRun: true
+  }, done).start();
+});
 
 gulp.task('default', ['clear', 'compile']);

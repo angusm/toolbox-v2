@@ -4,7 +4,7 @@ import { MultiValueMap } from './multi-value';
 
 const testObject = {};
 const testObject2 = {};
-const tests = [
+const tests: [any[], any][] = [
   [['a'], 1],
   [['a', 'b'], 2],
   [['a', 'c'], 3],
@@ -18,7 +18,7 @@ describe('MultiValueMap', () => {
     const testMap = new MultiValueMap(tests);
     tests.forEach(([testInput, expectedResult]) => {
       // expect(testMap.getInternalKey(testInput)).to.equal(expectedResult);
-      expect(testMap.getInternalKey(testInput)).to.equal(testMap.getInternalKey(testInput));
+      expect(testMap.get(testInput)).to.equal(expectedResult);
     });
   });
 

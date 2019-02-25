@@ -100,7 +100,7 @@ class Color implements ICssStyleValueInstance, IMeasurableInstance {
 
   public static fromRgb(value: string): Color {
     const values = value.split('(').slice(-1)[0].split(')')[0].split(',');
-    const trimmedValues = values.map(trim);
+    const trimmedValues = values.map((value) => trim(value));
     const rgbValues =
       trimmedValues.slice(0, 3).map((trimmed) => parseInt(trimmed));
     const rawAlphaValue = trimmedValues[3];

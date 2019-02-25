@@ -41,7 +41,7 @@ class MultiValueMap<K, V> extends MapWrapper<K[], V> {
 
   // Ensures a one-to-one mapping, so the same values always reference the
   // same array.
-  private getInternalKey(keys: K[]): K[] {
+  private getInternalKey_(keys: K[]): K[] {
     return this.stringToInternalKey.get(this.getStringId(keys));
   }
 
@@ -54,15 +54,15 @@ class MultiValueMap<K, V> extends MapWrapper<K[], V> {
   }
 
   public get(keys: K[]): V {
-    return super.get(this.getInternalKey(keys));
+    return super.get(this.getInternalKey_(keys));
   }
 
   public delete(keys: K[]): boolean {
-    return super.delete(this.getInternalKey(keys));
+    return super.delete(this.getInternalKey_(keys));
   }
 
   public has(keys: K[]): boolean {
-    return super.has(this.getInternalKey(keys));
+    return super.has(this.getInternalKey_(keys));
   }
 
   public keys(): IterableIterator<K[]> {
@@ -71,7 +71,7 @@ class MultiValueMap<K, V> extends MapWrapper<K[], V> {
   }
 
   public set(keys: K[], value: V): this {
-    return super.set(this.getInternalKey(keys), value);
+    return super.set(this.getInternalKey_(keys), value);
   }
 }
 

@@ -2,7 +2,7 @@ import { expect } from 'chai';
 import 'mocha';
 import { MapWrapper } from './map-wrapper';
 
-const tests = [
+const tests: [any, any][] = [
   [1, 2],
   [{}, 3],
   [{}, 4],
@@ -13,7 +13,7 @@ const tests = [
 
 describe('MapWrapper', () => {
   it('Should return values stored through the constructor', () => {
-    const testMap = new MapWrapper(tests);
+    const testMap = new MapWrapper<any, any>(tests);
     tests.forEach(([testInput, expectedResult]) => {
       expect(testMap.get(testInput)).to.equal(expectedResult);
     });

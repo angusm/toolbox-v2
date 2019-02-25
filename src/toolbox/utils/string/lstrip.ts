@@ -1,6 +1,7 @@
-function lstrip(value: string): string {
+function lstrip(value: string, characters: string[] = [' ']): string {
+  const charSet = new Set(characters);
   let startIndex: number = 0;
-  while (value[startIndex] === ' ') {
+  while (charSet.has(value[startIndex])) {
     startIndex++;
   }
   return value.slice(startIndex);

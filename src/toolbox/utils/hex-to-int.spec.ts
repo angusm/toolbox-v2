@@ -14,7 +14,7 @@ describe("hexToInt", () => {
     it(`should return ${JSON.stringify(expectedResult)} for ${JSON.stringify(
       testInput
     )}`, () => {
-      expect(hexToInt(testInput)).to.equal(expectedResult);
+      expect(hexToInt(<string>testInput)).to.equal(expectedResult);
     });
   });
 });
