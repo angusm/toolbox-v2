@@ -3,6 +3,14 @@ import {getVisibleYPosition} from "../../utils/dom/position/vertical/get-visible
 import {renderLoop} from "../../utils/render-loop";
 import {getOffsetFromAncestor} from "../../utils/dom/position/get-offset-from-ancestor";
 
+/**
+ * Positions the the element could be sticking to within the container.
+ *
+ * How the target element is positioned by sticky will change depending on
+ * whether its container is showing its top, middle or bottom most prominently.
+ *
+ * @hidden
+ */
 class ContainerPosition {
   public static TOP: Symbol = Symbol('top');
   public static MIDDLE: Symbol = Symbol('middle');
@@ -19,6 +27,14 @@ class Sticky {
   private destroyed_: boolean;
   private lastPosition_: Symbol;
 
+  /**
+   * @param target The Element to position as if it were "position: sticky"'d
+   *
+   *
+   * @param container Element to treat as the target's offset parent.
+   *
+   * Essentially the element that the target should be sticky'd to.
+   */
   constructor (target: HTMLElement, container: HTMLElement) {
     this.container_ = container;
     this.target_ = target;
