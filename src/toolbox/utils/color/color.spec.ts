@@ -64,4 +64,23 @@ describe("Color", () => {
       });
     });
   });
+
+  describe("fromRgb", () => {
+    const tests = [
+      ["255, 255, 255", [255, 255, 255, 1]],
+      ["0, 0, 0", [0, 0, 0, 1]],
+      ["129, 45, 211", [129, 45, 211, 1]],
+      ["255, 34, 255", [255, 34, 255, 1]]
+    ];
+    tests.forEach(([testInput, expectedResult]) => {
+      it(`should return ${JSON.stringify(
+        expectedResult
+      )} with Color.fromRgb(${JSON.stringify(testInput)})`, () => {
+        const result = Color.fromRgb(<string>testInput).toNumbers();
+        expect(areArrayValuesEqual(result, <number[]>expectedResult)).to.equal(
+          true
+        );
+      });
+    });
+  });
 });
