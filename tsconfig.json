@@ -15,7 +15,7 @@
     "mode": "modules",
     "includeDeclarations": true,
     "tsconfig": "tsconfig.json",
-    "out": "./typedocs",
+    "out": "./docs",
     "excludePrivate": true,
     "excludeProtected": true,
     "excludeExternals": true,
