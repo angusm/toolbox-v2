@@ -1,5 +1,5 @@
 import {renderLoop} from "../../../utils/render-loop";
-import {IEffect} from "./ieffect";
+import {IEffect} from "./i-effect";
 import {DynamicDefaultMap} from "../../../utils/map/dynamic-default";
 
 class VideoPlayUntilScroll implements IEffect {

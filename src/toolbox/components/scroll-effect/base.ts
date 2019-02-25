@@ -6,7 +6,7 @@ import {
 import {renderLoop} from "../../utils/render-loop";
 import {ArrayMap} from "../../utils/map/array";
 import {NumericRange} from "../../utils/math/numeric-range";
-import {IEffect} from "./effects/ieffect";
+import {IEffect} from "./effects/i-effect";
 import {removeFirstInstance} from "../../utils/array/remove-first-instance";
 import {GetDistanceFn} from "./types/get-distance-fn";
 

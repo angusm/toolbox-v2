@@ -1,4 +1,4 @@
-import {IEffect} from "../effects/ieffect";
+import {IEffect} from "../effects/i-effect";
 import {GetDistanceFn} from "./get-distance-fn";
 
 /**

@@ -1,4 +1,4 @@
-import {IEffect} from "../ieffect";
+import {IEffect} from "../i-effect";
 import {renderLoop} from "../../../../utils/render-loop";
 import {setStyle} from "../../../../utils/dom/style/set-style";
 import {Animation} from "./animation";

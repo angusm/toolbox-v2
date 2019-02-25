@@ -1,7 +1,7 @@
 import {Matrix} from "../../../utils/dom/position/matrix";
 import {renderLoop} from "../../../utils/render-loop";
 import {Vector2d} from "../../../utils/math/geometry/vector-2d";
-import {IEffect} from "./ieffect";
+import {IEffect} from "./i-effect";
 
 /**
  * Handles basic parallax by applying a portion of scroll as a translate.

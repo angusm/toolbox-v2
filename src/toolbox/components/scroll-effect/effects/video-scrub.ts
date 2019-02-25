@@ -1,5 +1,5 @@
 import {renderLoop} from "../../../utils/render-loop";
-import {IEffect} from "./ieffect";
+import {IEffect} from "./i-effect";
 import {isVideoReady} from "../../../utils/dom/video/is-video-ready";
 
 class VideoScrub implements IEffect {

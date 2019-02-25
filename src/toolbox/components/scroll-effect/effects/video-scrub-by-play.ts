@@ -1,5 +1,5 @@
 import {renderLoop} from "../../../utils/render-loop";
-import {IEffect} from "./ieffect";
+import {IEffect} from "./i-effect";
 import {DynamicDefaultMap} from "../../../utils/map/dynamic-default";
 import {NumericRange} from '../../../utils/math/numeric-range';
 import {setStyle} from "../../../utils/dom/style/set-style";

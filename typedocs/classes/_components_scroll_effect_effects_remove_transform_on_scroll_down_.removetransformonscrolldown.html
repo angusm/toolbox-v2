@@ -67,6 +67,17 @@
 <div class="container container-main">
 	<div class="row">
 		<div class="col-8 col-content">
+			<section class="tsd-panel tsd-comment">
+				<div class="tsd-comment tsd-typography">
+					<div class="lead">
+						<p>Removes the transform on an element after a minimum scroll.</p>
+					</div>
+					<p>This can be used to only display a header when the document is scrolled down.
+						For such a setup place a header with a transform that slides it up and out of
+						view. Then when scrolling down and the transform is removed the header will
+					be displayed.</p>
+				</div>
+			</section>
 			<section class="tsd-panel tsd-hierarchy">
 				<h3>Hierarchy</h3>
 				<ul class="tsd-hierarchy">
@@ -78,7 +89,7 @@
 			<section class="tsd-panel">
 				<h3>Implements</h3>
 				<ul class="tsd-hierarchy">
-					<li><a href="../interfaces/_components_scroll_effect_effects_ieffect_.ieffect.html" class="tsd-signature-type">IEffect</a></li>
+					<li><a href="../interfaces/_components_scroll_effect_effects_i_effect_.ieffect.html" class="tsd-signature-type">IEffect</a></li>
 				</ul>
 			</section>
 			<section class="tsd-panel-group tsd-index-group">
@@ -113,13 +124,20 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/angusm/toolbox-v2/blob/ac83fce9/src/toolbox/components/scroll-effect/effects/remove-transform-on-scroll-down.ts#L12">components/scroll-effect/effects/remove-transform-on-scroll-down.ts:12</a></li>
+									<li>Defined in <a href="https://github.com/angusm/toolbox-v2/blob/aaa103aa/src/toolbox/components/scroll-effect/effects/remove-transform-on-scroll-down.ts#L15">components/scroll-effect/effects/remove-transform-on-scroll-down.ts:15</a></li>
 								</ul>
 							</aside>
+							<div class="tsd-comment tsd-typography">
+							</div>
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
 									<h5><span class="tsd-flag ts-flagDefault value">Default value</span> minimumScrollDistance: <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol"> =&nbsp;0</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<div class="lead">
+											<p>Amount to scroll before running effect.</p>
+										</div>
+									</div>
 								</li>
 							</ul>
 							<h4 class="tsd-returns-title">Returns <a href="_components_scroll_effect_effects_remove_transform_on_scroll_down_.removetransformonscrolldown.html" class="tsd-signature-type">RemoveTransformOnScrollDown</a></h4>
@@ -138,9 +156,9 @@
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
-								<p>Implementation of <a href="../interfaces/_components_scroll_effect_effects_ieffect_.ieffect.html">IEffect</a>.<a href="../interfaces/_components_scroll_effect_effects_ieffect_.ieffect.html#destroy">destroy</a></p>
+								<p>Implementation of <a href="../interfaces/_components_scroll_effect_effects_i_effect_.ieffect.html">IEffect</a>.<a href="../interfaces/_components_scroll_effect_effects_i_effect_.ieffect.html#destroy">destroy</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/angusm/toolbox-v2/blob/ac83fce9/src/toolbox/components/scroll-effect/effects/remove-transform-on-scroll-down.ts#L31">components/scroll-effect/effects/remove-transform-on-scroll-down.ts:31</a></li>
+									<li>Defined in <a href="https://github.com/angusm/toolbox-v2/blob/aaa103aa/src/toolbox/components/scroll-effect/effects/remove-transform-on-scroll-down.ts#L43">components/scroll-effect/effects/remove-transform-on-scroll-down.ts:43</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
@@ -156,21 +174,35 @@
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
-								<p>Implementation of <a href="../interfaces/_components_scroll_effect_effects_ieffect_.ieffect.html">IEffect</a>.<a href="../interfaces/_components_scroll_effect_effects_ieffect_.ieffect.html#run">run</a></p>
+								<p>Implementation of <a href="../interfaces/_components_scroll_effect_effects_i_effect_.ieffect.html">IEffect</a>.<a href="../interfaces/_components_scroll_effect_effects_i_effect_.ieffect.html#run">run</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/angusm/toolbox-v2/blob/ac83fce9/src/toolbox/components/scroll-effect/effects/remove-transform-on-scroll-down.ts#L18">components/scroll-effect/effects/remove-transform-on-scroll-down.ts:18</a></li>
+									<li>Defined in <a href="https://github.com/angusm/toolbox-v2/blob/aaa103aa/src/toolbox/components/scroll-effect/effects/remove-transform-on-scroll-down.ts#L30">components/scroll-effect/effects/remove-transform-on-scroll-down.ts:30</a></li>
 								</ul>
 							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Applies the effect.</p>
+								</div>
+							</div>
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
 									<h5>target: <span class="tsd-signature-type">HTMLElement</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>The HTMLElement to apply the effect to.</p>
+									</div>
 								</li>
 								<li>
 									<h5>distance: <span class="tsd-signature-type">number</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>The amount of scrolling performed.</p>
+									</div>
 								</li>
 								<li>
 									<h5>distanceAsPercent: <span class="tsd-signature-type">number</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>Scrolled amount as a percent of the valid range.</p>
+									</div>
 								</li>
 							</ul>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>

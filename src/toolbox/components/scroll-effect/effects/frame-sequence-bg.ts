@@ -1,5 +1,5 @@
 import {renderLoop} from "../../../utils/render-loop";
-import {IEffect} from "./ieffect";
+import {IEffect} from "./i-effect";
 import {setStyle} from "../../../utils/dom/style/set-style";
 import {percentToIndex} from "../../../utils/array/percent-to-index";
 
