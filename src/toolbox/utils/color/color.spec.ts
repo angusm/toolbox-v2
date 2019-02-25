@@ -117,4 +117,22 @@ describe("Color", () => {
       });
     });
   });
+
+  describe("getAlpha", () => {
+    const tests = [
+      [[255, 255, 255, 1], 1],
+      [[0, 0, 0, 0], 0],
+      [[12, 234, 123, 0.4], 0.4],
+      [[0, 0, 0], 1]
+    ];
+    tests.forEach(([testInput, expectedResult]) => {
+      it(`should return ${JSON.stringify(
+        expectedResult
+      )} with Color.getAlpha(${JSON.stringify(testInput)})`, () => {
+        const res = new Color(...testInput);
+        const alpha = res.getAlpha();
+        expect(alpha).to.equal(expectedResult);
+      });
+    });
+  });
 });
