@@ -85,9 +85,18 @@
 					<div class="tsd-signature tsd-kind-icon">property<wbr>ToTweenable<wbr>Value<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Map</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">, </span><a href="../interfaces/_utils_math_interfaces_measurable_.imeasurablestatic.html" class="tsd-signature-type">IMeasurableStatic</a><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/_utils_dom_style_interfaces_css_style_value_.icssstylevalueinstance.html" class="tsd-signature-type">ICssStyleValueInstance</a><span class="tsd-signature-symbol"> &amp; </span><a href="../interfaces/_utils_math_interfaces_measurable_.imeasurableinstance.html" class="tsd-signature-type">IMeasurableInstance</a><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol"> &amp; </span><a href="../interfaces/_utils_dom_style_interfaces_css_style_value_.icssstylevaluestatic.html" class="tsd-signature-type">ICssStyleValueStatic</a><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/_utils_dom_style_interfaces_css_style_value_.icssstylevalueinstance.html" class="tsd-signature-type">ICssStyleValueInstance</a><span class="tsd-signature-symbol"> &amp; </span><a href="../interfaces/_utils_math_interfaces_measurable_.imeasurableinstance.html" class="tsd-signature-type">IMeasurableInstance</a><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol"> =&nbsp;new Map&lt;string, ITweenableValueStatic&gt;([[&#x27;background-color&#x27;, Color],[&#x27;border-color&#x27;, Color],[&#x27;bottom&#x27;, CssCalcFormula],[&#x27;color&#x27;, Color],[&#x27;height&#x27;, CssCalcFormula],[&#x27;left&#x27;, CssCalcFormula],[&#x27;margin-bottom&#x27;, CssCalcFormula],[&#x27;margin-left&#x27;, CssCalcFormula],[&#x27;margin-right&#x27;, CssCalcFormula],[&#x27;margin-top&#x27;, CssCalcFormula],[&#x27;opacity&#x27;, CssNumber],[&#x27;padding-bottom&#x27;, CssCalcFormula],[&#x27;padding-left&#x27;, CssCalcFormula],[&#x27;padding-right&#x27;, CssCalcFormula],[&#x27;padding-top&#x27;, CssCalcFormula],[&#x27;right&#x27;, CssCalcFormula],[&#x27;top&#x27;, CssCalcFormula],[&#x27;width&#x27;, CssCalcFormula],])</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/angusm/toolbox-v2/blob/205955fb/src/toolbox/components/scroll-effect/effects/tween/property-to-tweenable-value.ts#L6">components/scroll-effect/effects/tween/property-to-tweenable-value.ts:6</a></li>
+							<li>Defined in <a href="https://github.com/angusm/toolbox-v2/blob/dec845ee/src/toolbox/components/scroll-effect/effects/tween/property-to-tweenable-value.ts#L14">components/scroll-effect/effects/tween/property-to-tweenable-value.ts:14</a></li>
 						</ul>
 					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>Define Classes to use to represent the values of different CSS properties.</p>
+						</div>
+						<p>Each property contained here should be tweenable and should be represented
+							by a class that implements ITweenableValueStatic, which is to say that it
+							implements both IMeasurableStatic<ITweenableValueInstance> and
+						ICssStyleValueStatic<ITweenableValueInstance>.</p>
+					</div>
 				</section>
 			</section>
 		</div>
