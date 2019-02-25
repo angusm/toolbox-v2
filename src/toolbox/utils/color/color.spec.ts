@@ -51,7 +51,8 @@ describe("Color", () => {
       ["#000000", [0, 0, 0, 1]],
       ["#812dd3", [129, 45, 211, 1]],
       ["#F2F", [255, 34, 255, 1]],
-      ["FFFFFF", [255, 255, 255, 1]]
+      ["FFFFFF", [255, 255, 255, 1]],
+      ["DdD", [221, 221, 221, 1]]
     ];
     tests.forEach(([testInput, expectedResult]) => {
       it(`should return ${JSON.stringify(
@@ -70,7 +71,10 @@ describe("Color", () => {
       ["255, 255, 255", [255, 255, 255, 1]],
       ["0, 0, 0", [0, 0, 0, 1]],
       ["129, 45, 211", [129, 45, 211, 1]],
-      ["255, 34, 255", [255, 34, 255, 1]]
+      ["255, 34, 255", [255, 34, 255, 1]],
+      ["rgb(39,2,0)", [39, 2, 0, 1]],
+      ["rgba(75,63,23,0.5)", [75, 63, 23, 0.5]],
+      ["rgb(255, 255, 255)", [255, 255, 255, 1]]
     ];
     tests.forEach(([testInput, expectedResult]) => {
       it(`should return ${JSON.stringify(
@@ -90,7 +94,11 @@ describe("Color", () => {
       ["#FFF", true],
       ["000000", true],
       ["FFF", true],
-      ["cat", false]
+      ["cat", false],
+      ["FFFF", true],
+      ["FF", true],
+      ["FFFFF", true],
+      ["FFFFFFFFF", true]
     ];
     tests.forEach(([testInput, expectedResult]) => {
       it(`should return ${JSON.stringify(
