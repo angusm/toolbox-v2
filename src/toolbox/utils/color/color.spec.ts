@@ -135,4 +135,58 @@ describe("Color", () => {
       });
     });
   });
+
+  describe("getRed", () => {
+    const tests = [
+      [[255, 255, 255, 1], 255],
+      [[0, 0, 0, 0], 0],
+      [[12, 234, 123, 0.4], 12],
+      [[0, 0, 0], 0]
+    ];
+    tests.forEach(([testInput, expectedResult]) => {
+      it(`should return ${JSON.stringify(
+        expectedResult
+      )} with Color.getRed(${JSON.stringify(testInput)})`, () => {
+        const res = new Color(...testInput);
+        const red = res.getRed();
+        expect(red).to.equal(expectedResult);
+      });
+    });
+  });
+
+  describe("getGreen", () => {
+    const tests = [
+      [[255, 255, 255, 1], 255],
+      [[0, 0, 0, 0], 0],
+      [[12, 234, 123, 0.4], 234],
+      [[0, 0, 0], 0]
+    ];
+    tests.forEach(([testInput, expectedResult]) => {
+      it(`should return ${JSON.stringify(
+        expectedResult
+      )} with Color.getGreen(${JSON.stringify(testInput)})`, () => {
+        const res = new Color(...testInput);
+        const green = res.getGreen();
+        expect(green).to.equal(expectedResult);
+      });
+    });
+  });
+
+  describe("getBlue", () => {
+    const tests = [
+      [[255, 255, 255, 1], 255],
+      [[0, 0, 0, 0], 0],
+      [[12, 234, 123, 0.4], 123],
+      [[0, 0, 0], 0]
+    ];
+    tests.forEach(([testInput, expectedResult]) => {
+      it(`should return ${JSON.stringify(
+        expectedResult
+      )} with Color.getBlue(${JSON.stringify(testInput)})`, () => {
+        const res = new Color(...testInput);
+        const blue = res.getBlue();
+        expect(blue).to.equal(expectedResult);
+      });
+    });
+  });
 });
