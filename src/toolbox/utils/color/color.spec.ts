@@ -83,4 +83,21 @@ describe("Color", () => {
       });
     });
   });
+
+  describe("isHexValue", () => {
+    const tests = [
+      ["#F2F2F2", true],
+      ["#FFF", true],
+      ["000000", true],
+      ["FFF", true],
+      ["cat", false]
+    ];
+    tests.forEach(([testInput, expectedResult]) => {
+      it(`should return ${JSON.stringify(
+        expectedResult
+      )} with Color.isHexValue(${JSON.stringify(testInput)})`, () => {
+        expect(Color.isHexValue_(<string>testInput)).to.equal(expectedResult);
+      });
+    });
+  });
 });
