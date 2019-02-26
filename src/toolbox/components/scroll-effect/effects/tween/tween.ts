@@ -111,7 +111,7 @@ class Tween implements IEffect {
       this.animation_.getPropertyValueMapFromPosition(distance);
     const styleTarget = this.styleTarget_ === null ? target : this.styleTarget_;
 
-    renderLoop.mutate(() => {
+    renderLoop.scrollMutate(() => {
       Array.from(propertyValueMap.entries())
         .forEach(
           ([property, value]) => {
