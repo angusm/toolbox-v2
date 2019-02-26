@@ -136,6 +136,24 @@ describe("Color", () => {
     });
   });
 
+  describe("toStyleString", () => {
+    const tests = [
+      [[255, 255, 255, 1], "rgba(255, 255, 255, 1)"],
+      [[0, 0, 0, 0], "rgba(0, 0, 0, 0)"],
+      [[12, 234, 123, 0.4], "rgba(12, 234, 123, 0.4)"],
+      [[0, 0, 0], "rgba(0, 0, 0, 1)"]
+    ];
+    tests.forEach(([testInput, expectedResult]) => {
+      it(`should return ${JSON.stringify(
+        expectedResult
+      )} with Color.toStyleString(${JSON.stringify(testInput)})`, () => {
+        const color = new Color(...testInput);
+        const styleString = color.toStyleString();
+        expect(styleString).to.equal(expectedResult);
+      });
+    });
+  });
+
   describe("getBrightness", () => {
     const tests = [
       [[255, 255, 255, 1]],
