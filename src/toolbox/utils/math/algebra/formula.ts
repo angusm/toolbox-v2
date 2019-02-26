@@ -1,7 +1,7 @@
 import {
   CloseParenthesis,
   OpenParenthesis,
-  IOperation
+  IOperation, Subtract
 } from "./operation";
 import {Variable} from "./variable";
 import {contains as stringContains} from "../../string/contains";
@@ -142,6 +142,12 @@ class Formula {
       operationsInOrder.reduce(
         (lastPass, operation) => {
           let reducedFormula: Array<FormulaPiece> = [];
+
+          if (lastPass.length === 2 && lastPass[0] === Subtract) {
+            const value = <Variable>lastPass[1];
+            return Subtract.execute(new Variable(0, value.symbol), value);
+          }
+
           for (let i = 0; i < lastPass.length; i++) {
             const lastVariable = reducedFormula.slice(-2, -1)[0];
             const operationToRun = reducedFormula.slice(-1)[0];
