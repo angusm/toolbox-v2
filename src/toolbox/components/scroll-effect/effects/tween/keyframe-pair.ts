@@ -3,10 +3,17 @@ import {NumericRange} from "../../../../utils/math/numeric-range";
 import {MeasurableRange} from "../../../../utils/math/measurable-range";
 import {ITweenableValueInstance} from "./interfaces/tweenable-value";
 
+/**
+ * Represents a pair of subsequent keyframes.
+ */
 class KeyframePair {
   private readonly positionRange_: NumericRange;
   private readonly valueRange_: MeasurableRange;
 
+  /**
+   * @param keyframeA First keyframe in the pair.
+   * @param keyframeB Last keyframe in the pair.
+   */
   constructor(keyframeA: Keyframe, keyframeB: Keyframe) {
     this.positionRange_
       = new NumericRange(keyframeA.getPosition(), keyframeB.getPosition());
@@ -14,10 +21,18 @@ class KeyframePair {
       new MeasurableRange(keyframeA.getValue(), keyframeB.getValue());
   }
 
+  /**
+   * Returns whether the given position is contained in between the pair.
+   * @param position Numeric position.
+   */
   public containsPosition(position: number): boolean {
     return this.positionRange_.contains(position);
   }
 
+  /**
+   * The style at the given position between the keyframes.
+   * @param position The position whose value should be returned.
+   */
   public getValueAtPosition(position: number): ITweenableValueInstance {
     let percent :number;
     if (this.positionRange_.getMin() === Number.NEGATIVE_INFINITY) {
@@ -30,6 +45,11 @@ class KeyframePair {
     return <ITweenableValueInstance>this.valueRange_.getPercentAsValue(percent);
   }
 
+  /**
+   * Returns the value at the given position between the given keyframe pairs.
+   * @param position The position whose value should be returned.
+   * @param keyframePairs The keyframe pairs to check for the given position.
+   */
   public static getValueFromRanges(
     position: number,
     keyframePairs: KeyframePair[]
@@ -40,6 +60,10 @@ class KeyframePair {
       .getValueAtPosition(position);
   }
 
+  /**
+   * Groups keyframes by position and returns them as a list of KeyframePairs.
+   * @param keyframes The keyframes to group into pairs.
+   */
   public static fromKeyframes(keyframes: Keyframe[]): KeyframePair[] {
     const sortedKeyframes: Keyframe[] =
       keyframes

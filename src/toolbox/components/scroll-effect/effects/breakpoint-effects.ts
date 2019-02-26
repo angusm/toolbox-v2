@@ -27,7 +27,7 @@ class BreakpointEffects implements IEffect {
    * Runs the effects configured in the constructor for the current breakpoint.
    * @param target Element targeted by the calling ScrollEffect.
    * @param distance Distance scrolled as a number.
-   * @param distanceAsPercent Sistance scrolled as a parecent of a valid range.
+   * @param distanceAsPercent Distance scrolled as a percent of a valid range.
    */
   run(target: HTMLElement, distance: number, distanceAsPercent: number) {
     const windowWidth = window.innerWidth;
