@@ -13,6 +13,7 @@ import {getTweenableValue} from "./get-tweenable-value";
 import {Transform} from "../../../../utils/dom/style/transform/transform";
 import {generateTweenableTransformClass} from "./generate-tweenable-transform-class";
 import {ITransformValueStatic} from "../../../../utils/dom/style/transform/transform-value/i-transform-value";
+import {TransformValueBase} from "../../../../utils/dom/style/transform/transform-value/transform-value-base";
 
 type TPositionStylePair = [number, string];
 type TPositionStylesMap = Map<number, string>;
@@ -113,6 +114,48 @@ class Keyframe {
       );
   }
 
+  private static getTransformClassesInOrder_(
+    sortedStyleMaps: TSortedPropertyStyleMaps
+  ): ITransformValueStatic[] {
+
+    const transformsByPosition: [number, Transform][] =
+      this.getTransformsByPosition_(sortedStyleMaps);
+
+    const orderedListsOfTransformClasses: ITransformValueStatic[][] =
+      transformsByPosition
+        .map(([position, transform]) => transform.getTransformValueClasses());
+
+    const transformClassesInOrder = [];
+    for (
+      let position = 0;
+      position < orderedListsOfTransformClasses.length;
+      position++
+    ) {
+
+      const classesForPosition = orderedListsOfTransformClasses[position];
+      for (
+        let classIndex = 0;
+        classIndex < classesForPosition.length;
+        classIndex++
+      ) {
+        const classToAdd = classesForPosition[classIndex];
+        transformClassesInOrder.push(classToAdd);
+
+        for (let k = 0; k < orderedListsOfTransformClasses.length; k++) {
+          const subsequentClassesForPosition =
+            orderedListsOfTransformClasses[k];
+
+          if (subsequentClassesForPosition[0] === classToAdd) {
+            orderedListsOfTransformClasses[k] =
+              subsequentClassesForPosition.slice(1);
+          }
+        }
+      }
+    }
+
+    return transformClassesInOrder;
+  }
+
   private static getTransformTweenableKeyframes_(
     sortedStyleMaps: TSortedPropertyStyleMaps
   ): Keyframe[] {
@@ -120,18 +163,11 @@ class Keyframe {
     const transformsByPosition: [number, Transform][] =
       this.getTransformsByPosition_(sortedStyleMaps);
 
-    const transformClassesInOrder: ITransformValueStatic[] =
-      flatten(
-        transformsByPosition
-          .map(
-            ([position, transform]) => transform.getTransformValueClasses()));
+    const transformClassesInOrder =
+      Keyframe.getTransformClassesInOrder_(sortedStyleMaps);
 
     const TweenableTransformClass =
       generateTweenableTransformClass(transformClassesInOrder);
-
-    let prefixClassesToDefault: ITransformValueStatic[] = [];
-    let suffixClassesToDefault: ITransformValueStatic[] =
-      transformClassesInOrder;
 
     const tweenableTransformsByPosition: [number, ITweenableValueInstance][] =
       transformsByPosition
@@ -139,46 +175,33 @@ class Keyframe {
           ([position, transform]: [number, Transform]) => {
             const transformValues = transform.getTransformValues();
             const transformClasses = transform.getTransformValueClasses();
+            let numbers: number[] = [];
+            let currentTransformClassesIndex = 0;
+            let allTransformClassesIndex = 0;
 
-            const prefixNumbers: number[] =
-              prefixClassesToDefault
-                .reduce(
-                  (numbers, prefixClass) => {
-                    return [
-                      ...numbers, ...prefixClass.getDefaultValue().toNumbers()];
-                  },
-                  []
-                );
-            const transformNumbers =
-              transformValues
-                .reduce(
-                  (numbers, transformValue) => {
-                    return [...numbers, ...transformValue.toNumbers()];
-                  },
-                  []
-                );
+            while (
+              allTransformClassesIndex < transformClassesInOrder.length
+            ) {
+              const anticipatedTransformClass =
+                transformClassesInOrder[allTransformClassesIndex];
+              const currentTransformClass =
+                transformClasses[currentTransformClassesIndex];
 
-            suffixClassesToDefault =
-              suffixClassesToDefault.slice(transformClasses.length);
-            prefixClassesToDefault = [
-              ...prefixClassesToDefault,
-              ...transformClasses
-            ];
-
-            const suffixNumbers =
-              suffixClassesToDefault
-                .reduce(
-                  (numbers, suffixClass) => {
-                    return [
-                      ...numbers, ...suffixClass.getDefaultValue().toNumbers()];
-                  },
-                  []
-                );
+              if (anticipatedTransformClass === currentTransformClass) {
+                numbers = [
+                  ...numbers,
+                  ...transformValues[currentTransformClassesIndex].toNumbers()];
+                currentTransformClassesIndex++;
+              } else {
+                numbers = [
+                  ...numbers,
+                  ...anticipatedTransformClass.getDefaultValue().toNumbers()];
+              }
+              allTransformClassesIndex++;
+            }
 
             const tweenableInstance: ITweenableValueInstance =
-              TweenableTransformClass
-                .fromNumbers(
-                  ...prefixNumbers, ...transformNumbers, ...suffixNumbers);
+              TweenableTransformClass.fromNumbers(...numbers);
             return <[number, ITweenableValueInstance]>[
               position, tweenableInstance];
           }
