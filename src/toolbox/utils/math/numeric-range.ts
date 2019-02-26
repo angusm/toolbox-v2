@@ -10,6 +10,10 @@ class NumericRange implements IRange<number>{
     this.max_ = max;
   }
 
+  public static fromUnorderedValues(a: number, b: number): NumericRange {
+    return new NumericRange(Math.min(a, b), Math.max(a, b));
+  }
+
   public clamp(value: number): number {
     return Math.min(this.max_, Math.max(this.min_, value));
   }
