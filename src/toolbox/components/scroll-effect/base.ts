@@ -274,7 +274,7 @@ class ScrollEffect {
   }
 
   private runCallbacks_(
-    callbacks: TScrollEffectCallback[], runValue: ScrollEffectRunValue
+    callbacks: TScrollEffectCallback[]  , runValue: ScrollEffectRunValue
   ): void {
     callbacks
       .forEach(
