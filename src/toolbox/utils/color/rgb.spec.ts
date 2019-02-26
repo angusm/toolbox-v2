@@ -72,4 +72,40 @@ describe("RGB", () => {
       });
     });
   });
+
+  describe("toNumbers", () => {
+    const tests = [
+      [[255, 0, 0], [255, 0, 0]],
+      [[0, 255, 144], [0, 255, 144]],
+      [[12, 12, 234], [12, 12, 234]],
+      [[4, 30, 123], [4, 30, 123]]
+    ];
+    tests.forEach(([testInput, expectedResult]) => {
+      it(`should return ${JSON.stringify(
+        expectedResult
+      )} from toNumbers(${JSON.stringify(testInput)})`, () => {
+        const rgb = new RGB(...testInput);
+        const res = rgb.toNumbers();
+        expect(areArrayValuesEqual(res, expectedResult)).to.equal(true);
+      });
+    });
+  });
+
+  describe("fromNumbers", () => {
+    const tests = [
+      [[255, 0, 0]],
+      [[0, 255, 144]],
+      [[12, 12, 234]],
+      [[4, 30, 123]]
+    ];
+    tests.forEach(([testInput]) => {
+      it(`should return an RGB from fromNumbers(${JSON.stringify(
+        testInput
+      )})`, () => {
+        const rgb = new RGB(...testInput);
+        const res = RGB.fromNumbers(...testInput);
+        expect(rgb).to.equal(res);
+      });
+    });
+  });
 });
