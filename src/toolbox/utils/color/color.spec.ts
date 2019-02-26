@@ -189,4 +189,22 @@ describe("Color", () => {
       });
     });
   });
+
+  describe("toNumbers", () => {
+    const tests = [
+      [[255, 255, 255], [255, 255, 255, 1]],
+      [[0, 0, 0, 0], [0, 0, 0, 0]],
+      [[12, 234, 123, 0.4], [12, 234, 123, 0.4]],
+      [[0, 0, 0], [0, 0, 0, 1]]
+    ];
+    tests.forEach(([testInput, expectedResult]) => {
+      it(`should return ${JSON.stringify(
+        expectedResult
+      )} with Color.toNumbers(${JSON.stringify(testInput)})`, () => {
+        const res = new Color(...testInput);
+        const numbers = res.toNumbers();
+        expect(areArrayValuesEqual(numbers, expectedResult)).to.equal(true);
+      });
+    });
+  });
 });
