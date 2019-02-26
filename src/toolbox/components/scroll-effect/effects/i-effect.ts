@@ -1,9 +1,10 @@
-/**
- * Created by angusm on 07/08/18.
- */
+import {TScrollEffectCallback} from "../types/t-scroll-effect-callback";
+
 interface IEffect {
-  run(target: HTMLElement, distanceAsPx: number, distancePercent: number): void;
+  run: TScrollEffectCallback,
   destroy(): void;
 }
 
-export {IEffect};
+export {
+  IEffect
+};

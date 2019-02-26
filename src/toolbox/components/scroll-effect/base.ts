@@ -1,14 +1,15 @@
 import {DistanceFunction} from "./distance-function";
-import {
-  IScrollEffectOptions,
-  TScrollEffectDistanceValue
-} from "./types/scroll-effect-options";
+import {IScrollEffectOptions} from "./types/i-scroll-effect-options";
 import {renderLoop} from "../../utils/render-loop";
 import {ArrayMap} from "../../utils/map/array";
 import {NumericRange} from "../../utils/math/numeric-range";
 import {IEffect} from "./effects/i-effect";
 import {removeFirstInstance} from "../../utils/array/remove-first-instance";
 import {GetDistanceFn} from "./types/get-distance-fn";
+import {TScrollEffectCallbackMap} from "./types/t-scroll-effect-callback-map";
+import {TScrollEffectCallback} from "./types/t-scroll-effect-callback";
+import {flatten} from "../../utils/array/flatten";
+import {TScrollEffectDistanceValue} from "./types/t-scroll-effect-distance-value";
 
 /**
  * These are the default option values provided to ScrollEffect unless otherwise
@@ -17,6 +18,8 @@ import {GetDistanceFn} from "./types/get-distance-fn";
  */
 const defaultOptions: IScrollEffectOptions =
   {
+    distanceCallbacks: <TScrollEffectCallbackMap>[],
+    percentCallbacks: <TScrollEffectCallbackMap>[],
     getDistanceFunction: DistanceFunction.DISTANCE_FROM_DOCUMENT_CENTER,
     startDistance: () => Number.NEGATIVE_INFINITY,
     endDistance: () => Number.POSITIVE_INFINITY,
@@ -29,6 +32,37 @@ const defaultOptions: IScrollEffectOptions =
  */
 const ActiveEffects: ArrayMap<IEffect, ScrollEffect> = new ArrayMap();
 
+type TParsedCallbackMap = ArrayMap<NumericRange, TScrollEffectCallback>;
+
+/** @hidden */
+class ScrollEffectRunValue {
+  public readonly distance: number;
+  public readonly distanceAsPercent: number;
+  public readonly lastRunDistance: number;
+  public readonly lastRunDistanceAsPercent: number;
+
+  constructor(
+    distance: number,
+    distanceAsPercent: number,
+    lastRunDistance: number,
+    lastRunDistanceAsPercent: number,
+  ) {
+    this.distance = distance;
+    this.distanceAsPercent = distanceAsPercent;
+    this.lastRunDistance = lastRunDistance;
+    this.lastRunDistanceAsPercent = lastRunDistanceAsPercent;
+  }
+
+  getRunRangeAsPercent(): NumericRange {
+    return new NumericRange(
+      this.lastRunDistanceAsPercent, this.distanceAsPercent);
+  }
+
+  getRunRange(): NumericRange {
+    return new NumericRange(this.lastRunDistance, this.distance);
+  }
+}
+
 /**
  * Handles a scroll effect or scroll effects on a target element.
  *
@@ -36,6 +70,8 @@ const ActiveEffects: ArrayMap<IEffect, ScrollEffect> = new ArrayMap();
  * ranges, before calling the run function on the provided effects.
  */
 class ScrollEffect {
+  private readonly distanceCallbacks_: TParsedCallbackMap;
+  private readonly percentCallbacks_: TParsedCallbackMap;
   private readonly target_: HTMLElement;
   private readonly getDistanceFunction_: GetDistanceFn;
   private readonly startDistance_: TScrollEffectDistanceValue;
@@ -98,17 +134,31 @@ class ScrollEffect {
    * function.
    *
    * Effects are run in order.
+   *
+   * @param distanceCallbacks Callbacks to run at certain scroll positions.
+   *
+   * TODO(Angus): Expand this documentation.
+   *
+   * @param percentCallbacks Callbacks to run at certain scroll positions.
+   *
+   * TODO(Angus): Expand this documentation.
+   *
    */
   constructor(
     target: HTMLElement,
     {
-
+      distanceCallbacks = defaultOptions.distanceCallbacks,
+      percentCallbacks = defaultOptions.percentCallbacks,
       getDistanceFunction = defaultOptions.getDistanceFunction,
       startDistance = defaultOptions.startDistance,
       endDistance = defaultOptions.endDistance,
       effects = defaultOptions.effects,
     }: IScrollEffectOptions = defaultOptions,
   ) {
+    this.distanceCallbacks_ =
+      ScrollEffect.mapCallbacksFromCallbackOptions_(distanceCallbacks);
+    this.percentCallbacks_ =
+      ScrollEffect.mapCallbacksFromCallbackOptions_(percentCallbacks);
     this.target_ = target;
     this.getDistanceFunction_ = getDistanceFunction;
     this.startDistance_ = startDistance;
@@ -122,8 +172,35 @@ class ScrollEffect {
   private init_(): void {
     this.effects_.forEach(
         (effect: IEffect) => ActiveEffects.get(effect).push(this));
-    renderLoop.measure(() => this.runEffect_());
+    renderLoop.measure(() => {
+      const runValue = this.getRunValue_();
+      this.runEffects_(runValue);
+      this.lastRunDistance_ = runValue.distance;
+    });
     renderLoop.scrollMeasure(() => this.handleScroll_());
+  }
+
+  private static mapCallbacksFromCallbackOptions_(
+    callbacks: TScrollEffectCallbackMap
+  ): ArrayMap<NumericRange, TScrollEffectCallback> {
+    const values =
+      callbacks instanceof ArrayMap ?
+        Array.from(callbacks.entries()) : callbacks;
+
+    const parsedValues: [NumericRange, TScrollEffectCallback[]][] =
+      values
+        .map(([key, value]) => {
+          if (key instanceof NumericRange) {
+            return <[NumericRange, TScrollEffectCallback[]]>[key, value];
+          } else if (key instanceof Array) {
+            return  <[NumericRange, TScrollEffectCallback[]]>(
+              [new NumericRange(key[0], key[1]), value]);
+          } else {
+            return  <[NumericRange, TScrollEffectCallback[]]>(
+              [new NumericRange(key, key), value]);
+          }
+        });
+    return new ArrayMap(parsedValues);
   }
 
   /**
@@ -137,7 +214,15 @@ class ScrollEffect {
 
     renderLoop.scrollMeasure(() => {
       renderLoop.scrollCleanup(() => this.handleScroll_());
-      this.runEffect_();
+
+      const runValue = this.getRunValue_();
+      if (runValue.distance === runValue.lastRunDistance) {
+        return; // Do nothing if there've been no real changes.
+      }
+
+      this.runEffects_(runValue);
+      this.runCallbacksForPosition_(runValue);
+      this.lastRunDistance_ = runValue.distance;
     });
   }
 
@@ -161,16 +246,67 @@ class ScrollEffect {
     return new NumericRange(this.getStartDistance_(), this.getEndDistance_());
   }
 
-  private runEffect_() {
-    const distance = this.getRunDistance_();
-    if (distance === this.lastRunDistance_) {
-      return; // Do nothing if there've been no real changes.
-    }
-    this.lastRunDistance_ = distance;
+  private static getCallbacks(
+    runRange: NumericRange, callbacksMap: TParsedCallbackMap
+  ): TScrollEffectCallback[] {
+    return flatten(
+      Array.from(callbacksMap.entries())
+        .filter(([triggerRange, callbacks]) => {
+          return triggerRange.getOverlap(runRange) !== null;
+        })
+        .map(([triggerRange, callbacks]) => callbacks)
+    );
+  }
 
+  private getRunValue_(): ScrollEffectRunValue {
+    const distance = this.getRunDistance_();
+    const lastRunDistance = this.lastRunDistance_;
     const percent = this.getDistanceRange_().getValueAsPercent(distance);
-    this.effects_
-      .forEach((effect) => effect.run(this.target_, distance, percent));
+    const lastRunDistancePercent =
+      this.getDistanceRange_().getValueAsPercent(lastRunDistance);
+
+    return new ScrollEffectRunValue(
+      distance,
+      percent,
+      lastRunDistance,
+      lastRunDistancePercent
+    )
+  }
+
+  private runCallbacks_(
+    callbacks: TScrollEffectCallback[], runValue: ScrollEffectRunValue
+  ): void {
+    callbacks
+      .forEach(
+        (callback) => callback(
+          this.target_,
+          runValue.distance,
+          runValue.distanceAsPercent,
+          runValue.lastRunDistance,
+          runValue.lastRunDistanceAsPercent,
+        ));
+
+  }
+
+  private runCallbacksForPosition_(runValue: ScrollEffectRunValue) {
+    const percentCallbacksToRun =
+      ScrollEffect.getCallbacks(
+        runValue.getRunRangeAsPercent(), this.percentCallbacks_);
+    const distanceCallbacksToRun =
+      ScrollEffect.getCallbacks(
+        runValue.getRunRange(), this.distanceCallbacks_);
+
+    const allCallbacks =
+      flatten([percentCallbacksToRun, distanceCallbacksToRun]);
+
+    this.runCallbacks_(allCallbacks, runValue);
+  }
+
+  private runEffects_(runValue: ScrollEffectRunValue) {
+    const effectsRunFns =
+      this.effects_.map((effect) => effect.run.bind(effect));
+
+    this.runCallbacks_(effectsRunFns, runValue);
   }
 
   private getRunDistance_(): number {

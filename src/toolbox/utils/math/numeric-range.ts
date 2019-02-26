@@ -46,6 +46,10 @@ class NumericRange implements IRange<number>{
     return this.max_;
   }
 
+  public getDistance(): number {
+    return this.max_ - this.min_;
+  }
+
   get min() {
     console.warn('WARNING: Please use getMin() and getMax() in place of getter properties min and max');
     return this.min_;

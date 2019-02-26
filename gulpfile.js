@@ -20,4 +20,4 @@ gulp.task('clear', targets.map((target) => `clear-${target}`));
 gulp.task('compile', targets.map((target) => `compile-${target}`));
 gulp.task('doc', () => exec(`typedoc; touch docs/.nojekyll`));
 
-gulp.task('default', ['clear', 'compile', 'doc']);
+gulp.task('default', ['clear', 'compile']);

@@ -1,13 +1,7 @@
 import {IEffect} from "../effects/i-effect";
 import {GetDistanceFn} from "./get-distance-fn";
-
-/**
- * Type of function that returns a start or end distance for a Scroll Effect.
- *
- * Function receives the target HTMLElement and returns a number. May also be
- * a plain-old number for simplicity's sake.
- */
-type TScrollEffectDistanceValue = ((t?: HTMLElement) => number) | number;
+import {TScrollEffectDistanceValue} from "./t-scroll-effect-distance-value";
+import {TScrollEffectCallbackMap} from "./t-scroll-effect-callback-map";
 
 /**
  * Interface for ScrollEffect configuration options.
@@ -18,13 +12,12 @@ type TScrollEffectDistanceValue = ((t?: HTMLElement) => number) | number;
  * values.
  */
 interface IScrollEffectOptions {
+  distanceCallbacks: TScrollEffectCallbackMap,
+  percentCallbacks: TScrollEffectCallbackMap,
   getDistanceFunction: GetDistanceFn,
   startDistance: TScrollEffectDistanceValue,
   endDistance: TScrollEffectDistanceValue,
   effects: Array<IEffect>,
 }
 
-export {
-  IScrollEffectOptions,
-  TScrollEffectDistanceValue
-};
+export {IScrollEffectOptions};
