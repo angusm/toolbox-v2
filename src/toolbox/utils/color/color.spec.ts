@@ -207,4 +207,22 @@ describe("Color", () => {
       });
     });
   });
+
+  describe("fromNumbers", () => {
+    const tests = [
+      [[255, 255, 255]],
+      [[0, 0, 0, 0]],
+      [[12, 234, 123, 0.4]],
+      [[0, 0, 0]]
+    ];
+    tests.forEach(([testInput]) => {
+      it(`should return the same color with Color.fromNumbers(${JSON.stringify(
+        testInput
+      )})`, () => {
+        const input = Color.fromNumbers(...testInput);
+        const res = new Color(...testInput);
+        expect(input).to.equal(res);
+      });
+    });
+  });
 });
