@@ -136,6 +136,26 @@ describe("Color", () => {
     });
   });
 
+  describe("getBrightness", () => {
+    const tests = [
+      [[255, 255, 255, 1]],
+      [[0, 0, 0, 0]],
+      [[12, 234, 123, 0.4]],
+      [[0, 0, 0]]
+    ];
+    tests.forEach(([testInput]) => {
+      it(`should return the brightness with Color.getBrightness(${JSON.stringify(
+        testInput
+      )})`, () => {
+        const color = new Color(...testInput);
+        const brightness = color.getBrightness();
+        const calcBrightness =
+          (3 * color.getRed() + 4 * color.getGreen() + color.getBlue()) >>> 3;
+        expect(brightness).to.equal(calcBrightness);
+      });
+    });
+  });
+
   describe("getRed", () => {
     const tests = [
       [[255, 255, 255, 1], 255],
