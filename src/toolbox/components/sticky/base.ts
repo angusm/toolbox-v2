@@ -106,30 +106,18 @@ class Sticky {
   }
 
   private positionTop_(): void {
-    if (this.lastPosition_ === ContainerPosition.MIDDLE) {
-      this.unpin_();
-    }
+    this.target_.style.position = '';
     this.target_.style.transform = '';
   }
 
   private positionMiddle_(containerXOffset: number): void {
-    this.pin_();
+    this.target_.style.position = 'fixed';
     this.target_.style.transform = `translateX(${containerXOffset}px)`;
   }
 
   private positionBottom_(maxDistance: number): void {
-    if (this.lastPosition_ === ContainerPosition.MIDDLE) {
-      this.unpin_();
-    }
-    this.target_.style.transform = `translateY(${maxDistance}px)`;
-  }
-
-  private pin_(): void {
-    this.target_.style.position = 'fixed';
-  }
-
-  private unpin_(): void {
     this.target_.style.position = 'absolute';
+    this.target_.style.transform = `translateY(${maxDistance}px)`;
   }
 
   public destroy() {
