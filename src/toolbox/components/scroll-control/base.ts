@@ -2,16 +2,16 @@ import {DistanceFunction} from "../scroll-effect/distance-function";
 import {GetDistanceFn} from "./types/get-distance-fn";
 import {IScrollControlOptions} from "./types/scroll-control-options";
 import {NumericRange} from "../../utils/math/numeric-range";
-import {getVisibleDistanceBetweenElementCenters} from "../../utils/dom/position/vertical/get-visible-distance-between-element-centers";
 import {renderLoop} from "../../utils/render-loop";
 import {getScrollElement} from "../../utils/dom/position/get-scroll-element";
-import {getSign} from "../../utils/math/get-sign";
+import {TScrollEffectDistanceValue} from "../scroll-effect/types/t-scroll-effect-distance-value";
+import {TScrollControlDistanceValue} from "./types/t-scroll-control-distance-value";
 
 const defaultOptions: IScrollControlOptions =
   {
     getDistanceFunction: DistanceFunction.DISTANCE_FROM_DOCUMENT_CENTER,
-    startDistance: Number.NEGATIVE_INFINITY,
-    endDistance: Number.POSITIVE_INFINITY,
+    startDistance: (frame: HTMLElement) => frame.offsetHeight / -2,
+    endDistance: (frame: HTMLElement) => frame.offsetHeight / 2,
   };
 
 const INTERACTION_START_EVENTS = [
@@ -28,7 +28,8 @@ class ScrollControl {
   private readonly control_: HTMLInputElement;
   private readonly frame_: HTMLElement;
   private readonly getDistanceFunction_: GetDistanceFn;
-  private readonly distanceRange_: NumericRange;
+  private readonly startDistance_: TScrollControlDistanceValue;
+  private readonly endDistance_: TScrollControlDistanceValue;
   private lastValue_: number;
   private interacting_: boolean;
   private destroyed_: boolean;
@@ -48,10 +49,11 @@ class ScrollControl {
     this.control_ = control;
     this.frame_ = frame === null ? document.body : frame;
     this.getDistanceFunction_ = getDistanceFunction;
-    this.distanceRange_ = new NumericRange(startDistance, endDistance);
     this.interacting_ = false;
     this.destroyed_ = false;
     this.lastValue_ = parseFloat(this.control_.value);
+    this.startDistance_ = startDistance;
+    this.endDistance_ = endDistance;
     this.init_();
   }
 
@@ -110,8 +112,10 @@ class ScrollControl {
 
       const percent =
         this.getValueRange_().getValueAsPercent(currentValue);
-      const targetDistance = this.getFrameRange_().getPercentAsValue(percent);
-      const currentDistance = this.getFrameRange_().clamp(this.getDistance_());
+      const targetDistance =
+        this.getDistanceRange_().getPercentAsValue(percent);
+      const currentDistance =
+        this.getDistanceRange_().clamp(this.getDistance_());
       const scrollDifference = targetDistance - currentDistance;
 
       // Don't fuss over tiny differences
@@ -140,12 +144,22 @@ class ScrollControl {
   }
 
   private getDistanceAsPercent_(): number {
-    return this.getFrameRange_().getValueAsPercent(this.getDistance_());
+    return this.getDistanceRange_().getValueAsPercent(this.getDistance_());
   }
 
-  private getFrameRange_(): NumericRange {
-    const range = this.frame_.offsetHeight / 2;
-    return this.distanceRange_.getOverlap(new NumericRange(-range, range));
+  private getDistanceRange_() {
+    return new NumericRange(
+      this.getDistanceValue_(this.startDistance_),
+      this.getDistanceValue_(this.endDistance_)
+    );
+  }
+
+  private getDistanceValue_(value: TScrollEffectDistanceValue): number {
+    if (typeof value === 'number') {
+      return value;
+    } else {
+      return value(this.frame_);
+    }
   }
 
   public destroy() {

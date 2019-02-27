@@ -1,9 +1,10 @@
 import {GetDistanceFn} from "./get-distance-fn";
+import {TScrollControlDistanceValue} from "./t-scroll-control-distance-value";
 
 interface IScrollControlOptions {
   getDistanceFunction: GetDistanceFn,
-  startDistance: number,
-  endDistance: number,
+  startDistance: TScrollControlDistanceValue,
+  endDistance: TScrollControlDistanceValue,
 }
 
 export {IScrollControlOptions};
