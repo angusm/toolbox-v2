@@ -2,7 +2,7 @@ import {Draggable} from '../draggable/draggable';
 import {DraggableFixedXConstraint} from "../draggable/constraints/fixed-x";
 import {ContainerConstraint} from "../draggable/constraints/container";
 
-class HorizontalScroll {
+class VerticalScroll {
   constructor(element: HTMLElement, container: HTMLElement) {
     new Draggable(
       element,
@@ -13,4 +13,4 @@ class HorizontalScroll {
   }
 }
 
-export {HorizontalScroll};
+export {VerticalScroll};
