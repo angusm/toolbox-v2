@@ -9,7 +9,7 @@ function getLastMatchingIndex<T>(...lists: T[][]): number {
       return matchIndex - 1;
     }
   }
-  return matchIndex;
+  return matchIndex - 1;
 }
 
 export {getLastMatchingIndex};

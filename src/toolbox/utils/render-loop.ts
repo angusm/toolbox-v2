@@ -42,7 +42,7 @@ const SCROLL_STEP_ORDER: Array<symbol> = [
 ];
 
 class RenderFunctionID {
-  private step_: symbol;
+  private readonly step_: symbol;
 
   constructor(step: symbol) {
     this.step_ = step;
@@ -63,7 +63,6 @@ class RenderLoop {
   private currentRun_: Date;
   private msPerFrame_: number;
   private scheduledFns_: DynamicDefaultMap<symbol, RenderFunctionMap>;
-  private scrolledSinceLastFrame_: boolean;
 
   constructor() {
     this.scheduledFns_ =
@@ -71,10 +70,9 @@ class RenderLoop {
         .usingFunction<symbol, RenderFunctionMap>(
           (unused: symbol) => new Map<RenderFunctionID, RenderFunction>());
     this.msPerFrame_ = 33; // Default to 30fps
-    this.scrolledSinceLastFrame_ = false;
     this.lastRun_ = new Date();
     window.addEventListener('scroll', () => this.runScrollLoop_());
-    this.runScrollFns_();
+    this.runScrollLoop_();
     this.runLoop_();
   }
 
@@ -170,7 +168,6 @@ class RenderLoop {
   }
 
   private runScrollLoop_(): void {
-    this.scrolledSinceLastFrame_ = true;
     this.runScrollFns_();
   }
 
@@ -179,11 +176,7 @@ class RenderLoop {
   }
 
   private runFns_(): void {
-    const stepOrder =
-      this.scrolledSinceLastFrame_ ?
-        ALL_STEP_ORDER : ANIMATION_FRAME_STEP_ORDER;
-    this.scrolledSinceLastFrame_ = false;
-    stepOrder.forEach((step) => this.runFnsForStep_(step));
+    ANIMATION_FRAME_STEP_ORDER.forEach((step) => this.runFnsForStep_(step));
   }
 
   private runFnsForStep_(step: symbol): void {
