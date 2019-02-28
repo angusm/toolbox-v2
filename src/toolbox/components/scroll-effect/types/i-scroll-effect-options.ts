@@ -12,12 +12,12 @@ import {TScrollEffectCallbackMap} from "./t-scroll-effect-callback-map";
  * values.
  */
 interface IScrollEffectOptions {
-  distanceCallbacks: TScrollEffectCallbackMap,
-  percentCallbacks: TScrollEffectCallbackMap,
-  getDistanceFunction: GetDistanceFn,
-  startDistance: TScrollEffectDistanceValue,
-  endDistance: TScrollEffectDistanceValue,
-  effects: Array<IEffect>,
+  distanceCallbacks?: TScrollEffectCallbackMap,
+  percentCallbacks?: TScrollEffectCallbackMap,
+  getDistanceFunction?: GetDistanceFn,
+  startDistance?: TScrollEffectDistanceValue,
+  endDistance?: TScrollEffectDistanceValue,
+  effects?: Array<IEffect>,
 }
 
 export {IScrollEffectOptions};
