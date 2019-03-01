@@ -33,8 +33,8 @@ class Carousel implements ICarousel {
     slides: HTMLElement[],
     {
       activeCssClass = CssClass.ACTIVE_SLIDE,
-      beforeCssClass = CssClass.ACTIVE_SLIDE,
-      afterCssClass = CssClass.ACTIVE_SLIDE,
+      beforeCssClass = CssClass.BEFORE_SLIDE,
+      afterCssClass = CssClass.AFTER_SLIDE,
       allowLooping = true,
       transition = defaultTransition,
     }: {
