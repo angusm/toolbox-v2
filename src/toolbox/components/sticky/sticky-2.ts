@@ -1,12 +1,9 @@
 import {NumericRange} from "../../utils/math/numeric-range";
 import {getVisibleYPosition} from "../../utils/dom/position/vertical/get-visible-y-position";
 import {renderLoop} from "../../utils/render-loop";
-import {getOffsetFromAncestor} from "../../utils/dom/position/get-offset-from-ancestor";
 import {Vector2d} from "../../utils/math/geometry/vector-2d";
-import {Dimensions2d} from "../../utils/math/geometry/dimensions-2d";
 import {getVisibleDistanceBetweenElements} from "../../utils/dom/position/get-visible-distance-between-elements";
 import {getVisibleDistanceFromRoot} from "../../utils/dom/position/get-visible-distance-from-root";
-import {getCommonOffsetAncestor} from "../../utils/dom/position/get-common-offset-ancestor";
 import {getCommonPositionedParentElement} from "../../utils/dom/position/get-common-positioned-parent-element";
 
 /**
@@ -24,6 +21,31 @@ class ContainerPosition {
 }
 
 /**
+ * Contains values measured from the DOM for sticky updates.
+ */
+class MeasureValue {
+  public readonly position: ContainerPosition;
+  public readonly cloneStyle: CSSStyleDeclaration;
+  public readonly cloneDistanceFromFrame: Vector2d;
+  public readonly cloneDistanceFromRoot: Vector2d;
+  public readonly maxDistance: number;
+
+  constructor(
+    position: ContainerPosition,
+    cloneStyle: CSSStyleDeclaration,
+    cloneDistanceFromFrame: Vector2d,
+    cloneDistanceFromRoot: Vector2d,
+    maxDistance: number
+  ) {
+    this.position = position;
+    this.cloneStyle = cloneStyle;
+    this.cloneDistanceFromFrame = cloneDistanceFromFrame;
+    this.cloneDistanceFromRoot = cloneDistanceFromRoot;
+    this.maxDistance = maxDistance;
+  }
+}
+
+/**
  * Simulates `position: sticky` when native support isn't available due to
  * `overflow: hidden` on parent elements.
  */
@@ -32,7 +54,7 @@ class Sticky2 {
   private readonly target_: HTMLElement;
   private readonly clone_: HTMLElement;
   private destroyed_: boolean;
-  private lastPosition_: Symbol;
+  private lastPosition_: ContainerPosition;
 
   /**
    * @param target The Element to position as if it were "position: sticky"'d
@@ -64,22 +86,13 @@ class Sticky2 {
     this.target_.style.margin = '0';
     this.target_.style.padding = '0';
 
-    this.measure_();
     this.renderLoop_();
+    this.scrollLoop_();
   }
 
-  private renderLoop_(): void {
-    if (this.destroyed_) {
-      return;
-    }
-
-    renderLoop.scrollMeasure(() => {
-      renderLoop.scrollCleanup(() => this.renderLoop_());
-      this.measure_()
-    });
-  }
-
-  private static getPosition_(shouldPin: boolean, yPosition: number): Symbol {
+  private static getPosition_(
+    shouldPin: boolean, yPosition: number
+  ): ContainerPosition {
     if (shouldPin) {
       return ContainerPosition.MIDDLE;
     } else if (yPosition < 0) {
@@ -89,8 +102,31 @@ class Sticky2 {
     }
   }
 
-  // Split out so it can be run on initial load
-  private measure_(): void {
+  private scrollLoop_(): void {
+    if (this.destroyed_) {
+      return;
+    }
+
+    renderLoop.scrollMeasure(() => {
+      renderLoop.scrollCleanup(() => this.scrollLoop_());
+      const measureValue = this.getMeasureValue_();
+      renderLoop.scrollMutate(() => this.mutate_(measureValue));
+    });
+  }
+
+  private renderLoop_() {
+    if (this.destroyed_) {
+      return;
+    }
+
+    renderLoop.measure(() => {
+      renderLoop.cleanup(() => this.renderLoop_());
+      const measureValue = this.getMeasureValue_();
+      renderLoop.mutate(() => this.mutate_(measureValue));
+    });
+  }
+
+  private getMeasureValue_(): MeasureValue {
     const yPosition: number = getVisibleYPosition(this.container_);
     const maxDistance: number =
       this.container_.offsetHeight -
@@ -106,34 +142,44 @@ class Sticky2 {
     const cloneDistanceFromRoot = getVisibleDistanceFromRoot(this.clone_);
     const cloneStyle = window.getComputedStyle(this.clone_);
 
+    return new MeasureValue(
+      position,
+      cloneStyle,
+      cloneDistanceFromFrame,
+      cloneDistanceFromRoot,
+      maxDistance);
+  }
+
+  private mutate_(measureValue: MeasureValue): void {
+    this.applyCloneStylesToTarget_(measureValue.cloneStyle);
 
     // Skip duplicating work
-    if (this.lastPosition_ === position) {
+    if (this.lastPosition_ === measureValue.position) {
       return;
     }
 
-    renderLoop.scrollMutate(() => {
-      this.applyCloneStylesToTarget_(cloneStyle);
+    // Determine if the target should stick
+    if (measureValue.position === ContainerPosition.TOP) {
+      this.target_.style.position = 'absolute';
+      measureValue.cloneDistanceFromFrame
+        .positionElementByTranslation(this.target_);
+    }
+    else if (measureValue.position === ContainerPosition.MIDDLE) {
+      this.target_.style.position = 'fixed';
+      new Vector2d(
+        measureValue.cloneDistanceFromRoot.x,
+        measureValue.cloneDistanceFromFrame.y
+      )
+        .positionElementByTranslation(this.target_);
+    }
+    else if (measureValue.position === ContainerPosition.BOTTOM) {
+      this.target_.style.position = 'absolute';
+      measureValue.cloneDistanceFromFrame
+        .add(new Vector2d(0, measureValue.maxDistance))
+        .positionElementByTranslation(this.target_);
+    }
 
-      // Determine if the target should stick
-      if (position === ContainerPosition.TOP) {
-        this.target_.style.position = 'absolute';
-        cloneDistanceFromFrame.positionElementByTranslation(this.target_);
-      }
-      else if (position === ContainerPosition.MIDDLE) {
-        this.target_.style.position = 'fixed';
-        new Vector2d(cloneDistanceFromRoot.x, cloneDistanceFromFrame.y)
-          .positionElementByTranslation(this.target_);
-      }
-      else if (position === ContainerPosition.BOTTOM) {
-        this.target_.style.position = 'absolute';
-        cloneDistanceFromFrame
-          .add(new Vector2d(0, maxDistance))
-          .positionElementByTranslation(this.target_);
-      }
-
-      this.lastPosition_ = position;
-    });
+    this.lastPosition_ = measureValue.position;
   }
 
   private applyCloneStylesToTarget_(cloneStyles: CSSStyleDeclaration): void {
