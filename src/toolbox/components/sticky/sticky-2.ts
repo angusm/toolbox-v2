@@ -153,11 +153,6 @@ class Sticky2 {
   private mutate_(measureValue: MeasureValue): void {
     this.applyCloneStylesToTarget_(measureValue.cloneStyle);
 
-    // Skip duplicating work
-    if (this.lastPosition_ === measureValue.position) {
-      return;
-    }
-
     // Determine if the target should stick
     if (measureValue.position === ContainerPosition.TOP) {
       this.target_.style.position = 'absolute';
