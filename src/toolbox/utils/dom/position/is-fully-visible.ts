@@ -1,15 +1,11 @@
-import {getVisibleArea} from './get-visible-area';
-import {isDisplayed} from "../style/is-displayed";
+import {isPercentVisible} from "./is-percent-visible";
 
 function isFullyVisible(
   target: HTMLElement,
   container: HTMLElement = null,
   factorInOpacity: boolean = false
 ): boolean {
-  const visibleArea = getVisibleArea(target, container, factorInOpacity);
-  return isDisplayed(target) &&
-    visibleArea > 0 &&
-    visibleArea === target.offsetWidth * target.offsetHeight;
+  return isPercentVisible(target, 1, container, factorInOpacity);
 }
 
 export {isFullyVisible};

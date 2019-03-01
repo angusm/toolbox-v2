@@ -6,9 +6,9 @@ import {subtract} from "../../utils/array/subtract";
 const MODIFIER = 'active';
 
 class ActiveOnCondition {
-  private baseClass_: string;
-  private conditionFn_: (element: HTMLElement) => boolean;
-  private modifier_: string;
+  private readonly baseClass_: string;
+  private readonly conditionFn_: (element: HTMLElement) => boolean;
+  private readonly modifier_: string;
   private destroyed_: boolean;
 
   constructor(
