@@ -1,4 +1,3 @@
-import {Fade as FadeTransition} from './transitions/fade';
 import {ICarousel, ITransition} from './interfaces';
 import {isVisible} from '../../utils/dom/position/is-visible';
 import {removeFirstInstance} from '../../utils/array/remove-first-instance';
@@ -8,15 +7,20 @@ import {addClassIfMissing} from "../../utils/dom/class/add-class-if-missing";
 import {removeClassIfPresent} from "../../utils/dom/class/remove-class-if-present";
 import {CarouselSyncManager} from './sync-manager';
 import {NumericRange} from "../../utils/math/numeric-range";
+import {CssClassesOnly} from "./transitions/css-classes-only";
 
-const defaultTransition: ITransition = new FadeTransition();
+const defaultTransition: ITransition = new CssClassesOnly();
 const INTERACTION: symbol = Symbol('interaction');
 const CssClass = Object.freeze({
   ACTIVE_SLIDE: 'active',
+  BEFORE_SLIDE: 'before',
+  AFTER_SLIDE: 'after',
 });
 
 class Carousel implements ICarousel {
   private readonly activeClass_: string;
+  private readonly beforeCssClass_: string;
+  private readonly afterCssClass_: string;
   private readonly container_: HTMLElement;
   private readonly slides_: HTMLElement[];
   private readonly transition_: ITransition;
@@ -29,15 +33,21 @@ class Carousel implements ICarousel {
     slides: HTMLElement[],
     {
       activeCssClass = CssClass.ACTIVE_SLIDE,
+      beforeCssClass = CssClass.ACTIVE_SLIDE,
+      afterCssClass = CssClass.ACTIVE_SLIDE,
       allowLooping = true,
       transition = defaultTransition,
     }: {
       activeCssClass?: string,
+      beforeCssClass?: string,
+      afterCssClass?: string,
       allowLooping?: boolean,
       transition?: ITransition,
     } = {}
   ) {
     this.activeClass_ = activeCssClass;
+    this.beforeCssClass_ = beforeCssClass;
+    this.afterCssClass_ = afterCssClass;
     this.allowLooping_ = allowLooping;
     this.container_ = container;
     this.slides_ = slides;
@@ -89,14 +99,35 @@ class Carousel implements ICarousel {
       this.handleTransition_();
 
       const activeSlide = this.getActiveSlide();
-      const inactiveSlides =
-        this.getSlides().filter((slide) => slide !== activeSlide);
       renderLoop.mutate(() => {
-        addClassIfMissing(activeSlide, this.activeClass_);
-        inactiveSlides
-          .forEach((slide) => removeClassIfPresent(slide, this.activeClass_));
+        this.updateClasses_(activeSlide);
       });
     });
+  }
+
+  private updateClasses_(activeSlide: HTMLElement) {
+    const slidesBefore = this.getSlidesBefore(activeSlide);
+    const slidesAfter = this.getSlidesAfter(activeSlide);
+
+    addClassIfMissing(activeSlide, this.activeClass_);
+    removeClassIfPresent(activeSlide, this.beforeCssClass_);
+    removeClassIfPresent(activeSlide, this.afterCssClass_);
+
+    slidesBefore
+      .forEach((slide, index) => {
+        removeClassIfPresent(slide, this.activeClass_);
+        addClassIfMissing(slide, this.beforeCssClass_);
+        removeClassIfPresent(slide, this.afterCssClass_);
+        addClassIfMissing(slide, `${this.beforeCssClass_}--${index}`);
+      });
+
+    slidesAfter
+      .forEach((slide, index) => {
+        removeClassIfPresent(slide, this.activeClass_);
+        removeClassIfPresent(slide, this.beforeCssClass_);
+        addClassIfMissing(slide, this.afterCssClass_);
+        addClassIfMissing(slide, `${this.afterCssClass_}--${index}`);
+      });
   }
 
   private handleTransition_() {
@@ -111,6 +142,10 @@ class Carousel implements ICarousel {
 
   public getActiveSlide(): HTMLElement {
     return this.transition_.getActiveSlide(this);
+  }
+
+  public getActiveClass(): string {
+    return this.activeClass_;
   }
 
   public getActiveSlideIndex(): number {
