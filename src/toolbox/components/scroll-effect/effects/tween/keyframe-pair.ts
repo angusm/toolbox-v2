@@ -8,7 +8,8 @@ import {ITweenableValueInstance} from "./interfaces/tweenable-value";
  */
 class KeyframePair {
   private readonly positionRange_: NumericRange;
-  private readonly valueRange_: MeasurableRange;
+  private readonly keyframeA_: Keyframe;
+  private readonly keyframeB_: Keyframe;
 
   /**
    * @param keyframeA First keyframe in the pair.
@@ -17,8 +18,8 @@ class KeyframePair {
   constructor(keyframeA: Keyframe, keyframeB: Keyframe) {
     this.positionRange_
       = new NumericRange(keyframeA.getPosition(), keyframeB.getPosition());
-    this.valueRange_ =
-      new MeasurableRange(keyframeA.getValue(), keyframeB.getValue());
+    this.keyframeA_ = keyframeA;
+    this.keyframeB_ = keyframeB;
   }
 
   /**
@@ -42,7 +43,14 @@ class KeyframePair {
     } else {
       percent = this.positionRange_.getValueAsPercent(position);
     }
-    return <ITweenableValueInstance>this.valueRange_.getPercentAsValue(percent);
+    return <ITweenableValueInstance>(
+      this.getValueRange_().getPercentAsValue(percent));
+  }
+
+  private getValueRange_(): MeasurableRange {
+    return new MeasurableRange(
+      this.keyframeA_.getValue(this.keyframeB_),
+      this.keyframeB_.getValue(this.keyframeA_));
   }
 
   /**

@@ -9,8 +9,13 @@ import {
 import {Transform} from "../../../../utils/dom/style/transform/transform";
 import {flatten} from "../../../../utils/array/flatten";
 import {sum} from "../../../../utils/math/sum";
+import {MultiValueDynamicDefaultMap} from "../../../../utils/map/multi-value-dynamic-default";
 
-function generateTweenableTransformClass(
+const generatedTweenableTransformClasses:
+  MultiValueDynamicDefaultMap<ITransformValueStatic, ITweenableValueStatic> =
+  MultiValueDynamicDefaultMap.usingFunction(generateTweenableTransformClass_);
+
+function generateTweenableTransformClass_(
   TransformValueClasses: ITransformValueStatic[]
 ): ITweenableValueStatic {
 
@@ -68,6 +73,12 @@ function generateTweenableTransformClass(
   }
 
   return TweenableTransformClass;
+}
+
+function generateTweenableTransformClass(
+  TransformValueClasses: ITransformValueStatic[]
+): ITweenableValueStatic {
+  return generatedTweenableTransformClasses.get(TransformValueClasses);
 }
 
 export {generateTweenableTransformClass};

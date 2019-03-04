@@ -3,7 +3,7 @@ import {renderLoop} from "../../../../utils/render-loop";
 import {setStyle} from "../../../../utils/dom/style/set-style";
 import {Animation} from "./animation";
 import {KeyframeStyle} from "./keyframe-style";
-import {TKeyframesConfig} from "./t-keyframes-config";
+import {TKeyframesConfig} from "./types/t-keyframes-config";
 import {ITweenOptions} from "./interfaces/tween-options";
 
 /**
