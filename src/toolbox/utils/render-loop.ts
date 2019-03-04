@@ -71,9 +71,9 @@ class RenderLoop {
           (unused: symbol) => new Map<RenderFunctionID, RenderFunction>());
     this.msPerFrame_ = 33; // Default to 30fps
     this.lastRun_ = new Date();
-    window.addEventListener('scroll', () => this.runScrollLoop_());
-    this.runScrollLoop_();
-    this.runLoop_();
+    window.addEventListener('scroll', () => this.runScrollLoop());
+    this.runScrollLoop();
+    this.runLoop();
   }
 
   public framecount(fn: RenderFunction): RenderFunctionID {
@@ -142,17 +142,23 @@ class RenderLoop {
     return nextRun - <number>new Date().valueOf();
   }
 
-  private runLoop_(): void {
+  /**
+   * Runs all functions in the render loop.
+   *
+   * Use with caution!
+   * Calling this manually should be avoided if at all possible.
+   */
+  public runLoop(): void {
     this.currentRun_ = new Date();
     const nextRun = <number>this.currentRun_.valueOf() + this.msPerFrame_;
     this.runFns_();
     this.lastRun_ = this.currentRun_;
     if (RenderLoop.getTimeUntilNextRun_(nextRun) > 2) {
       setTimeout(
-        () => window.requestAnimationFrame(() => this.runLoop_()),
+        () => window.requestAnimationFrame(() => this.runLoop()),
         RenderLoop.getTimeUntilNextRun_(nextRun));
     } else {
-      window.requestAnimationFrame(() => this.runLoop_())
+      window.requestAnimationFrame(() => this.runLoop())
     }
   }
 
@@ -167,7 +173,13 @@ class RenderLoop {
     return this.getElapsedMilliseconds() / 1000;
   }
 
-  private runScrollLoop_(): void {
+  /**
+   * Runs all functions in the scroll loop.
+   *
+   * Use with caution!
+   * Calling this manually should be avoided if at all possible.
+   */
+  public runScrollLoop(): void {
     this.runScrollFns_();
   }
 
