@@ -18,6 +18,7 @@ import {TScrollEffectDistanceValue} from "./types/t-scroll-effect-distance-value
  */
 const defaultOptions: IScrollEffectOptions =
   {
+    condition: () => true,
     distanceCallbacks: <TScrollEffectCallbackMap>[],
     percentCallbacks: <TScrollEffectCallbackMap>[],
     getDistanceFunction: DistanceFunction.DISTANCE_FROM_DOCUMENT_CENTER,
@@ -70,6 +71,7 @@ class ScrollEffectRunValue {
  * ranges, before calling the run function on the provided effects.
  */
 class ScrollEffect {
+  private readonly condition_: () => boolean;
   private readonly distanceCallbacks_: TParsedCallbackMap;
   private readonly percentCallbacks_: TParsedCallbackMap;
   private readonly target_: HTMLElement;
@@ -88,6 +90,8 @@ class ScrollEffect {
    * but some effects such as Tween will allow you to provide separate
    * targets to apply effect styles to.
    *
+   *
+   * @param condition Effects will only run if this function evaluates to true.
    *
    * @param getDistanceFunction Method used to determine distance scrolled.
    *
@@ -150,6 +154,7 @@ class ScrollEffect {
   constructor(
     target: HTMLElement,
     {
+      condition = defaultOptions.condition,
       distanceCallbacks = defaultOptions.distanceCallbacks,
       percentCallbacks = defaultOptions.percentCallbacks,
       getDistanceFunction = defaultOptions.getDistanceFunction,
@@ -158,6 +163,7 @@ class ScrollEffect {
       effects = defaultOptions.effects,
     }: IScrollEffectOptions = defaultOptions,
   ) {
+    this.condition_ = condition;
     this.distanceCallbacks_ =
       ScrollEffect.mapCallbacksFromCallbackOptions_(distanceCallbacks);
     this.percentCallbacks_ =
@@ -176,6 +182,11 @@ class ScrollEffect {
     this.effects_.forEach(
         (effect: IEffect) => ActiveEffects.get(effect).push(this));
     renderLoop.measure(() => {
+      // Do nothing if the condition doesn't evaluate to true.
+      if (!this.condition_()) {
+        return;
+      }
+
       const runValue = this.getRunValue_();
       this.runEffects_(runValue);
       this.lastRunDistance_ = runValue.distance;
@@ -217,6 +228,11 @@ class ScrollEffect {
 
     renderLoop.scrollMeasure(() => {
       renderLoop.scrollCleanup(() => this.handleScroll_());
+
+      // Do nothing if the condition doesn't evaluate to true.
+      if (!this.condition_()) {
+        return;
+      }
 
       const runValue = this.getRunValue_();
       if (runValue.distance === runValue.lastRunDistance) {
