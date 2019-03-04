@@ -181,7 +181,7 @@ class FrameSequenceBg implements IEffect {
       backFrameStyles.set('opacity', '1');
     }
 
-    renderLoop.scrollMutate(
+    renderLoop.anyMutate(
       () => {
         setStylesFromMap(this.backFrame_, backFrameStyles);
         setStylesFromMap(this.frontFrame_, frontFrameStyles);

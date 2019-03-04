@@ -10,6 +10,7 @@ class RenderStep {
   public static readonly SCROLL_PRE_MEASURE = Symbol('Scroll-measure');
   public static readonly SCROLL_MEASURE = Symbol('Scroll-measure');
   public static readonly SCROLL_MUTATE = Symbol('Scroll-mutate');
+  public static readonly ANY_MUTATE = Symbol('any-mutate');
   public static readonly SCROLL_CLEANUP = Symbol('Scroll-cleanup');
 }
 
@@ -21,6 +22,7 @@ const ALL_STEP_ORDER: Array<symbol> = [
   RenderStep.SCROLL_MEASURE,
   RenderStep.MUTATE,
   RenderStep.SCROLL_MUTATE,
+  RenderStep.ANY_MUTATE,
   RenderStep.CLEANUP,
   RenderStep.SCROLL_CLEANUP,
 ];
@@ -31,6 +33,7 @@ const ANIMATION_FRAME_STEP_ORDER: Array<symbol> = [
   RenderStep.MEASURE,
   RenderStep.PHYSICS,
   RenderStep.MUTATE,
+  RenderStep.ANY_MUTATE,
   RenderStep.CLEANUP,
 ];
 
@@ -38,6 +41,7 @@ const SCROLL_STEP_ORDER: Array<symbol> = [
   RenderStep.SCROLL_PRE_MEASURE,
   RenderStep.SCROLL_MEASURE,
   RenderStep.SCROLL_MUTATE,
+  RenderStep.ANY_MUTATE,
   RenderStep.SCROLL_CLEANUP,
 ];
 
@@ -114,6 +118,10 @@ class RenderLoop {
 
   scrollCleanup(fn: RenderFunction): RenderFunctionID {
     return this.addFnToStep_(fn, RenderStep.SCROLL_CLEANUP);
+  }
+
+  public anyMutate(fn: RenderFunction): RenderFunctionID {
+    return this.addFnToStep_(fn, RenderStep.ANY_MUTATE);
   }
 
   public setFps(fps: number): void {

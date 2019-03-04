@@ -18,9 +18,9 @@ class RemoveTransformWhenScrolled implements IEffect {
     target: HTMLElement, distance: number, distanceAsPercent: number
   ): void {
     if (distance > this.minimumScrollDistance_) {
-      renderLoop.scrollMutate(() => setStyle(target, 'transform', 'none'));
+      renderLoop.anyMutate(() => setStyle(target, 'transform', 'none'));
     } else {
-      renderLoop.scrollMutate(() => setStyle(target, 'transform', ''));
+      renderLoop.anyMutate(() => setStyle(target, 'transform', ''));
     }
   }
 

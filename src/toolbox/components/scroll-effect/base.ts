@@ -79,8 +79,9 @@ class ScrollEffect {
   private readonly startDistance_: TScrollEffectDistanceValue;
   private readonly endDistance_: TScrollEffectDistanceValue;
   private readonly effects_: Array<IEffect>;
-  private lastRunDistance_: number;
   private destroyed_: boolean;
+  private forceRun_: boolean;
+  private lastRunDistance_: number;
 
   /**
    *
@@ -175,6 +176,7 @@ class ScrollEffect {
     this.effects_ = effects;
     this.lastRunDistance_ = null;
     this.destroyed_ = false;
+    this.forceRun_ = false;
     this.init_();
   }
 
@@ -182,13 +184,10 @@ class ScrollEffect {
     this.effects_.forEach(
         (effect: IEffect) => ActiveEffects.get(effect).push(this));
     renderLoop.measure(() => {
-      // Do nothing if the condition doesn't evaluate to true.
-      if (!this.condition_()) {
-        return;
-      }
-
       const runValue = this.getRunValue_();
-      this.runEffects_(runValue);
+      if (this.shouldRun_(runValue)) {
+        this.runEffectsAndCallbacks_(runValue);
+      }
       this.lastRunDistance_ = runValue.distance;
     });
     renderLoop.scrollMeasure(() => this.handleScroll_());
@@ -229,20 +228,46 @@ class ScrollEffect {
     renderLoop.scrollMeasure(() => {
       renderLoop.scrollCleanup(() => this.handleScroll_());
 
-      // Do nothing if the condition doesn't evaluate to true.
-      if (!this.condition_()) {
-        return;
-      }
-
       const runValue = this.getRunValue_();
-      if (runValue.distance === runValue.lastRunDistance) {
-        return; // Do nothing if there've been no real changes.
+      if (this.shouldRun_(runValue)) {
+        this.runEffectsAndCallbacks_(runValue);
       }
-
-      this.runEffects_(runValue);
-      this.runCallbacksForPosition_(runValue);
       this.lastRunDistance_ = runValue.distance;
     });
+  }
+
+  /**
+   * Force the scroll effect to run on the next frame.
+   *
+   * Ignores scroll distance or provided condition evaluation.
+   */
+  public forceRun(): void {
+    if (this.forceRun_) {
+      return; // Run already being forced.
+    }
+    this.forceRun_ = true;
+    renderLoop.measure(() => {
+      const runValue = this.getRunValue_();
+      this.runEffectsAndCallbacks_(runValue);
+      this.lastRunDistance_ = runValue.distance;
+      renderLoop.cleanup(() => this.forceRun_ = false);
+    });
+  }
+
+  private runEffectsAndCallbacks_(runValue: ScrollEffectRunValue): void {
+    this.runEffects_(runValue);
+    this.runCallbacksForPosition_(runValue);
+  }
+
+  /**
+   * @param optionalRunValue Provided only as an option to improve performance.
+   * By providing a run value a new one won't be instantiated.
+   *
+   * @private
+   */
+  private shouldRun_(optionalRunValue?: ScrollEffectRunValue): boolean {
+    const runValue = optionalRunValue || this.getRunValue_();
+    return this.condition_() && runValue.distance !== runValue.lastRunDistance;
   }
 
   private getDistanceValue_(value: TScrollEffectDistanceValue): number {
@@ -293,7 +318,7 @@ class ScrollEffect {
   }
 
   private runCallbacks_(
-    callbacks: TScrollEffectCallback[]  , runValue: ScrollEffectRunValue
+    callbacks: TScrollEffectCallback[], runValue: ScrollEffectRunValue
   ): void {
     callbacks
       .forEach(

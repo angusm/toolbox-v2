@@ -53,7 +53,10 @@ class Sticky {
       return;
     }
 
-    renderLoop.scrollMeasure(() => this.measure_());
+    renderLoop.scrollMeasure(() => {
+      renderLoop.scrollCleanup(() => this.renderLoop_());
+      this.measure_()
+    });
   }
 
   private getPosition_(shouldPin: boolean, yPosition: number): Symbol {
@@ -72,8 +75,6 @@ class Sticky {
       return;
     }
 
-    renderLoop.scrollCleanup(() => this.renderLoop_());
-
     const yPosition: number = getVisibleYPosition(this.container_);
     const maxDistance: number =
       this.container_.offsetHeight -
@@ -89,7 +90,7 @@ class Sticky {
       return;
     }
 
-    renderLoop.scrollMutate(() => {
+    renderLoop.anyMutate(() => {
       // Determine if the target should stick
       if (position === ContainerPosition.TOP) {
         this.positionTop_();

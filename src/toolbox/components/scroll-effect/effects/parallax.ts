@@ -37,7 +37,7 @@ class Parallax implements IEffect {
     const translation =
       originalMatrix.set2dTranslation(new Vector2d(0, offset));
 
-    renderLoop.scrollMutate(() => translation.applyToElementTransform(target));
+    renderLoop.anyMutate(() => translation.applyToElementTransform(target));
   }
 
   /**
