@@ -15,6 +15,7 @@ const propertyToTweenableValue =
   new Map<string, ITweenableValueStatic>([
     ['background-color', Color],
     ['border-color', Color],
+    ['border-radius', CssCalcFormula],
     ['bottom', CssCalcFormula],
     ['color', Color],
     ['height', CssCalcFormula],
