@@ -75,7 +75,7 @@ class NumericRange implements IRange<number>{
   }
 
   public getOverlap(overlap: NumericRange): NumericRange {
-    if (this.max_ <= overlap.getMin() || overlap.getMax() <= this.min_) {
+    if (this.max_ < overlap.getMin() || overlap.getMax() < this.min_) {
       return null;
     } else {
       return new NumericRange(
