@@ -99,9 +99,11 @@ class Carousel implements ICarousel {
       this.handleTransition_();
 
       const activeSlide = this.getActiveSlide();
-      renderLoop.mutate(() => {
-        this.updateClasses_(activeSlide);
-      });
+      if (activeSlide) {
+        renderLoop.mutate(() => {
+          this.updateClasses_(activeSlide);
+        });
+      }
     });
   }
 

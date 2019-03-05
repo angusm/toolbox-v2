@@ -5,16 +5,18 @@ import {ArrayMap} from "../../../utils/map/array";
 import {max} from "../../../utils/array/max";
 
 class Video implements ITransition {
+  private readonly activeSlides_: Map<ICarousel, HTMLElement>;
+  private readonly transitionTargets_: ArrayMap<ICarousel, HTMLElement>;
   private readonly transitionTime_: number;
   private readonly video_: HTMLVideoElement;
   private shouldShift_: boolean;
-  private transitionTargets_: ArrayMap<ICarousel, HTMLElement>;
 
   constructor(video: HTMLVideoElement, transitionPoint: number) {
+    this.activeSlides_ = new Map();
     this.transitionTargets_ = new ArrayMap();
     this.transitionTime_ = transitionPoint;
-    this.video_ = video;
     this.shouldShift_ = false;
+    this.video_ = video;
   }
 
   public init(targetSlide: HTMLElement, carousel: ICarousel) {
@@ -22,12 +24,12 @@ class Video implements ITransition {
       carousel.getSlides()
         .forEach((slide: HTMLElement) => slide.style.opacity = '0');
       targetSlide.style.opacity = '1';
+      this.activeSlides_.set(carousel, targetSlide);
     });
   }
 
   public getActiveSlide(carousel: ICarousel): HTMLElement {
-    return getMostVisibleElement(
-      carousel.getSlides(), carousel.getContainer(), true);
+    return this.activeSlides_.get(carousel);
   }
 
   public transition(targetSlide: HTMLElement, carousel: ICarousel) {
@@ -56,6 +58,7 @@ class Video implements ITransition {
           .filter((slide: HTMLElement) => slide !== nextTarget)
           .forEach((slide: HTMLElement) => slide.style.opacity = '0');
         nextTarget.style.opacity = '1';
+        this.activeSlides_.set(carousel, nextTarget);
       });
     }
   }
