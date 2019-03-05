@@ -25,19 +25,23 @@ class Carousel implements ICarousel {
   private readonly slides_: HTMLElement[];
   private readonly transition_: ITransition;
   private readonly allowLooping_: boolean;
+  private readonly onTransitionCallbacks_: ((carousel: ICarousel) => void)[];
   private transitionTarget_: HTMLElement;
   private interactions_: symbol[];
+  private lastActiveSlide_: HTMLElement;
 
   constructor(
     container: HTMLElement,
     slides: HTMLElement[],
     {
+      onTransitionCallbacks = [],
       activeCssClass = CssClass.ACTIVE_SLIDE,
       beforeCssClass = CssClass.BEFORE_SLIDE,
       afterCssClass = CssClass.AFTER_SLIDE,
       allowLooping = true,
       transition = defaultTransition,
     }: {
+      onTransitionCallbacks?: ((carousel: ICarousel) => void)[],
       activeCssClass?: string,
       beforeCssClass?: string,
       afterCssClass?: string,
@@ -50,6 +54,8 @@ class Carousel implements ICarousel {
     this.afterCssClass_ = afterCssClass;
     this.allowLooping_ = allowLooping;
     this.container_ = container;
+    this.lastActiveSlide_ = null;
+    this.onTransitionCallbacks_ = onTransitionCallbacks;
     this.slides_ = slides;
     this.transition_ = transition;
     this.transitionTarget_ = null;
@@ -99,6 +105,12 @@ class Carousel implements ICarousel {
       this.handleTransition_();
 
       const activeSlide = this.getActiveSlide();
+
+      if (activeSlide !== this.lastActiveSlide_) {
+        this.lastActiveSlide_ = activeSlide;
+        this.onTransitionCallbacks_.forEach((callback) => callback(this));
+      }
+
       if (activeSlide) {
         renderLoop.mutate(() => {
           this.updateClasses_(activeSlide);
