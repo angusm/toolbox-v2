@@ -74,7 +74,9 @@ class RenderLoop {
 
     // runLoopCallback_ is a micro-optimization to prevent creating identically
     // anonymous functions on each frame.
-    this.runLoopCallback_ = (timestamp: number) => {this.runLoop(timestamp);};
+    this.runLoopCallback_ = (timestamp: number) => {
+      this.runLoopAndSetupFrameCallback_(timestamp);
+    };
     this.init_();
   }
 
@@ -99,7 +101,7 @@ class RenderLoop {
   private setupScrollListener_() {
     window.addEventListener(
       'scroll',
-      () => this.runScrollLoop(),
+      () => this.runScrollLoopAndSetupListener_(),
       {passive: true, capture: false, once: true});
   }
 
@@ -163,7 +165,11 @@ class RenderLoop {
     this.currentRun_ = currentTime || performance.now();
     this.runStepsInOrder_(ANIMATION_FRAME_STEP_ORDER);
     this.lastRun_ = this.currentRun_;
-    window.requestAnimationFrame(this.runLoopCallback_);
+  }
+
+  private runLoopAndSetupFrameCallback_(timestamp: number): void {
+    this.runLoop(timestamp);
+    this.setupRequestAnimationFrame_();
   }
 
   /**
@@ -185,6 +191,10 @@ class RenderLoop {
    */
   public runScrollLoop(): void {
     this.runStepsInOrder_(SCROLL_STEP_ORDER);
+  }
+
+  private runScrollLoopAndSetupListener_(): void {
+    this.runScrollLoop();
     this.setupScrollListener_();
   }
 
