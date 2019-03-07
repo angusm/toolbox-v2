@@ -18,7 +18,7 @@ import {TScrollEffectDistanceValue} from "./types/t-scroll-effect-distance-value
  */
 const defaultOptions: IScrollEffectOptions =
   {
-    condition: () => true,
+    condition: null,
     distanceCallbacks: <TScrollEffectCallbackMap>[],
     percentCallbacks: <TScrollEffectCallbackMap>[],
     getDistanceFunction: DistanceFunction.DISTANCE_FROM_DOCUMENT_CENTER,
@@ -267,7 +267,8 @@ class ScrollEffect {
    */
   private shouldRun_(optionalRunValue?: ScrollEffectRunValue): boolean {
     const runValue = optionalRunValue || this.getRunValue_();
-    return this.condition_() && runValue.distance !== runValue.lastRunDistance;
+    return runValue.distance !== runValue.lastRunDistance && (
+      this.condition_ === null || this.condition_());
   }
 
   private getDistanceValue_(value: TScrollEffectDistanceValue): number {

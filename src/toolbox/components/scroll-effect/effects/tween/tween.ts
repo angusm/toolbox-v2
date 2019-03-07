@@ -23,8 +23,9 @@ const defaultOptions: ITweenOptions = {
  */
 class Tween implements IEffect {
   private readonly animation_: Animation;
-  private readonly keyframeStyle_: KeyframeStyle;
   private readonly styleTarget_: HTMLElement;
+  private readonly cachedGetDistanceFn_:
+    (distanceAsPx: number, distanceAsPercent: number) => number;
 
   /**
    * Creates a new instance of the tween effect.
@@ -72,21 +73,13 @@ class Tween implements IEffect {
     }: ITweenOptions = defaultOptions
   ) {
     this.animation_ = Animation.fromKeyframesConfig(keyframes);
-    this.keyframeStyle_ = keyframeStyle;
     this.styleTarget_ = styleTarget;
-  }
+    this.cachedGetDistanceFn_ =
+      keyframeStyle === KeyframeStyle.PERCENT ?
+        (distanceAsPx: number, distanceAsPercent: number) => distanceAsPercent :
+        (distanceAsPx: number, distanceAsPercent: number) => distanceAsPx;
 
-  private getDistance_(
-    distanceAsPx: number,
-    distanceAsPercent: number
-  ): number {
-    if (this.keyframeStyle_ === KeyframeStyle.PERCENT) {
-      return distanceAsPercent;
-    } else {
-      return distanceAsPx;
-    }
   }
-
 
   /**
    * Applies the tween effect to an element.
@@ -106,17 +99,16 @@ class Tween implements IEffect {
     rawDistance: number,
     distanceAsPercent: number
   ): void {
-    const distance = this.getDistance_(rawDistance, distanceAsPercent);
+    const distance = this.cachedGetDistanceFn_(rawDistance, distanceAsPercent);
     const propertyValueMap =
       this.animation_.getPropertyValueMapFromPosition(distance);
     const styleTarget = this.styleTarget_ === null ? target : this.styleTarget_;
 
     renderLoop.anyMutate(() => {
-      Array.from(propertyValueMap.entries())
-        .forEach(
-          ([property, value]) => {
-            setStyle(styleTarget, property, value.toStyleString())
-          });
+      propertyValueMap.forEach(
+        (value, property) => {
+          setStyle(styleTarget, property, value.toStyleString())
+        });
     });
   }
 

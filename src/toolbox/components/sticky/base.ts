@@ -18,10 +18,13 @@ class ContainerPosition {
 }
 
 class StickyRunValue {
+  public readonly target: HTMLElement;
   public readonly containerXOffset: number;
   public readonly maxDistance: number;
 
-  constructor(containerXOffset: number, maxDistance: number) {
+  constructor(
+    target: HTMLElement, containerXOffset: number, maxDistance: number
+  ) {
     this.containerXOffset = containerXOffset;
     this.maxDistance = maxDistance;
   }
@@ -32,6 +35,14 @@ class StickyRunValue {
  * `overflow: hidden` on parent elements.
  */
 class Sticky {
+  private static positionFnMap_ =
+    new Map<Symbol, (rv: StickyRunValue) => void>([
+      [ContainerPosition.TOP, Sticky.positionTop_],
+      [ContainerPosition.MIDDLE, Sticky.positionMiddle_],
+      [ContainerPosition.BOTTOM, Sticky.positionBottom_],
+    ]);
+
+
   private readonly container_: HTMLElement;
   private readonly target_: HTMLElement;
   private destroyed_: boolean;
@@ -92,43 +103,36 @@ class Sticky {
       this.target_.offsetTop;
     const shouldPin = new NumericRange(0, maxDistance).contains(-yPosition);
     const position = this.getPosition_(shouldPin, yPosition);
-    const containerXOffset: number =
-      getOffsetFromAncestor(this.container_, null).x;
 
     // Skip duplicating work
     if (this.lastPosition_ === position) {
       return;
     }
 
-    renderLoop.anyMutate(() => {
-      // Determine if the target should stick
-      if (position === ContainerPosition.TOP) {
-        this.positionTop_();
-      }
-      else if (position === ContainerPosition.MIDDLE) {
-        this.positionMiddle_(containerXOffset);
-      }
-      else if (position === ContainerPosition.BOTTOM) {
-        this.positionBottom_(maxDistance);
-      }
+    const containerXOffset: number =
+      getOffsetFromAncestor(this.container_, null).x;
 
+    renderLoop.anyMutate(() => {
+      Sticky.positionFnMap_.get(position)(
+        new StickyRunValue(this.target_, containerXOffset, maxDistance));
       this.lastPosition_ = position;
     });
   }
 
-  private positionTop_(): void {
-    this.target_.style.position = '';
-    this.target_.style.transform = '';
+  private static positionTop_(runValue: StickyRunValue): void {
+    runValue.target.style.position = '';
+    runValue.target.style.transform = '';
   }
 
-  private positionMiddle_(containerXOffset: number): void {
-    this.target_.style.position = 'fixed';
-    this.target_.style.transform = `translateX(${containerXOffset}px)`;
+  private static positionMiddle_(runValue: StickyRunValue): void {
+    runValue.target.style.position = 'fixed';
+    runValue.target.style.transform =
+      `translateX(${runValue.containerXOffset}px)`;
   }
 
-  private positionBottom_(maxDistance: number): void {
-    this.target_.style.position = 'absolute';
-    this.target_.style.transform = `translateY(${maxDistance}px)`;
+  private static positionBottom_(runValue: StickyRunValue): void {
+    runValue.target.style.position = 'absolute';
+    runValue.target.style.transform = `translateY(${runValue.maxDistance}px)`;
   }
 
   public destroy() {
