@@ -3,19 +3,7 @@ import {getVisibleYPosition} from "../../utils/dom/position/vertical/get-visible
 import {renderLoop} from "../../utils/render-loop";
 import {getOffsetFromAncestor} from "../../utils/dom/position/get-offset-from-ancestor";
 
-/**
- * Positions the the element could be sticking to within the container.
- *
- * How the target element is positioned by sticky will change depending on
- * whether its container is showing its top, middle or bottom most prominently.
- *
- * @hidden
- */
-class ContainerPosition {
-  public static TOP: Symbol = Symbol('top');
-  public static MIDDLE: Symbol = Symbol('middle');
-  public static BOTTOM: Symbol = Symbol('bottom');
-}
+type TPositionFunction = (rv: StickyRunValue) => void;
 
 class StickyRunValue {
   public readonly target: HTMLElement;
@@ -36,18 +24,10 @@ class StickyRunValue {
  * `overflow: hidden` on parent elements.
  */
 class Sticky {
-  private static positionFnMap_ =
-    new Map<Symbol, (rv: StickyRunValue) => void>([
-      [ContainerPosition.TOP, Sticky.positionTop_],
-      [ContainerPosition.MIDDLE, Sticky.positionMiddle_],
-      [ContainerPosition.BOTTOM, Sticky.positionBottom_],
-    ]);
-
-
   private readonly container_: HTMLElement;
   private readonly target_: HTMLElement;
   private destroyed_: boolean;
-  private lastPosition_: Symbol;
+  private lastPositionFunction_: TPositionFunction;
 
   /**
    * @param target The Element to position as if it were "position: sticky"'d
@@ -60,7 +40,7 @@ class Sticky {
   constructor (target: HTMLElement, container: HTMLElement) {
     this.container_ = container;
     this.target_ = target;
-    this.lastPosition_ = null;
+    this.lastPositionFunction_ = null;
     this.destroyed_ = false;
     this.init_();
   }
@@ -81,13 +61,16 @@ class Sticky {
     });
   }
 
-  private getPosition_(shouldPin: boolean, yPosition: number): Symbol {
+  private static getPositionFunction_(
+    shouldPin: boolean,
+    yPosition: number
+  ): TPositionFunction {
     if (shouldPin) {
-      return ContainerPosition.MIDDLE;
+      return Sticky.positionMiddle_;
     } else if (yPosition < 0) {
-      return ContainerPosition.BOTTOM;
+      return Sticky.positionBottom_;
     } else {
-      return ContainerPosition.TOP;
+      return Sticky.positionTop_;
     }
   }
 
@@ -103,10 +86,10 @@ class Sticky {
       this.target_.offsetHeight -
       this.target_.offsetTop;
     const shouldPin = new NumericRange(0, maxDistance).contains(-yPosition);
-    const position = this.getPosition_(shouldPin, yPosition);
+    const positionFunction = Sticky.getPositionFunction_(shouldPin, yPosition);
 
     // Skip duplicating work
-    if (this.lastPosition_ === position) {
+    if (this.lastPositionFunction_ === positionFunction) {
       return;
     }
 
@@ -114,9 +97,9 @@ class Sticky {
       getOffsetFromAncestor(this.container_, null).x;
 
     renderLoop.anyMutate(() => {
-      Sticky.positionFnMap_.get(position)(
+      positionFunction(
         new StickyRunValue(this.target_, containerXOffset, maxDistance));
-      this.lastPosition_ = position;
+      this.lastPositionFunction_ = positionFunction;
     });
   }
 
