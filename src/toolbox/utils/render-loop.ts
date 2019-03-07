@@ -18,6 +18,7 @@ const ALL_STEP_ORDER: Array<symbol> = [
   RenderStep.SCROLL_PRE_MEASURE,
   RenderStep.MEASURE,
   RenderStep.SCROLL_MEASURE,
+  RenderStep.PHYSICS,
   RenderStep.MUTATE,
   RenderStep.SCROLL_MUTATE,
   RenderStep.ANY_MUTATE,

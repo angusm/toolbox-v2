@@ -17,6 +17,16 @@ class ContainerPosition {
   public static BOTTOM: Symbol = Symbol('bottom');
 }
 
+class StickyRunValue {
+  public readonly containerXOffset: number;
+  public readonly maxDistance: number;
+
+  constructor(containerXOffset: number, maxDistance: number) {
+    this.containerXOffset = containerXOffset;
+    this.maxDistance = maxDistance;
+  }
+}
+
 /**
  * Simulates `position: sticky` when native support isn't available due to
  * `overflow: hidden` on parent elements.
@@ -44,7 +54,7 @@ class Sticky {
   }
 
   private init_(): void {
-    this.measure_();
+    renderLoop.measure(() => this.measure_());
     this.renderLoop_();
   }
 
