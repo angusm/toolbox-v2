@@ -85,6 +85,8 @@ class CssCalcFormula implements IMeasurableInstance, ICssStyleValueInstance {
         .map((pair) => pair.join(''));
     if (values.length === 0) {
       return `0px`;
+    } else if (values.length === 1) {
+      return values[0];
     } else {
       return `calc(${values.join(' + ')})`;
     }
