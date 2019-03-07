@@ -78,7 +78,6 @@ class Tween implements IEffect {
       keyframeStyle === KeyframeStyle.PERCENT ?
         (distanceAsPx: number, distanceAsPercent: number) => distanceAsPercent :
         (distanceAsPx: number, distanceAsPercent: number) => distanceAsPx;
-
   }
 
   /**

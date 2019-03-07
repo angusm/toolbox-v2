@@ -1,11 +1,11 @@
 function merge<T>(...sets: Set<T>[]): Set<T> {
-  return new Set(
-    Array.from(sets)
-      .reduce(
-        (allValues, set) => [...allValues, ...Array.from(set.values())],
-        []
-      )
-  );
+  const result = new Set();
+  sets.forEach((set) => {
+    set.forEach((value) => {
+      result.add(value);
+    });
+  });
+  return result;
 }
 
 export {merge};
