@@ -243,6 +243,14 @@ class Carousel implements ICarousel {
       return new NumericRange(0, slidesLength - 1).clamp(index);
     }
   }
+
+  public transitionToSlideByIndex(index: number): void {
+    this.transitionToSlide(this.getSlideByIndex(index));
+  }
+
+  public getSlideByIndex(index: number): HTMLElement {
+    return this.slides_[index];
+  }
 }
 
 export {Carousel};

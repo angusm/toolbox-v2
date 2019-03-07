@@ -77,7 +77,7 @@ class Sticky2 {
     this.clone_.style.visibility = 'hidden';
     Array.from(this.target_.classList)
       .forEach((className) => this.clone_.classList.add(className));
-    this.container_.insertBefore(this.clone_, this.target_);
+    this.target_.parentElement.insertBefore(this.clone_, this.target_);
     this.target_.style.position = 'absolute';
     this.target_.style.top = '0';
     this.target_.style.left = '0';
@@ -110,7 +110,7 @@ class Sticky2 {
     renderLoop.scrollMeasure(() => {
       renderLoop.scrollCleanup(() => this.scrollLoop_());
       const measureValue = this.getMeasureValue_();
-      renderLoop.scrollMutate(() => this.mutate_(measureValue));
+      renderLoop.anyMutate(() => this.mutate_(measureValue));
     });
   }
 

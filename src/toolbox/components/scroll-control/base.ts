@@ -84,7 +84,7 @@ class ScrollControl {
       }
 
       const value = this.getControlValueFromScroll_();
-      renderLoop.scrollMutate(() => {
+      renderLoop.anyMutate(() => {
         this.control_.value = `${value}`;
         this.lastValue_ = value;
       });

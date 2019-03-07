@@ -1,5 +1,3 @@
-import {DynamicDefaultMap} from './map/dynamic-default';
-
 class RenderStep {
   public static readonly CLEANUP = Symbol('Cleanup');
   public static readonly FRAME_COUNT = Symbol('Frame Count');
@@ -62,22 +60,46 @@ type RenderFunctionMap = Map<RenderFunctionID, RenderFunction>;
 
 class RenderLoop {
   private static singleton_: RenderLoop = null;
+  private static msPerFrame_: number = 1000 / 60; // Browsers target 60fps
 
-  private lastRun_: Date;
-  private currentRun_: Date;
-  private msPerFrame_: number;
-  private scheduledFns_: DynamicDefaultMap<symbol, RenderFunctionMap>;
+  private readonly runLoopCallback_: (timestamp: number) => void;
+  private readonly scheduledFns_: Map<symbol, RenderFunctionMap>;
+  private lastRun_: number;
+  private currentRun_: number;
 
   constructor() {
-    this.scheduledFns_ =
-      DynamicDefaultMap
-        .usingFunction<symbol, RenderFunctionMap>(
-          (unused: symbol) => new Map<RenderFunctionID, RenderFunction>());
-    this.msPerFrame_ = 33; // Default to 30fps
-    this.lastRun_ = new Date();
-    window.addEventListener('scroll', () => this.runScrollLoop());
-    this.runScrollLoop();
-    this.runLoop();
+    this.scheduledFns_ = new Map<symbol, RenderFunctionMap>();
+    this.lastRun_ = performance.now();
+
+    // runLoopCallback_ is a micro-optimization to prevent creating identically
+    // anonymous functions on each frame.
+    this.runLoopCallback_ = (timestamp: number) => {this.runLoop(timestamp);};
+    this.init_();
+  }
+
+  private init_() {
+    // Manually setup map instead of using DynamicDefault to avoid performance
+    // overhead.
+    ALL_STEP_ORDER.forEach((step) => this.scheduledFns_.set(step, new Map()));
+
+    this.runStepsInOrder_(ALL_STEP_ORDER);
+    this.setupListeners_();
+  }
+
+  private setupListeners_() {
+    this.setupScrollListener_();
+    this.setupRequestAnimationFrame_();
+  }
+
+  private setupRequestAnimationFrame_() {
+    window.requestAnimationFrame(this.runLoopCallback_);
+  }
+
+  private setupScrollListener_() {
+    window.addEventListener(
+      'scroll',
+      () => this.runScrollLoop(),
+      {passive: true, capture: false, once: true});
   }
 
   public framecount(fn: RenderFunction): RenderFunctionID {
@@ -124,30 +146,10 @@ class RenderLoop {
     return this.addFnToStep_(fn, RenderStep.ANY_MUTATE);
   }
 
-  public setFps(fps: number): void {
-    this.msPerFrame_ = 1000 / fps;
-  }
-
-  public getFps(): number {
-    return 1000 / this.msPerFrame_;
-  }
-
-  public getMsPerFrame(): number {
-    return this.msPerFrame_;
-  }
-
-  public getTargetFrameLength() {
-    return this.msPerFrame_;
-  }
-
   private addFnToStep_(fn: RenderFunction, step: symbol): RenderFunctionID {
     const renderFn = new RenderFunctionID(step);
     this.scheduledFns_.get(step).set(renderFn, fn);
     return renderFn;
-  }
-
-  private static getTimeUntilNextRun_(nextRun: number): number {
-    return nextRun - <number>new Date().valueOf();
   }
 
   /**
@@ -156,25 +158,18 @@ class RenderLoop {
    * Use with caution!
    * Calling this manually should be avoided if at all possible.
    */
-  public runLoop(): void {
-    this.currentRun_ = new Date();
-    const nextRun = <number>this.currentRun_.valueOf() + this.msPerFrame_;
-    this.runFns_();
+  public runLoop(currentTime: number = null): void {
+    this.currentRun_ = currentTime || performance.now();
+    this.runStepsInOrder_(ANIMATION_FRAME_STEP_ORDER);
     this.lastRun_ = this.currentRun_;
-    if (RenderLoop.getTimeUntilNextRun_(nextRun) > 2) {
-      setTimeout(
-        () => window.requestAnimationFrame(() => this.runLoop()),
-        RenderLoop.getTimeUntilNextRun_(nextRun));
-    } else {
-      window.requestAnimationFrame(() => this.runLoop())
-    }
+    window.requestAnimationFrame(this.runLoopCallback_);
   }
 
   /**
    * Returns the time since the last render loop in milliseconds
    */
   public getElapsedMilliseconds(): number {
-    return this.currentRun_.valueOf() - this.lastRun_.valueOf();
+    return this.currentRun_ - this.lastRun_;
   }
 
   public getElapsedSeconds(): number {
@@ -188,15 +183,12 @@ class RenderLoop {
    * Calling this manually should be avoided if at all possible.
    */
   public runScrollLoop(): void {
-    this.runScrollFns_();
+    this.runStepsInOrder_(SCROLL_STEP_ORDER);
+    this.setupScrollListener_();
   }
 
-  private runScrollFns_(): void {
-    SCROLL_STEP_ORDER.forEach((step) => this.runFnsForStep_(step));
-  }
-
-  private runFns_(): void {
-    ANIMATION_FRAME_STEP_ORDER.forEach((step) => this.runFnsForStep_(step));
+  private runStepsInOrder_(stepOrder: Array<symbol>): void {
+    stepOrder.forEach((step) => this.runFnsForStep_(step));
   }
 
   private runFnsForStep_(step: symbol): void {
@@ -214,6 +206,26 @@ class RenderLoop {
 
   public static getSingleton(): RenderLoop {
     return RenderLoop.singleton_ = RenderLoop.singleton_ || new this();
+  }
+
+  public getFps() {
+    return 60;
+  }
+
+  public getTargetFrameLength() {
+    return RenderLoop.msPerFrame_;
+  }
+
+  public getMsPerFrame() {
+    return RenderLoop.msPerFrame_;
+  }
+
+  // DEPRECATED
+  public setFps() {
+    console.warn(
+      'DEPRECATED: RenderLoop support for custom frame-rates has been ' +
+      'dropped. Defaulting to maximum FPS per browser. This is to reduce ' +
+      'overhead inside the loop.');
   }
 }
 
