@@ -111,9 +111,7 @@ class Keyframe {
         const positionMap = mappedStyles.get(position);
         const styleMap: TKeyframesConfigPropertyStyleMap =
           typeof style === 'string' ? styleStringToMap(style) : style;
-
-        Array.from(styleMap.entries())
-          .forEach(([style, value]) => positionMap.set(style, value));
+        styleMap.forEach((value, style) => positionMap.set(style, value));
       });
 
     return Array.from(mappedStyles.entries())

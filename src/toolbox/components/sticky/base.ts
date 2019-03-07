@@ -25,6 +25,7 @@ class StickyRunValue {
   constructor(
     target: HTMLElement, containerXOffset: number, maxDistance: number
   ) {
+    this.target = target;
     this.containerXOffset = containerXOffset;
     this.maxDistance = maxDistance;
   }
