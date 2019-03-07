@@ -16,13 +16,13 @@ class Animation {
   ): ArrayMap<string, KeyframePair> {
     const mappedKeyframes: ArrayMap<string, Keyframe> =
       this.mapKeyframesByProperty_(keyframes);
-    return Array.from(mappedKeyframes.entries())
-      .reduce(
-        (map, [property, keyframes]) => {
-          map.set(property, KeyframePair.fromKeyframes(keyframes));
-          return map;
-        },
-        new ArrayMap<string, KeyframePair>());
+    const result = new ArrayMap<string, KeyframePair>();
+    mappedKeyframes.forEach(
+      (keyframes, property) => {
+        result.set(property, KeyframePair.fromKeyframes(keyframes));
+      });
+
+    return result;
   }
 
   private static mapKeyframesByProperty_(
@@ -41,16 +41,15 @@ class Animation {
   public getPropertyValueMapFromPosition(
     position: number
   ): Map<string, ITweenableValueInstance> {
-    const pairs: [string, ITweenableValueInstance][] =
-      Array.from(this.keyframePairsByProperty_.keys())
-        .map(
-          (property) => {
-            const keyframePairs: KeyframePair[] =
-              this.keyframePairsByProperty_.get(property);
-            const value: ITweenableValueInstance =
-              KeyframePair.getValueFromRanges(position, keyframePairs);
-            return <[string, ITweenableValueInstance]>[property, value];
-          });
+    const pairs: [string, ITweenableValueInstance][] = [];
+
+    this.keyframePairsByProperty_.forEach(
+        (keyframePairs, property) => {
+          pairs.push([
+            property,
+            KeyframePair.getValueFromRanges(position, keyframePairs)
+          ]);
+        });
 
     return new Map<string, ITweenableValueInstance>(pairs);
   }
