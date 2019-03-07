@@ -62,8 +62,8 @@ class VideoScrubByPlay implements IEffect {
 
   private getReversePlayableTime_(video: HTMLMediaElement): NumericRange {
       return new NumericRange(
-        Math.max(0, video.duration - this.playableTime_.max),
-        Math.min(video.duration, video.duration - this.playableTime_.min));
+        Math.max(0, video.duration - this.playableTime_.getMax()),
+        Math.min(video.duration, video.duration - this.playableTime_.getMin()));
   }
 
   private getAdjustedPercentage_(rawPercentage: number): number {
@@ -112,8 +112,8 @@ class VideoScrubByPlay implements IEffect {
               secondaryVideo = backwardsVideo;
 
               if (
-                primaryVideo.currentTime < this.playableTime_.min &&
-                targetTime === this.playableTime_.min
+                primaryVideo.currentTime < this.playableTime_.getMin() &&
+                targetTime === this.playableTime_.getMin()
               ) {
                 return;
               }
