@@ -113,8 +113,7 @@ class Formula {
   }
 
   public toString(): string {
-    return this.reduce()
-      .getPieces()
+    return this.reduce().getPieces()
       .map((value) => {
         if (operationToString.has(<IOperation>value)) {
           return operationToString.get(<IOperation>value);
