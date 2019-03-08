@@ -1,7 +1,7 @@
 import {
   CloseParenthesis,
   OpenParenthesis,
-  IOperation, Subtract
+  IOperation, Subtract, ALL_OPERATIONS
 } from "./operation";
 import {Variable} from "./variable";
 import {contains as stringContains} from "../../string/contains";
@@ -11,6 +11,7 @@ import {zip} from "../../array/zip";
 import {operationToString} from "./operation-to-string";
 import {operationsInOrder} from "./operations-in-order";
 import {replace} from "../../array/replace";
+import {replaceInPlace} from "../../array/replace-in-place";
 
 type FormulaPiece = IOperation | Variable | Formula;
 type InterstitialFormulaPiece = IOperation | Symbol | string
@@ -27,38 +28,49 @@ class Formula {
   }
 
   public static fromString(formula: string): Formula {
-    const stripped: string = formula.split(' ').join('');
+    const stripped: string = formula.replace(/ /, '');
 
     // Insert operations
     const withOperations: InterstitialFormula =
-      replace(stripped.split(''), stringToOperation);
+      replaceInPlace<InterstitialFormulaPiece>(
+        stripped.split(''), stringToOperation);
+
+    let hasSubformula = false;
 
     // Group variable strings
-    let withVariableStrings: InterstitialFormula = [withOperations[0]];
-    for (let i = 1; i < withOperations.length; i++) {
+    // NOTE: Intentionally verbose for sake of performance
+    let withOperationsAndVariables: Array<FormulaPiece|Symbol> = [];
+    let currentString = '';
+    let insertIndex = 0;
+    for (let i = 0; i < withOperations.length; i++) {
       const value = withOperations[i];
-      const lastValue = withOperations[i - 1];
-      if (typeof value === 'string' && typeof lastValue === 'string') {
-        withVariableStrings =
-          [
-            ...withVariableStrings.slice(0, -1),
-            `${withVariableStrings.slice(-1)[0]}${value}`];
+      hasSubformula = value === OpenParenthesis || hasSubformula;
+      if (typeof value === 'string') {
+        currentString += value;
       } else {
-        withVariableStrings = [...withVariableStrings, value];
+        if (currentString) {
+          withOperationsAndVariables[insertIndex] =
+            Variable.fromString(currentString);
+          withOperationsAndVariables[insertIndex + 1] = value;
+          currentString = '';
+          insertIndex += 2
+        } else {
+          withOperationsAndVariables[insertIndex] = value;
+          insertIndex++;
+        }
       }
     }
+    if (currentString) {
+      withOperationsAndVariables[insertIndex] =
+        Variable.fromString(currentString);
+    }
 
-    // Convert strings to variables
-    const withOperationsAndVariables: Array<IOperation | Variable> =
-      withVariableStrings
-        .map(
-          (value) => {
-            return typeof value === 'string' ?
-              Variable.fromString(<string>value) :
-              <IOperation>value;
-          });
-
-    return new Formula(Formula.extractSubFormulas_(withOperationsAndVariables));
+    if (hasSubformula) {
+      return new Formula(
+        Formula.extractSubFormulas_(withOperationsAndVariables));
+    } else {
+      return new Formula(<FormulaPiece[]>withOperationsAndVariables);
+    }
   }
 
   private static extractSubFormulas_(

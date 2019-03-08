@@ -19,7 +19,7 @@ const CSS_CALC_FORMULA_ALLOWED_UNITS = [
 
 class CssCalcFormula implements IMeasurableInstance, ICssStyleValueInstance {
   ['constructor']: typeof CssCalcFormula;
-  private values_: number[];
+  protected values_: number[];
 
   constructor(...values: number[]) {
     this.values_ = values;

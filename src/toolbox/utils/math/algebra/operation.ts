@@ -60,7 +60,18 @@ class Subtract implements IOperationInstance {
 const OpenParenthesis = Symbol('(');
 const CloseParenthesis = Symbol(')');
 
+const ALL_OPERATIONS: Set<IOperation|symbol> =
+  new Set([
+    Divide,
+    Multiply,
+    Add,
+    Subtract,
+    OpenParenthesis,
+    CloseParenthesis
+  ]);
+
 export {
+  ALL_OPERATIONS,
   IOperation,
   OperationResult,
   Divide,
