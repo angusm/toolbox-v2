@@ -110,8 +110,7 @@ class Physical2d {
   }
 
   public setVelocity(velocity: Vector2d) {
-    this.velocity_ =
-      Constraint2d.applyConstraints(velocity, ...this.constraints_);
+    this.velocity_ = Constraint2d.applyConstraints(velocity, this.constraints_);
   }
 
   private render_() {
@@ -176,7 +175,7 @@ class Physical2d {
     //     Constraint2d
     //       .applyConstraints(
     //         velocity.add(accelPerMs).scale(this.breakForce_),
-    //         ...this.constraints_);
+    //         this.constraints_);
     //   distance = distance.add(velocity.scale(1/1000));
     // }
 
@@ -191,12 +190,12 @@ class Physical2d {
       Constraint2d.applyConstraints(
           this.velocity_.scale(Math.pow(this.breakForce_, milliseconds))
             .add(scaledAccelPerMs),
-          ...this.constraints_);
+          this.constraints_);
 
     const distance =
       Constraint2d.applyConstraints(
           this.velocity_.add(this.acceleration_).scale(breakFactor/1000),
-          ...this.constraints_);
+          this.constraints_);
 
     return new PredictedPhysical2dState(distance, velocity);
   }

@@ -7,7 +7,7 @@ class Constraint2d implements IConstraint2d{
     return delta;
   }
 
-  static applyConstraints(delta: Vector2d, ...constraints: IConstraint2d[]) {
+  static applyConstraints(delta: Vector2d, constraints: IConstraint2d[]) {
     return constraints.reduce(
       (result, constraint) => constraint.constrain(result), delta);
   }

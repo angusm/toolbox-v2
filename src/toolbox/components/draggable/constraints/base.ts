@@ -10,7 +10,7 @@ class DraggableConstraint implements IDraggableConstraint {
   static applyConstraints(
     draggable: IDraggable,
     delta: Vector2d,
-    ...constraints: IDraggableConstraint[]
+    constraints: IDraggableConstraint[]
   ) {
     return constraints.reduce(
       (result, constraint) => constraint.constrain(draggable, result), delta);
