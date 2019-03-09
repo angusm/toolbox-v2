@@ -4,6 +4,7 @@ import {IConstraint2d} from "../../utils/math/geometry/2d-constraints/interface"
 import {Constraint2d} from "../../utils/math/geometry/2d-constraints/base";
 import {eventHandler} from "../../utils/event/event-handler";
 import {Move2d} from "./move-2d-event";
+import {ZERO_VECTOR_2D} from "../../utils/math/geometry/zero-vector-2d";
 
 /**
  * NOTE: Physical values are determined as such:
@@ -20,13 +21,13 @@ interface IPhysical2dConfig {
 }
 
 const defaultPhysical2dConfig = {
-  acceleration: new Vector2d(0, 0),
+  acceleration: ZERO_VECTOR_2D,
   breakForce: .999,
   constraints: <IConstraint2d[]>[],
   decelerationExponent: .9,
-  deceleration: new Vector2d(0, 0),
+  deceleration: ZERO_VECTOR_2D,
   enabled: true,
-  initialVelocity: new Vector2d(0, 0),
+  initialVelocity: ZERO_VECTOR_2D,
   minVelocity: 10,
 };
 
@@ -73,7 +74,7 @@ class Physical2d {
     this.acceleration_ = acceleration;
     this.breakForce_ = breakForce;
     this.enabled_ = enabled;
-    this.lastAppliedVelocity_ = new Vector2d(0, 0);
+    this.lastAppliedVelocity_ = ZERO_VECTOR_2D;
     this.minVelocity_ = minVelocity;
     this.velocity_ = initialVelocity;
     this.render_();
@@ -92,7 +93,7 @@ class Physical2d {
   }
 
   public disable() {
-    this.lastAppliedVelocity_ = new Vector2d(0, 0);
+    this.lastAppliedVelocity_ = ZERO_VECTOR_2D;
     this.enabled_ = false;
   }
 
@@ -147,6 +148,10 @@ class Physical2d {
     });
   }
 
+  /**
+   * NOTE: This code is intentionally a bit verbose for performance reasons.
+   * @param milliseconds
+   */
   public predictStateInXMilliseconds(
     milliseconds: number
   ): PredictedPhysical2dState {
@@ -157,16 +162,14 @@ class Physical2d {
       this.acceleration_.getLength() === 0
     ) {
       return new PredictedPhysical2dState(
-        new Vector2d(0, 0), new Vector2d(0, 0));
+        ZERO_VECTOR_2D, ZERO_VECTOR_2D);
     }
-
-    const accelPerMs = this.acceleration_.scale(1/1000);
 
     /** NOTE: Left intentionally as reference for original formula that the
      * shorthand below was derived from.
      */
     // let velocity = this.velocity_;
-    // let distance = new Vector2d(0, 0);
+    // let distance = ZERO_VECTOR_2D;
     //
     // for (let i = 0; i < milliseconds; i++) {
     //   velocity =
@@ -182,25 +185,24 @@ class Physical2d {
       (Math.pow(this.breakForce_, milliseconds) - 1) /
       (this.breakForce_ - 1);
 
+    const scaledAccelPerMs = this.acceleration_.scale(breakFactor/1000);
+
     const velocity =
-      Constraint2d
-        .applyConstraints(
+      Constraint2d.applyConstraints(
           this.velocity_.scale(Math.pow(this.breakForce_, milliseconds))
-            .add(accelPerMs.scale(breakFactor)),
+            .add(scaledAccelPerMs),
           ...this.constraints_);
 
     const distance =
-      Constraint2d
-        .applyConstraints(
-          this.velocity_.scale(1/1000).scale(breakFactor)
-            .add(accelPerMs.scale(breakFactor)),
+      Constraint2d.applyConstraints(
+          this.velocity_.add(this.acceleration_).scale(breakFactor/1000),
           ...this.constraints_);
 
     return new PredictedPhysical2dState(distance, velocity);
   }
 
   private zeroLastAppliedVelocity_(): void {
-    this.lastAppliedVelocity_ = new Vector2d(0, 0);
+    this.lastAppliedVelocity_ = ZERO_VECTOR_2D;
   }
 
   public getLastAppliedVelocity(): Vector2d {

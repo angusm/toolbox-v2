@@ -5,8 +5,8 @@ import {filterUntilFalse} from '../array/filter-until-false';
 import {filterUntilFirst} from '../array/filter-until-first';
 import {frame} from '../frame';
 import {renderLoop} from '../render-loop';
+import {ZERO_VECTOR_2D} from "../math/geometry/zero-vector-2d";
 
-const ZERO_VECTOR: Vector2d = new Vector2d();
 const GESTURE_TIME_LIMIT: number = 1000; // Time limit in ms
 const POSITION_LIMIT: number = 100;
 
@@ -57,7 +57,7 @@ class CursorPosition {
   }
 }
 
-const ZERO_POSITION: CursorPosition = new CursorPosition(ZERO_VECTOR, false);
+const ZERO_POSITION: CursorPosition = new CursorPosition(ZERO_VECTOR_2D, false);
 class CursorData {
   private readonly positions_: CursorPosition[];
 
@@ -93,7 +93,7 @@ class CursorData {
     const positions: CursorPosition[] =
       this.getPositionsForFrameDelta_(usePressedPositionsOnly);
     return positions.length === 0 ?
-      ZERO_VECTOR :
+      ZERO_VECTOR_2D :
       Vector2d.sumDeltas<Vector2d>(
         ...positions.map((position) => position.getPosition()));
   }

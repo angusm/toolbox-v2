@@ -2,6 +2,7 @@ import {Physical2d} from "../physical-2d";
 import {renderLoop} from "../../../utils/render-loop";
 import {Vector2d} from "../../../utils/math/geometry/vector-2d";
 import {Matrix} from "../../../utils/dom/position/matrix";
+import {ZERO_VECTOR_2D} from "../../../utils/math/geometry/zero-vector-2d";
 
 class PhysicallyPositionedElement2d {
   private readonly target_: HTMLElement;
@@ -13,7 +14,7 @@ class PhysicallyPositionedElement2d {
     this.target_ = target;
     this.physical2d_ = physical2d;
 
-    this.nextFrameAdjustment_ = new Vector2d(0, 0);
+    this.nextFrameAdjustment_ = ZERO_VECTOR_2D;
 
     this.init_();
   }
@@ -29,7 +30,7 @@ class PhysicallyPositionedElement2d {
   private render_() {
     renderLoop.measure(() => {
       renderLoop.cleanup(() => {
-        this.nextFrameAdjustment_ = new Vector2d(0, 0);
+        this.nextFrameAdjustment_ = ZERO_VECTOR_2D;
         this.render_()
       });
 

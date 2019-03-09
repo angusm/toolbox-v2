@@ -1,10 +1,11 @@
 import {Vector2d} from '../../math/geometry/vector-2d';
+import {ZERO_VECTOR_2D} from "../../math/geometry/zero-vector-2d";
 
 function getTransformFromAncestor(
   element: HTMLElement, ancestor: HTMLElement
 ): Vector2d {
   if (!element || element === ancestor) {
-    return new Vector2d(0, 0);
+    return ZERO_VECTOR_2D;
   } else {
     return Vector2d.fromElementTransform(element)
       .add(

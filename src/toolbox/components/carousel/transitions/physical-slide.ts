@@ -18,8 +18,8 @@ import {sumOffsetWidths} from "../../../utils/dom/position/sum-offset-widths";
 import {Physical2d} from "../../physical/physical-2d";
 import {getSign} from "../../../utils/math/get-sign";
 import {split} from "../../../utils/array/split";
+import {ZERO_VECTOR_2D} from "../../../utils/math/geometry/zero-vector-2d";
 
-const ZERO_VECTOR = new Vector2d(0, 0);
 const MAX_DRAG_VELOCITY = 10000;
 const SLIDE_INTERACTION = Symbol('Physical Slide Interaction');
 
@@ -163,13 +163,13 @@ class PhysicalSlide implements ITransition {
     const breakForce = draggable.getBreakForce();
 
     // Make our lives easier and clear out acceleration
-    draggable.setAcceleration(new Vector2d(0, 0));
+    draggable.setAcceleration(ZERO_VECTOR_2D);
 
     // If we're close enough, let's call it
     if (
       remainingTime <= renderLoop.getTargetFrameLength() * 1.1 ||
       Math.abs(distanceToCenter) < 10) {
-      draggable.setVelocity(new Vector2d(0, 0));
+      draggable.setVelocity(ZERO_VECTOR_2D);
       carousel.getSlides()
         .forEach(
           (slide) => {
@@ -203,7 +203,7 @@ class PhysicalSlide implements ITransition {
   private adjustSplit_(
     carousel: ICarousel,
     target: HTMLElement = null,
-    adjustment: Vector2d = ZERO_VECTOR
+    adjustment: Vector2d = ZERO_VECTOR_2D
   ): void {
     const targetSlide = target ? target : carousel.getActiveSlide();
     const halves = this.getHalves_(carousel, targetSlide);
