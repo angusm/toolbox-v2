@@ -19,14 +19,10 @@ import {Physical2d} from "../../physical/physical-2d";
 import {getSign} from "../../../utils/math/get-sign";
 import {split} from "../../../utils/array/split";
 import {ZERO_VECTOR_2D} from "../../../utils/math/geometry/zero-vector-2d";
+import {IPhysicalSlideConfig} from "./i-physical-slide-config";
 
 const MAX_DRAG_VELOCITY = 10000;
 const SLIDE_INTERACTION = Symbol('Physical Slide Interaction');
-
-interface IPhysicalSlideConfig {
-  physical2d?: Physical2d;
-  transitionTime?: number;
-}
 
 class TransitionTarget {
   private readonly target_: HTMLElement;
@@ -254,10 +250,8 @@ class PhysicalSlide implements ITransition {
     direction: number,
     additionalTranslation: Vector2d
   ): void {
-    Array.from(
-      this.getSlideAdjustments_(activeSlide, slides, direction).entries())
-      .forEach(
-        ([slide, adjustment]) => {
+      this.getSlideAdjustments_(activeSlide, slides, direction).forEach(
+        (adjustment, slide) => {
           this.draggableBySlide_
             .get(slide)
             .adjustNextFrame(
@@ -325,7 +319,4 @@ class PhysicalSlide implements ITransition {
   }
 }
 
-export {
-  IPhysicalSlideConfig,
-  PhysicalSlide
-};
+export {PhysicalSlide};
