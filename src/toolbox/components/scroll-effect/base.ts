@@ -54,12 +54,12 @@ class ScrollEffectRunValue {
     this.lastRunDistanceAsPercent = lastRunDistanceAsPercent;
   }
 
-  getRunRangeAsPercent(): NumericRange {
+  public getRunRangeAsPercent(): NumericRange {
     return NumericRange.fromUnorderedValues(
       this.lastRunDistanceAsPercent, this.distanceAsPercent);
   }
 
-  getRunRange(): NumericRange {
+  public getRunRange(): NumericRange {
     return NumericRange.fromUnorderedValues(this.lastRunDistance, this.distance);
   }
 }
