@@ -27,12 +27,15 @@ class FrameSequenceBg implements IEffect {
   private readonly container_: HTMLElement;
   private readonly backFrame_: HTMLElement;
   private readonly frontFrame_: HTMLElement;
+  private isLoading_: boolean;
+  private loadingPaused_: boolean;
   private framesToLoadInOrderIndex_: number;
 
   /**
    * @param frames In order list of image URLs representing a sequence.
    * @param container Non-statically positioned HTML element to contain frames.
    * @param createFrameFunction Used to create front/back frames.
+   * @param startLoadingImmediately Whether to immediately start loading images.
    *
    * Inner frames are positioned absolutely, so the container should be
    * positioned using fixed, absolute or relative.
@@ -42,8 +45,10 @@ class FrameSequenceBg implements IEffect {
     container: HTMLElement,
     {
       createFrameFunction = () => document.createElement('div'),
+      startLoadingImmediately = true,
     }: {
-      createFrameFunction?: (isBack: boolean) => HTMLElement
+      createFrameFunction?: (isBack: boolean) => HTMLElement,
+      startLoadingImmediately?: boolean,
     } = {}
   ) {
     this.imageUrlsInOrder_ = frames;
@@ -55,8 +60,21 @@ class FrameSequenceBg implements IEffect {
     this.frontFrame_ = createFrameFunction(false);
     this.container_ = container;
     this.loadedImages_ = new Set();
+    this.loadingPaused_ = !startLoadingImmediately;
+    this.isLoading_ = false;
 
     this.init_();
+  }
+
+  public stopLoading(): void {
+    this.loadingPaused_ = true;
+  }
+
+  public startLoading(): void {
+    this.loadingPaused_ = false;
+    if (!this.isLoading_) {
+      this.loadNextImage_();
+    }
   }
 
   private init_() {
@@ -86,18 +104,25 @@ class FrameSequenceBg implements IEffect {
       return; // We've loaded everything, let's chill.
     }
 
+    if (this.loadingPaused_) {
+      return; // Loading's been paused, take a break.
+    }
+
     const frameToLoad =
       this.framesToLoadInOrder_[this.framesToLoadInOrderIndex_];
     const frameUrl = this.imageUrlsInOrder_[frameToLoad];
+    this.isLoading_ = true;
     loadImage(frameUrl)
       .then(
         (loadedImage) => {
+          this.isLoading_ = false;
           this.loadedImages_.add(loadedImage); // Keep image in memory
-          this.framesToLoadInOrderIndex_++;
           this.loadedFrames_.add(frameToLoad);
+          this.framesToLoadInOrderIndex_++;
           this.loadNextImage_();
         },
         () => {
+          this.isLoading_ = false;
           this.framesToLoadInOrderIndex_++;
           this.loadNextImage_();
         });
