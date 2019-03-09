@@ -8,6 +8,8 @@ import {styleStringToMap} from "../../../utils/dom/style/style-string-to-map";
 import {setStylesFromMap} from "../../../utils/dom/style/set-styles-from-map";
 import {min} from "../../../utils/array/min";
 import {NumericRange} from "../../../utils/math/numeric-range";
+import {DynamicDefaultMap} from "../../../utils/map/dynamic-default";
+import {MultiValueDynamicDefaultMap} from "../../../utils/map/multi-value-dynamic-default";
 
 const DEFAULT_FRAME_STYLE = `
   position: absolute;
@@ -27,6 +29,8 @@ class FrameSequenceBg implements IEffect {
   private readonly container_: HTMLElement;
   private readonly backFrame_: HTMLElement;
   private readonly frontFrame_: HTMLElement;
+  private readonly reloadFrameMap_:
+    MultiValueDynamicDefaultMap<HTMLImageElement|number, () => void>;
   private isLoading_: boolean;
   private loadingPaused_: boolean;
   private framesToLoadInOrderIndex_: number;
@@ -62,6 +66,16 @@ class FrameSequenceBg implements IEffect {
     this.loadedImages_ = new Set();
     this.loadingPaused_ = !startLoadingImmediately;
     this.isLoading_ = false;
+
+    this.reloadFrameMap_ =
+      MultiValueDynamicDefaultMap.usingFunction(
+        ([frameToLoad, loadedImage]: [number, HTMLImageElement]) => {
+          return () => {
+            this.loadedImages_.delete(loadedImage);
+            this.loadedFrames_.delete(frameToLoad);
+            this.loadImage_(frameToLoad);
+          }
+        });
 
     this.init_();
   }
@@ -110,11 +124,18 @@ class FrameSequenceBg implements IEffect {
 
     const frameToLoad =
       this.framesToLoadInOrder_[this.framesToLoadInOrderIndex_];
+    this.isLoading_ = true;
+    this.loadImage_(frameToLoad).then(() => this.isLoading_ = false);
+  }
+
+  private loadImage_(frameToLoad: number): Promise<void> {
     const frameUrl = this.imageUrlsInOrder_[frameToLoad];
     this.isLoading_ = true;
-    loadImage(frameUrl)
+    return loadImage(frameUrl)
       .then(
         (loadedImage) => {
+          loadedImage.addEventListener(
+            'emptied', this.reloadFrameMap_.get([frameToLoad, loadedImage]));
           this.isLoading_ = false;
           this.loadedImages_.add(loadedImage); // Keep image in memory
           this.loadedFrames_.add(frameToLoad);
