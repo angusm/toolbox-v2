@@ -32,18 +32,27 @@ class FrameSequenceBg implements IEffect {
   /**
    * @param frames In order list of image URLs representing a sequence.
    * @param container Non-statically positioned HTML element to contain frames.
+   * @param createFrameFunction Used to create front/back frames.
    *
    * Inner frames are positioned absolutely, so the container should be
    * positioned using fixed, absolute or relative.
    */
-  constructor(frames: string[], container: HTMLElement) {
+  constructor(
+    frames: string[],
+    container: HTMLElement,
+    {
+      createFrameFunction = () => document.createElement('div'),
+    }: {
+      createFrameFunction?: (isBack: boolean) => HTMLElement
+    } = {}
+  ) {
     this.imageUrlsInOrder_ = frames;
     this.framesToLoadInOrder_ =
       FrameSequenceBg.generateFrameLoadOrder(frames.length);
     this.framesToLoadInOrderIndex_ = 0;
     this.loadedFrames_ = new Set<number>();
-    this.backFrame_ = document.createElement('div');
-    this.frontFrame_ = document.createElement('div');
+    this.backFrame_ = createFrameFunction(true);
+    this.frontFrame_ = createFrameFunction(false);
     this.container_ = container;
     this.loadedImages_ = new Set();
 
