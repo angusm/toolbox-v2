@@ -29,6 +29,7 @@ class Carousel implements ICarousel {
   private transitionTarget_: HTMLElement;
   private interactions_: symbol[];
   private lastActiveSlide_: HTMLElement;
+  private destroyed_: boolean;
 
   constructor(
     container: HTMLElement,
@@ -60,6 +61,7 @@ class Carousel implements ICarousel {
     this.transition_ = transition;
     this.transitionTarget_ = null;
     this.interactions_ = [];
+    this.destroyed_ = false;
 
     this.init_();
   }
@@ -98,6 +100,10 @@ class Carousel implements ICarousel {
   }
 
   private render_(): void {
+    if (this.destroyed_) {
+      return;
+    }
+
     renderLoop.measure(() => {
       renderLoop.cleanup(() => this.render_());
 
@@ -250,6 +256,10 @@ class Carousel implements ICarousel {
 
   public getSlideByIndex(index: number): HTMLElement {
     return this.slides_[index];
+  }
+
+  destroy() {
+    this.destroyed_ = true;
   }
 }
 

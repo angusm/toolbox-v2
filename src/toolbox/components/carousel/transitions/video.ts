@@ -1,6 +1,5 @@
 import {ICarousel, ITransition} from '../interfaces';
 import {renderLoop} from '../../../utils/render-loop';
-import {getMostVisibleElement} from "../../../utils/dom/position/get-most-visible-element";
 import {ArrayMap} from "../../../utils/map/array";
 import {max} from "../../../utils/array/max";
 
