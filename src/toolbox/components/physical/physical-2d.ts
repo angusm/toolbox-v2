@@ -32,31 +32,23 @@ const defaultPhysical2dConfig = {
 };
 
 class PredictedPhysical2dState {
-  private readonly distanceTraveled_: Vector2d;
-  private readonly velocity_: Vector2d;
+  public readonly distanceTraveled: Vector2d;
+  public readonly velocity: Vector2d;
 
   constructor(distanceTraveled: Vector2d, velocity: Vector2d) {
-    this.distanceTraveled_ = distanceTraveled;
-    this.velocity_ = velocity;
-  }
-
-  public getDistanceTraveled(): Vector2d {
-    return this.distanceTraveled_;
-  }
-
-  public getVelocity(): Vector2d {
-    return this.velocity_;
+    this.distanceTraveled = distanceTraveled;
+    this.velocity = velocity;
   }
 }
 
 class Physical2d {
   private readonly constraints_: IConstraint2d[];
+  private readonly minVelocity_: number;
 
   private acceleration_: Vector2d;
   private breakForce_: number;
   private enabled_: boolean;
   private lastAppliedVelocity_: Vector2d;
-  private minVelocity_: number;
   private velocity_: Vector2d;
 
   constructor(
@@ -120,30 +112,23 @@ class Physical2d {
       // Skip work if there's nothing to do
       if (
         !this.enabled_ ||
-        (
-          this.velocity_.getLength() === 0 &&
-          this.acceleration_.getLength() === 0
-        )
+        (!this.velocity_.getLength() && !this.acceleration_.getLength())
       ) {
-        this.zeroLastAppliedVelocity_();
+        this.lastAppliedVelocity_ = ZERO_VECTOR_2D;
         return;
       }
 
-      const elapsedMilliseconds = renderLoop.getElapsedMilliseconds();
-      const newState = this.predictStateInXMilliseconds(elapsedMilliseconds);
+      const newState =
+        this.predictStateInXMilliseconds(renderLoop.getElapsedMilliseconds());
 
-      this.velocity_ = newState.getVelocity();
+      this.velocity_ = newState.velocity;
+      this.lastAppliedVelocity_ = newState.distanceTraveled;
 
-      // Skip work if there's nothing to do
-      if (newState.getDistanceTraveled().getLength() === 0) {
-        this.zeroLastAppliedVelocity_();
-        return;
+      // Dispatch an event if we moved
+      if (newState.distanceTraveled.getLength()) {
+        eventHandler.dispatchEvent(new Move2d(this, newState.distanceTraveled));
       }
 
-      this.lastAppliedVelocity_ = newState.getDistanceTraveled();
-
-      eventHandler.dispatchEvent(
-        new Move2d(this, newState.getDistanceTraveled()));
     });
   }
 
@@ -160,8 +145,7 @@ class Physical2d {
       this.velocity_.getLength() < this.minVelocity_ &&
       this.acceleration_.getLength() === 0
     ) {
-      return new PredictedPhysical2dState(
-        ZERO_VECTOR_2D, ZERO_VECTOR_2D);
+      return new PredictedPhysical2dState(ZERO_VECTOR_2D, ZERO_VECTOR_2D);
     }
 
     /** NOTE: Left intentionally as reference for original formula that the
@@ -179,17 +163,15 @@ class Physical2d {
     //   distance = distance.add(velocity.scale(1/1000));
     // }
 
+    const raisedBreakforce = Math.pow(this.breakForce_, milliseconds);
     const breakFactor = // Using estimation formulas for exponent summation
-      this.breakForce_ *
-      (Math.pow(this.breakForce_, milliseconds) - 1) /
-      (this.breakForce_ - 1);
+      this.breakForce_ * (raisedBreakforce - 1) / (this.breakForce_ - 1);
 
     const scaledAccelPerMs = this.acceleration_.scale(breakFactor/1000);
 
     const velocity =
       Constraint2d.applyConstraints(
-          this.velocity_.scale(Math.pow(this.breakForce_, milliseconds))
-            .add(scaledAccelPerMs),
+          this.velocity_.scale(raisedBreakforce).add(scaledAccelPerMs),
           this.constraints_);
 
     const distance =
@@ -198,10 +180,6 @@ class Physical2d {
           this.constraints_);
 
     return new PredictedPhysical2dState(distance, velocity);
-  }
-
-  private zeroLastAppliedVelocity_(): void {
-    this.lastAppliedVelocity_ = ZERO_VECTOR_2D;
   }
 
   public getLastAppliedVelocity(): Vector2d {

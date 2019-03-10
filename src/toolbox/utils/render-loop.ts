@@ -8,8 +8,9 @@ class RenderStep {
   public static readonly SCROLL_PRE_MEASURE = Symbol('Scroll-measure');
   public static readonly SCROLL_MEASURE = Symbol('Scroll-measure');
   public static readonly SCROLL_MUTATE = Symbol('Scroll-mutate');
-  public static readonly ANY_MUTATE = Symbol('any-mutate');
+  public static readonly ANY_MUTATE = Symbol('Any-mutate');
   public static readonly SCROLL_CLEANUP = Symbol('Scroll-cleanup');
+  public static readonly ANY_CLEANUP = Symbol('Any-cleanup');
 }
 
 const ALL_STEP_ORDER: Array<symbol> = [
@@ -24,6 +25,7 @@ const ALL_STEP_ORDER: Array<symbol> = [
   RenderStep.ANY_MUTATE,
   RenderStep.CLEANUP,
   RenderStep.SCROLL_CLEANUP,
+  RenderStep.ANY_CLEANUP,
 ];
 
 const ANIMATION_FRAME_STEP_ORDER: Array<symbol> = [
@@ -34,6 +36,7 @@ const ANIMATION_FRAME_STEP_ORDER: Array<symbol> = [
   RenderStep.MUTATE,
   RenderStep.ANY_MUTATE,
   RenderStep.CLEANUP,
+  RenderStep.ANY_CLEANUP,
 ];
 
 const SCROLL_STEP_ORDER: Array<symbol> = [
@@ -42,6 +45,7 @@ const SCROLL_STEP_ORDER: Array<symbol> = [
   RenderStep.SCROLL_MUTATE,
   RenderStep.ANY_MUTATE,
   RenderStep.SCROLL_CLEANUP,
+  RenderStep.ANY_CLEANUP,
 ];
 
 class RenderFunctionID {
@@ -141,12 +145,16 @@ class RenderLoop {
     return this.addFnToStep_(fn, RenderStep.SCROLL_MUTATE);
   }
 
-  scrollCleanup(fn: RenderFunction): RenderFunctionID {
+  public scrollCleanup(fn: RenderFunction): RenderFunctionID {
     return this.addFnToStep_(fn, RenderStep.SCROLL_CLEANUP);
   }
 
   public anyMutate(fn: RenderFunction): RenderFunctionID {
     return this.addFnToStep_(fn, RenderStep.ANY_MUTATE);
+  }
+
+  public anyCleanup(fn: RenderFunction): RenderFunctionID {
+    return this.addFnToStep_(fn, RenderStep.ANY_CLEANUP);
   }
 
   private addFnToStep_(fn: RenderFunction, step: symbol): RenderFunctionID {
