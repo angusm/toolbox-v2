@@ -1,5 +1,4 @@
 import {defaultSymbol} from '../../default-symbol';
-import {getAsList} from '../../object/get-as-list';
 import {getAttributeValue} from '../get-attribute-value';
 import {runMapAsSwitch} from '../../run-map-as-switch';
 
