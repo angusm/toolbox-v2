@@ -30,11 +30,12 @@ class CarouselTimer {
     }
 
     renderLoop.measure(() => {
-      if (new Date().valueOf() > +this.lastActionTime_ + this.interval_) {
+      const now = new Date().valueOf();
+      if (now > +this.lastActionTime_ + this.interval_) {
         this.carousel_.next();
       }
       if (!this.carousel_.isIdle()) {
-        this.lastActionTime_ = new Date().valueOf();
+        this.lastActionTime_ = now;
       }
       renderLoop.mutate(() => this.startTimeout_());
     });
