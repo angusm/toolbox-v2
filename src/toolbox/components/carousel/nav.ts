@@ -89,8 +89,7 @@ class CarouselNav {
     slide: HTMLElement, carousel: Carousel
   ): HTMLElement   {
     const element = document.createElement('li');
-    addDomEventListener(
-      element, EventType.CLICK, () => carousel.transitionToSlide(slide));
+    element.addEventListener('click', () => carousel.transitionToSlide(slide));
     return element;
   }
 }
