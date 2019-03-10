@@ -1,3 +1,6 @@
+import {UserAgent} from "./user-agent/user-agent";
+import {IE} from "./user-agent/browser/ie";
+
 class RenderStep {
   public static readonly CLEANUP = Symbol('Cleanup');
   public static readonly FRAME_COUNT = Symbol('Frame Count');
@@ -12,6 +15,10 @@ class RenderStep {
   public static readonly SCROLL_CLEANUP = Symbol('Scroll-cleanup');
   public static readonly ANY_CLEANUP = Symbol('Any-cleanup');
 }
+
+const thirdScrollEventListenerParam =
+  UserAgent.getBrowser() === IE ?
+    false : {passive: true, capture: false, once: true};
 
 const ALL_STEP_ORDER: Array<symbol> = [
   RenderStep.FRAME_COUNT,
@@ -68,6 +75,7 @@ class RenderLoop {
   private static msPerFrame_: number = 1000 / 60; // Browsers target 60fps
 
   private readonly runLoopCallback_: (timestamp: number) => void;
+  private readonly scrollHandler_: () => void;
   private readonly scheduledFns_: Map<symbol, RenderFunctionMap>;
   private lastRun_: number;
   private currentRun_: number;
@@ -81,6 +89,12 @@ class RenderLoop {
     this.runLoopCallback_ = (timestamp: number) => {
       this.runLoopAndSetupFrameCallback_(timestamp);
     };
+
+    this.scrollHandler_ = () => {
+      window.removeEventListener('scroll', this.scrollHandler_);
+      this.runScrollLoopAndSetupListener_();
+    };
+
     this.init_();
   }
 
@@ -104,9 +118,7 @@ class RenderLoop {
 
   private setupScrollListener_() {
     window.addEventListener(
-      'scroll',
-      () => this.runScrollLoopAndSetupListener_(),
-      {passive: true, capture: false, once: true});
+      'scroll', this.scrollHandler_, thirdScrollEventListenerParam);
   }
 
   public framecount(fn: RenderFunction): RenderFunctionID {

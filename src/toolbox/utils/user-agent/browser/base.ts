@@ -3,7 +3,7 @@ import {USER_AGENT_STRING} from "../string";
 
 type Offset = [string, number];
 
-abstract  class Browser {
+abstract class Browser {
   protected static name_: string;
   protected static uaidsWithOffsets_: [string, Offset[]][];
 
