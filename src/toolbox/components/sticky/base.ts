@@ -2,7 +2,7 @@ import {NumericRange} from "../../utils/math/numeric-range";
 import {getVisibleYPosition} from "../../utils/dom/position/vertical/get-visible-y-position";
 import {renderLoop} from "../../utils/render-loop";
 import {getOffsetFromAncestor} from "../../utils/dom/position/get-offset-from-ancestor";
-import {Dimensions} from "../../utils/cached-vectors/dimensions';
+import {Dimensions} from "../../utils/cached-vectors/dimensions";
 
 type TPositionFunction = (rv: StickyRunValue) => void;
 
