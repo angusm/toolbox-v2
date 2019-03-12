@@ -92,6 +92,7 @@ class RenderLoop {
 
     this.scrollHandler_ = () => {
       window.removeEventListener('scroll', this.scrollHandler_);
+      window.removeEventListener('resize', this.scrollHandler_);
       this.runScrollLoopAndSetupListener_();
     };
 
@@ -119,6 +120,8 @@ class RenderLoop {
   private setupScrollListener_() {
     window.addEventListener(
       'scroll', this.scrollHandler_, thirdScrollEventListenerParam);
+    window.addEventListener(
+      'resize', this.scrollHandler_, thirdScrollEventListenerParam);
   }
 
   public framecount(fn: RenderFunction): RenderFunctionID {
