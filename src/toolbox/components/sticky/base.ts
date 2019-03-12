@@ -2,8 +2,11 @@ import {NumericRange} from "../../utils/math/numeric-range";
 import {getVisibleYPosition} from "../../utils/dom/position/vertical/get-visible-y-position";
 import {renderLoop} from "../../utils/render-loop";
 import {getOffsetFromAncestor} from "../../utils/dom/position/get-offset-from-ancestor";
+import {Dimensions} from "../../utils/cached-vectors/dimensions';
 
 type TPositionFunction = (rv: StickyRunValue) => void;
+
+const windowDimensions = Dimensions.getSingleton();
 
 class StickyRunValue {
   public readonly target: HTMLElement;
@@ -89,7 +92,10 @@ class Sticky {
     const positionFunction = Sticky.getPositionFunction_(shouldPin, yPosition);
 
     // Skip duplicating work
-    if (this.lastPositionFunction_ === positionFunction) {
+    if (
+      this.lastPositionFunction_ === positionFunction &&
+      !windowDimensions.hasChanged()
+    ) {
       return;
     }
 
