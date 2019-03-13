@@ -28,7 +28,7 @@ class Formula {
   }
 
   public static fromString(formula: string): Formula {
-    const stripped: string = formula.replace(/ /, '');
+    const stripped: string = formula.replace(/ /g, '');
 
     // Insert operations
     const withOperations: InterstitialFormula =
