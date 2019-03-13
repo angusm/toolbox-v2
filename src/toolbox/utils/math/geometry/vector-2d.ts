@@ -42,6 +42,10 @@ class Vector2d extends Vector {
     return this.fromMatrix(Matrix.fromElementTransform(element));
   }
 
+  public static fromWheelEvent<T extends Vector2d>(e: WheelEvent): T {
+    return <T>new this(e.deltaX, e.deltaY);
+  }
+
   public positionElement(element: HTMLElement): void {
     element.style.left = `${this.x}px`;
     element.style.top = `${this.y}px`;
