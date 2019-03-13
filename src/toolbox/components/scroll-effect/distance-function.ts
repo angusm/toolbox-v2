@@ -1,8 +1,8 @@
 import {getVisibleDistanceBetweenElementBottoms} from "../../utils/dom/position/vertical/get-visible-distance-between-element-bottoms";
 import {getVisibleDistanceBetweenElementCenters} from "../../utils/dom/position/vertical/get-visible-distance-between-element-centers";
-import {getVisibleDistanceBetweenElements} from "../../utils/dom/position/vertical/get-visible-distance-between-elements";
 import {Scroll} from "../../utils/cached-vectors/scroll";
 import {negateNumericFunction} from "../../utils/functions/negate-numeric-function";
+import {getVisibleDistanceFromRoot} from "../../utils/dom/position/vertical/get-visible-distance-from-root";
 
 const scroll = Scroll.getSingleton();
 
@@ -20,7 +20,7 @@ class DistanceFunction {
    * as a positive value.
    */
   public static DISTANCE_FROM_DOCUMENT_TOP =
-    negateNumericFunction(getVisibleDistanceBetweenElements);
+    negateNumericFunction(getVisibleDistanceFromRoot);
 
   /**
    * Returns distance from the center of viewport to the center of the target.
