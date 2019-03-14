@@ -1,5 +1,11 @@
 import {Vector2d} from "../../utils/math/geometry/vector-2d";
 import {applyScroll} from "../../utils/dom/position/apply-scroll";
+import {UserAgent} from "../../utils/user-agent/user-agent";
+import {IE} from "../../utils/user-agent/browser/ie";
+
+const thirdEventListenerParam =
+  UserAgent.getBrowser() === IE ?
+    true : {passive: false, capture: true, once: false};
 
 class JsScroll {
   private readonly wheelHandler_: (e: WheelEvent) => void;
@@ -12,7 +18,8 @@ class JsScroll {
 
   public init(): void {
     if (this.initializationCount_ === 0) {
-      window.addEventListener('wheel', this.wheelHandler_)
+      window.addEventListener(
+        'wheel', this.wheelHandler_, thirdEventListenerParam);
     }
     this.initializationCount_++;
   }
@@ -25,7 +32,8 @@ class JsScroll {
   public destroy(): void {
     this.initializationCount_--;
     if (this.initializationCount_ === 0) {
-      window.removeEventListener('wheel', this.wheelHandler_);
+      window.removeEventListener(
+        'wheel', this.wheelHandler_, thirdEventListenerParam);
     }
   }
 }
