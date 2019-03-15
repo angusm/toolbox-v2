@@ -30,9 +30,6 @@
     "typedoc": "^0.14.2",
     "typescript": "^2.7.2"
   },
-  "scripts": {
-    "test": "mocha -r ts-node/register ./src/**/*.spec.ts"
-  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/angusm/toolbox-v2.git"
