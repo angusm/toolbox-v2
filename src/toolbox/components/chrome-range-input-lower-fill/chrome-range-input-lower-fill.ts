@@ -11,6 +11,9 @@ class ChromeRangeInputLowerFill {
   private readonly fillColor_: string;
   private readonly element_: HTMLInputElement;
   private readonly inputHandler_: () => void;
+  private lastValue_: number;
+  private lastMin_: number;
+  private lastMax_: number;
   private destroyed_: boolean;
 
   constructor(
@@ -23,6 +26,7 @@ class ChromeRangeInputLowerFill {
     this.backgroundColor_ =
       ChromeRangeInputLowerFill.processColorParams_(backgroundColor);
     this.fillColor_ = ChromeRangeInputLowerFill.processColorParams_(fillColor);
+    this.lastValue_ = null;
     this.destroyed_ = false;
   }
 
@@ -55,6 +59,20 @@ class ChromeRangeInputLowerFill {
     const value  = parseFloat(this.element_.value);
     const min = parseFloat(this.element_.min) || 0;
     const max = parseFloat(this.element_.max) || 100;
+
+    if (
+      this.lastValue_ === value &&
+      this.lastMin_ === min &&
+      this.lastMax_ === max
+    ) {
+      return; // Don't waste time with no update updates
+    }
+
+    // Track last values so updates can be culled next run
+    this.lastValue_ = value;
+    this.lastMin_ = min;
+    this.lastMax_ = max;
+
     const percent = new NumericRange(min, max).getValueAsPercent(value) * 100;
 
     renderLoop.anyMutate(() => {
