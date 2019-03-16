@@ -2,6 +2,7 @@ import {Color} from "../../utils/dom/style/css-style-value/color";
 import {UserAgent} from "../../utils/user-agent/user-agent";
 import {Chrome} from "../../utils/user-agent/browser/chrome";
 import {NumericRange} from "../../utils/math/numeric-range";
+import {renderLoop} from "../../utils/render-loop";
 
 type ChromeRangeInputColor = Color|string;
 
@@ -10,6 +11,7 @@ class ChromeRangeInputLowerFill {
   private readonly fillColor_: string;
   private readonly element_: HTMLInputElement;
   private readonly inputHandler_: () => void;
+  private destroyed_: boolean;
 
   constructor(
     rangeInput: HTMLInputElement,
@@ -17,10 +19,11 @@ class ChromeRangeInputLowerFill {
     fillColor: ChromeRangeInputColor,
   ) {
     this.element_ = rangeInput;
-    this.inputHandler_ = () => this.handleInput_();
+    this.inputHandler_ = () => this.updateSliderStyle_();
     this.backgroundColor_ =
       ChromeRangeInputLowerFill.processColorParams_(backgroundColor);
     this.fillColor_ = ChromeRangeInputLowerFill.processColorParams_(fillColor);
+    this.destroyed_ = false;
   }
 
   private static processColorParams_(color: ChromeRangeInputColor): string {
@@ -34,23 +37,39 @@ class ChromeRangeInputLowerFill {
     }
 
     this.element_.addEventListener('input', this.inputHandler_);
+    this.renderLoop_();
   }
 
-  private handleInput_() {
+  private renderLoop_() {
+    if (this.destroyed_) {
+      return;
+    }
+
+    renderLoop.measure(() => {
+      renderLoop.cleanup(() => this.renderLoop_());
+      this.updateSliderStyle_();
+    });
+  }
+
+  private updateSliderStyle_() {
     const value  = parseFloat(this.element_.value);
     const min = parseFloat(this.element_.min) || 0;
     const max = parseFloat(this.element_.max) || 100;
     const percent = new NumericRange(min, max).getValueAsPercent(value) * 100;
-    this.element_.style.background =
-      'linear-gradient(' +
+
+    renderLoop.anyMutate(() => {
+      this.element_.style.background =
+        'linear-gradient(' +
         `to right, ${this.fillColor_} 0%,` +
         `${this.fillColor_} ${percent}%, ` +
         `${this.backgroundColor_} ${percent}%, ` +
         `${this.backgroundColor_} 100%)`;
+    });
   }
 
   public destroy() {
     this.element_.removeEventListener('input', this.inputHandler_);
+    this.destroyed_ = true;
   }
 }
 
