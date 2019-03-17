@@ -3,10 +3,14 @@ import {UserAgent} from "../../utils/user-agent/user-agent";
 import {Chrome} from "../../utils/user-agent/browser/chrome";
 import {NumericRange} from "../../utils/math/numeric-range";
 import {renderLoop} from "../../utils/render-loop";
+import {Safari} from "../../utils/user-agent/browser/safari";
+import {Browser} from "../../utils/user-agent/browser/base";
 
-type ChromeRangeInputColor = Color|string;
+type TLowerFillHackColor = Color|string;
 
-class ChromeRangeInputLowerFill {
+const targetedBrowsers: Set<typeof Browser> = new Set([Chrome, Safari]);
+
+class RangeInputLowerFillHack {
   private readonly backgroundColor_: string;
   private readonly fillColor_: string;
   private readonly element_: HTMLInputElement;
@@ -18,25 +22,25 @@ class ChromeRangeInputLowerFill {
 
   constructor(
     rangeInput: HTMLInputElement,
-    backgroundColor: ChromeRangeInputColor,
-    fillColor: ChromeRangeInputColor,
+    backgroundColor: TLowerFillHackColor,
+    fillColor: TLowerFillHackColor,
   ) {
     this.element_ = rangeInput;
     this.inputHandler_ = () => this.updateSliderStyle_();
     this.backgroundColor_ =
-      ChromeRangeInputLowerFill.processColorParams_(backgroundColor);
-    this.fillColor_ = ChromeRangeInputLowerFill.processColorParams_(fillColor);
+      RangeInputLowerFillHack.processColorParams_(backgroundColor);
+    this.fillColor_ = RangeInputLowerFillHack.processColorParams_(fillColor);
     this.lastValue_ = null;
     this.destroyed_ = false;
   }
 
-  private static processColorParams_(color: ChromeRangeInputColor): string {
+  private static processColorParams_(color: TLowerFillHackColor): string {
     return color instanceof Color ? color.toStyleString() : color;
   }
 
   public init() {
     // Only ever do Chrome
-    if (UserAgent.getBrowser() !== Chrome) {
+    if (!targetedBrowsers.has(UserAgent.getBrowser())) {
       return;
     }
 
@@ -91,4 +95,4 @@ class ChromeRangeInputLowerFill {
   }
 }
 
-export {ChromeRangeInputLowerFill};
+export {RangeInputLowerFillHack};
