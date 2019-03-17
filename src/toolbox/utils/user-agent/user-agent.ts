@@ -67,6 +67,10 @@ const operatingSystems: (typeof OS)[] = [
   WindowsXP,
 ];
 
+let browser: typeof Browser = null;
+let os: typeof OS = null;
+let isMobile: boolean = null;
+
 class UserAgent {
   public static getScreenSize(): Dimensions2d {
     if (!window.screen) {
@@ -76,17 +80,20 @@ class UserAgent {
   }
 
   public static getBrowser(): typeof Browser {
-    const matchingBrowser: typeof Browser = browsers.find(
-      (browser: typeof Browser) => browser.isCurrentBrowser());
-    if (isDefined(matchingBrowser)) {
-      return matchingBrowser;
-    } else {
-      return UnknownBrowser;
+    if (browser === null) {
+      const matchingBrowser: typeof Browser = browsers.find(
+        (candidate: typeof Browser) => candidate.isCurrentBrowser());
+      browser = isDefined(matchingBrowser) ? matchingBrowser : UnknownBrowser;
     }
+    return browser;
   }
 
   public static isMobile(): boolean {
-    return /Mobile|mini|Fennec|Android|iP(ad|od|hone)/.test(USER_AGENT_STRING);
+    if (isMobile === null) {
+      isMobile =
+        /Mobile|mini|Fennec|Android|iP(ad|od|hone)/.test(USER_AGENT_STRING);
+    }
+    return isMobile;
   }
 
   public static isCookieEnabled(): boolean {
@@ -102,12 +109,11 @@ class UserAgent {
   }
 
   public static getOS(): typeof OS {
-    const matchingOs = operatingSystems.find((os) => os.isCurrentOS());
-      if (isDefined(matchingOs)) {
-          return matchingOs;
-      } else {
-          return UnknownOS;
-      }
+    if (os === null) {
+      const matchingOs = operatingSystems.find((os) => os.isCurrentOS());
+      os = isDefined(matchingOs) ? matchingOs : UnknownOS;
+    }
+    return os;
   }
 }
 
