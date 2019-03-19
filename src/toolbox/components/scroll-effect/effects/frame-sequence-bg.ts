@@ -8,13 +8,9 @@ import {styleStringToMap} from "../../../utils/dom/style/style-string-to-map";
 import {setStylesFromMap} from "../../../utils/dom/style/set-styles-from-map";
 import {min} from "../../../utils/array/min";
 import {NumericRange} from "../../../utils/math/numeric-range";
-import {MultiValueDynamicDefaultMap} from "../../../utils/map/multi-value-dynamic-default";
-import {SetMap} from "../../../utils/map/set-map";
-import {frame} from "../../../utils/frame";
-
-type TStyleMap = Map<string, string>;
 
 const DEFAULT_FRAME_STYLE = `
+  display: none;
   position: absolute;
   top: 0;
   left: 0;
@@ -22,22 +18,35 @@ const DEFAULT_FRAME_STYLE = `
   bottom: 0;
   width: 100%;
   height: 100%;
+  opacity: 0;
 `;
 
+class TargetState {
+  public readonly desiredFrame: number;
+  public readonly backFrame: number;
+  public readonly frontFrame: number;
+  public readonly distanceAsPercent: number;
+
+  constructor(
+    desiredFrame: number,
+    backFrame: number,
+    frontFrame: number,
+    distanceAsPercent: number
+  ) {
+    this.desiredFrame = desiredFrame;
+    this.backFrame = backFrame;
+    this.frontFrame = frontFrame;
+    this.distanceAsPercent = distanceAsPercent;
+  }
+}
+
 class FrameSequenceBg implements IEffect {
-  private readonly loadedImages_: Set<HTMLImageElement>;
-  private readonly desiredFrameForTarget_: Map<HTMLElement, number>;
-  private readonly loadedBackFrameForTarget_: Map<HTMLElement, number>;
-  private readonly loadedFrontFrameForTarget_: Map<HTMLElement, number>;
-  private readonly lastDistanceAsPercentForTarget_: Map<HTMLElement, number>;
+  private readonly targetStates_: Map<HTMLElement, TargetState>;
   private readonly imageUrlsInOrder_: string[];
   private readonly framesToLoadInOrder_: number[];
+  private readonly frameElements_: HTMLElement[];
   private readonly loadedFrames_: Set<number>;
   private readonly container_: HTMLElement;
-  private readonly backFrame_: HTMLElement;
-  private readonly frontFrame_: HTMLElement;
-  private readonly reloadFrameMap_:
-    MultiValueDynamicDefaultMap<HTMLImageElement|number, () => void>;
   private isLoading_: boolean;
   private loadingPaused_: boolean;
   private framesToLoadInOrderIndex_: number;
@@ -58,35 +67,21 @@ class FrameSequenceBg implements IEffect {
       createFrameFunction = () => document.createElement('div'),
       startLoadingImmediately = true,
     }: {
-      createFrameFunction?: (isBack: boolean) => HTMLElement,
+      createFrameFunction?: (frame: number) => HTMLElement,
       startLoadingImmediately?: boolean,
     } = {}
   ) {
+    this.targetStates_ = new Map();
     this.imageUrlsInOrder_ = frames;
-    this.desiredFrameForTarget_ = new Map();
-    this.loadedBackFrameForTarget_ = new Map();
-    this.loadedFrontFrameForTarget_ = new Map();
-    this.lastDistanceAsPercentForTarget_ = new Map();
+    this.frameElements_ =
+      frames.map((frame, frameIndex) => createFrameFunction(frameIndex));
     this.framesToLoadInOrder_ =
       FrameSequenceBg.generateFrameLoadOrder(frames.length);
     this.framesToLoadInOrderIndex_ = 0;
     this.loadedFrames_ = new Set<number>();
-    this.backFrame_ = createFrameFunction(true);
-    this.frontFrame_ = createFrameFunction(false);
     this.container_ = container;
-    this.loadedImages_ = new Set();
     this.loadingPaused_ = !startLoadingImmediately;
     this.isLoading_ = false;
-
-    this.reloadFrameMap_ =
-      MultiValueDynamicDefaultMap.usingFunction(
-        ([frameToLoad, loadedImage]: [number, HTMLImageElement]) => {
-          return () => {
-            this.loadedImages_.delete(loadedImage);
-            this.loadedFrames_.delete(frameToLoad);
-            this.loadImage_(frameToLoad);
-          }
-        });
 
     this.init_();
   }
@@ -107,13 +102,9 @@ class FrameSequenceBg implements IEffect {
     this.startLoadingImages_();
   }
 
-  private getFrames_() {
-    return [this.backFrame_, this.frontFrame_];
-  }
-
   private setupFrames_() {
     const defaultStyles = styleStringToMap(DEFAULT_FRAME_STYLE);
-    this.getFrames_()
+    this.frameElements_
       .forEach((frame) => {
         setStylesFromMap(frame, defaultStyles);
         this.container_.appendChild(frame);
@@ -145,28 +136,28 @@ class FrameSequenceBg implements IEffect {
     return loadImage(frameUrl)
       .then(
         (loadedImage) => {
-          loadedImage.addEventListener(
-            'emptied', this.reloadFrameMap_.get([frameToLoad, loadedImage]));
           this.isLoading_ = false;
-          this.loadedImages_.add(loadedImage); // Keep image in memory
           this.loadedFrames_.add(frameToLoad);
 
-          this.desiredFrameForTarget_.forEach((desiredFrame, target) => {
+          // Update the elements with the background images
+          setStylesFromMap(
+            this.frameElements_[frameToLoad],
+            new Map([this.getBackgroundImageStyle_(frameToLoad)]));
+
+          this.targetStates_.forEach((targetState, target) => {
+            const desiredFrame = targetState.desiredFrame;
+
             if (desiredFrame === frameToLoad) {
               this.updateWithLoadedFrame_(target, desiredFrame);
-              this.desiredFrameForTarget_.delete(target);
-            } else {
-              const currentBack = this.loadedBackFrameForTarget_.get(target);
-              const currentFront = this.loadedFrontFrameForTarget_.get(target);
+              this.targetStates_.delete(target);
 
-              if (
-                (currentBack < frameToLoad && frameToLoad < desiredFrame) ||
-                (desiredFrame < frameToLoad && frameToLoad < currentFront)
-              ) {
+            } else {
+              const mustUpdate =
+                FrameSequenceBg
+                  .requiresUpdateForNewFrame_(frameToLoad, targetState);
+              if (mustUpdate) {
                 this.updateWithMissingFrame_(
-                  target,
-                  this.lastDistanceAsPercentForTarget_.get(target),
-                  desiredFrame);
+                  target, targetState.distanceAsPercent, desiredFrame);
               }
             }
           });
@@ -179,6 +170,18 @@ class FrameSequenceBg implements IEffect {
           this.framesToLoadInOrderIndex_++;
           this.loadNextImage_();
         });
+  }
+
+  private static requiresUpdateForNewFrame_(
+    newFrame: number, targetState: TargetState
+  ): boolean {
+    return (
+      targetState.backFrame < newFrame &&
+      newFrame < targetState.desiredFrame
+    ) || (
+      targetState.desiredFrame < newFrame &&
+      newFrame < targetState.frontFrame
+    );
   }
 
   public static generateFrameLoadOrder(length: number): number[] {
@@ -256,18 +259,36 @@ class FrameSequenceBg implements IEffect {
   }
 
   updateWithLoadedFrame_(target: HTMLElement, targetFrame: number): void {
-    this.clearCachedValuesForMissingFrame_(target);
-    const frameBackground = `url(${this.imageUrlsInOrder_[targetFrame]})`;
-    this.mutateUsingStyleMaps_(
-      new Map([['background-image', 'none'], ['opacity', '0']]),
-      new Map([['background-image', frameBackground], ['opacity', '1']]));
+    this.targetStates_.delete(target);
+    this.clearFrames_(new Set([targetFrame]));
+    this.setFrameOpacity_(targetFrame, '1');
   }
 
-  clearCachedValuesForMissingFrame_(target: HTMLElement): void {
-    this.desiredFrameForTarget_.delete(target);
-    this.lastDistanceAsPercentForTarget_.delete(target);
-    this.loadedBackFrameForTarget_.delete(target);
-    this.loadedFrontFrameForTarget_.delete(target);
+  getBackgroundImageStyle_(frame: number): [string, string] {
+    return ['background-image', `url(${this.imageUrlsInOrder_[frame]})`];
+  }
+
+  clearFrames_(rawExceptions: Set<number> = null) {
+    const exceptions = rawExceptions || new Set();
+    renderLoop.anyMutate(() => {
+      for (let i = 0; i < this.frameElements_.length; i++) {
+        if (exceptions.has(i)) {
+          continue;
+        }
+
+        this.frameElements_[i].style.display = 'none';
+      }
+    });
+  }
+
+  setFrameOpacity_(frame: number, opacity: string) {
+    if (typeof frame === 'undefined') {
+      return;
+    }
+    renderLoop.anyMutate(() => {
+      this.frameElements_[frame].style.display = 'block';
+      this.frameElements_[frame].style.opacity = opacity;
+    });
   }
 
   /**
@@ -282,8 +303,6 @@ class FrameSequenceBg implements IEffect {
     distanceAsPercent: number,
     targetFrame: number
   ): void {
-    this.lastDistanceAsPercentForTarget_.set(target, distanceAsPercent);
-    this.desiredFrameForTarget_.set(target, targetFrame);
     const frontFrame = this.getNextLoadedFrame_(targetFrame);
     const backFrame = this.getPreviousLoadedFrame_(targetFrame);
 
@@ -291,58 +310,35 @@ class FrameSequenceBg implements IEffect {
       this.getFrontFrameCrossfadeOpacity_(
         distanceAsPercent, frontFrame, backFrame);
 
-    this.updateBackFrameWithMissingFrame_(target, backFrame);
-    this.updateFrontFrameWithMissingFrame_(target, frontFrame, opacity);
+    this.clearFrames_(new Set([backFrame, frontFrame]));
+    this.updateBackFrameWithMissingFrame_(backFrame);
+    this.updateFrontFrameWithMissingFrame_(frontFrame, opacity);
+    this.targetStates_.set(
+      target,
+      new TargetState(targetFrame, backFrame, frontFrame, distanceAsPercent));
   }
 
   getFrontFrameCrossfadeOpacity_(
     distanceAsPercent: number, frontFrame: number, backFrame: number
   ): number {
-    const frontFramePercent = frontFrame / this.imageUrlsInOrder_.length;
-    const backFramePercent = backFrame / this.imageUrlsInOrder_.length;
-    const percentageRange =
-      new NumericRange(backFramePercent, frontFramePercent);
+    const frontPercent = frontFrame / this.imageUrlsInOrder_.length;
+    const backPercent = backFrame / this.imageUrlsInOrder_.length;
+    const percentageRange = new NumericRange(backPercent, frontPercent);
     return percentageRange.getValueAsPercent(distanceAsPercent);
   }
 
-  updateBackFrameWithMissingFrame_(
-    target: HTMLElement,
-    frameToDisplay: number
-  ): void {
-    this.loadedBackFrameForTarget_.set(target, frameToDisplay);
-    const imageUrl = `url(${this.imageUrlsInOrder_[frameToDisplay]})`;
-    renderLoop.anyMutate(() => {
-      setStylesFromMap(
-        this.backFrame_,
-        new Map([['background-image', imageUrl], ['opacity', '1']]));
-    });
+  updateBackFrameWithMissingFrame_(frame: number): void {
+    this.setFrameOpacity_(frame, '1');
   }
 
-  updateFrontFrameWithMissingFrame_(
-    target: HTMLElement,
-    frameToDisplay: number,
-    opacity: number
-  ): void {
-    this.loadedFrontFrameForTarget_.set(target, frameToDisplay);
-    const imageUrl = `url(${this.imageUrlsInOrder_[frameToDisplay]})`;
-    renderLoop.anyMutate(() => {
-      setStylesFromMap(
-        this.frontFrame_,
-        new Map([['background-image', imageUrl], ['opacity', `${opacity}`]]));
-    });
-  }
-
-  mutateUsingStyleMaps_(backStyle: TStyleMap, frontStyle: TStyleMap): void {
-    renderLoop.anyMutate(
-      () => {
-        setStylesFromMap(this.backFrame_, backStyle);
-        setStylesFromMap(this.frontFrame_, frontStyle);
-      });
+  updateFrontFrameWithMissingFrame_(frame: number, opacity: number): void {
+    this.setFrameOpacity_(frame, `${opacity}`);
   }
 
   destroy() {
-    this.loadedImages_.clear();
     this.loadedFrames_.clear();
+    this.frameElements_
+      .forEach((frameElement) => this.container_.removeChild(frameElement));
   }
 }
 
