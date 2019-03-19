@@ -8,8 +8,10 @@ import {styleStringToMap} from "../../../utils/dom/style/style-string-to-map";
 import {setStylesFromMap} from "../../../utils/dom/style/set-styles-from-map";
 import {min} from "../../../utils/array/min";
 import {NumericRange} from "../../../utils/math/numeric-range";
-import {DynamicDefaultMap} from "../../../utils/map/dynamic-default";
 import {MultiValueDynamicDefaultMap} from "../../../utils/map/multi-value-dynamic-default";
+import {SetMap} from "../../../utils/map/set-map";
+
+type TStyleMap = Map<string, string>;
 
 const DEFAULT_FRAME_STYLE = `
   position: absolute;
@@ -23,6 +25,7 @@ const DEFAULT_FRAME_STYLE = `
 
 class FrameSequenceBg implements IEffect {
   private readonly loadedImages_: Set<HTMLImageElement>;
+  private readonly desiredFrameForTarget_: Map<HTMLElement, number>;
   private readonly imageUrlsInOrder_: string[];
   private readonly framesToLoadInOrder_: number[];
   private readonly loadedFrames_: Set<number>;
@@ -56,6 +59,7 @@ class FrameSequenceBg implements IEffect {
     } = {}
   ) {
     this.imageUrlsInOrder_ = frames;
+    this.desiredFrameForTarget_ = new Map();
     this.framesToLoadInOrder_ =
       FrameSequenceBg.generateFrameLoadOrder(frames.length);
     this.framesToLoadInOrderIndex_ = 0;
@@ -139,6 +143,14 @@ class FrameSequenceBg implements IEffect {
           this.isLoading_ = false;
           this.loadedImages_.add(loadedImage); // Keep image in memory
           this.loadedFrames_.add(frameToLoad);
+
+          this.desiredFrameForTarget_.forEach((desiredFrame, target) => {
+            if (desiredFrame === frameToLoad) {
+              this.updateWithLoadedFrame_(target, desiredFrame);
+              this.desiredFrameForTarget_.delete(target);
+            }
+          });
+
           this.framesToLoadInOrderIndex_++;
           this.loadNextImage_();
         },
@@ -204,42 +216,67 @@ class FrameSequenceBg implements IEffect {
     return Array.from(this.loadedFrames_).filter(condition);
   }
 
+  /**
+   * Update the styles on the target's frames
+   * @param target
+   * @param distance
+   * @param distanceAsPercent
+   */
   public run(
     target: HTMLElement, distance: number, distanceAsPercent: number
   ): void {
     const targetFrame =
       percentToIndex(distanceAsPercent, this.imageUrlsInOrder_);
 
-    const backFrameStyles = new Map<string, string>();
-    const frontFrameStyles = new Map<string, string>();
-
     if (this.loadedFrames_.has(targetFrame)) {
-      frontFrameStyles
-        .set('background-image', `url(${this.imageUrlsInOrder_[targetFrame]})`);
-      backFrameStyles.set('background-image', 'none');
-      frontFrameStyles.set('opacity', '1');
-      backFrameStyles.set('opacity', '0');
+      this.updateWithLoadedFrame_(target, targetFrame);
     } else {
-      const frontFrame = this.getNextLoadedFrame_(targetFrame);
-      const backFrame = this.getPreviousLoadedFrame_(targetFrame);
-      const frontFramePercent = frontFrame / this.imageUrlsInOrder_.length;
-      const backFramePercent = backFrame / this.imageUrlsInOrder_.length;
-      const percentageRange =
-        new NumericRange(backFramePercent, frontFramePercent);
-      const opacitySplit = percentageRange.getValueAsPercent(distanceAsPercent);
-
-      frontFrameStyles
-        .set('background-image', `url(${this.imageUrlsInOrder_[frontFrame]})`);
-      backFrameStyles
-        .set('background-image', `url(${this.imageUrlsInOrder_[backFrame]})`);
-      frontFrameStyles.set('opacity', '' + opacitySplit);
-      backFrameStyles.set('opacity', '1');
+      this.updateWithMissingFrame_(target, distanceAsPercent, targetFrame);
     }
+  }
 
+  updateWithLoadedFrame_(target: HTMLElement, targetFrame: number): void {
+    this.desiredFrameForTarget_.delete(target);
+    const frameBackground = `url(${this.imageUrlsInOrder_[targetFrame]})`;
+    this.mutateUsingStyleMaps_(
+      new Map([['background-image', 'none'], ['opacity', '0']]),
+      new Map([['background-image', frameBackground], ['opacity', '1']]));
+  }
+
+  /**
+   * Updates back/front frames with a cross fade to accommodate a missing frame.
+   * @param target
+   * @param distanceAsPercent
+   * @param targetFrame
+   * @private
+   */
+  updateWithMissingFrame_(
+    target: HTMLElement,
+    distanceAsPercent: number,
+    targetFrame: number
+  ): void {
+    this.desiredFrameForTarget_.set(target, targetFrame);
+    const frontFrame = this.getNextLoadedFrame_(targetFrame);
+    const backFrame = this.getPreviousLoadedFrame_(targetFrame);
+    const frontFramePercent = frontFrame / this.imageUrlsInOrder_.length;
+    const backFramePercent = backFrame / this.imageUrlsInOrder_.length;
+    const percentageRange =
+      new NumericRange(backFramePercent, frontFramePercent);
+    const opacitySplit = percentageRange.getValueAsPercent(distanceAsPercent);
+
+    const backImg = `url(${this.imageUrlsInOrder_[backFrame]})`;
+    const frontImg = `url(${this.imageUrlsInOrder_[frontFrame]})`;
+    this.mutateUsingStyleMaps_(
+      new Map([['background-image', backImg], ['opacity', '1']]),
+      new Map([['background-image', frontImg], ['opacity', `${opacitySplit}`]]),
+    );
+  }
+
+  mutateUsingStyleMaps_(backStyle: TStyleMap, frontStyle: TStyleMap): void {
     renderLoop.anyMutate(
       () => {
-        setStylesFromMap(this.backFrame_, backFrameStyles);
-        setStylesFromMap(this.frontFrame_, frontFrameStyles);
+        setStylesFromMap(this.backFrame_, backStyle);
+        setStylesFromMap(this.frontFrame_, frontStyle);
       });
   }
 
