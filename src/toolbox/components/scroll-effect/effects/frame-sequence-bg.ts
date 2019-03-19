@@ -8,6 +8,7 @@ import {styleStringToMap} from "../../../utils/dom/style/style-string-to-map";
 import {setStylesFromMap} from "../../../utils/dom/style/set-styles-from-map";
 import {min} from "../../../utils/array/min";
 import {NumericRange} from "../../../utils/math/numeric-range";
+import {subtract} from "../../../utils/set/subtract";
 
 const DEFAULT_FRAME_STYLE = `
   display: none;
@@ -47,6 +48,7 @@ class FrameSequenceBg implements IEffect {
   private readonly frameElements_: HTMLElement[];
   private readonly loadedFrames_: Set<number>;
   private readonly container_: HTMLElement;
+  private readonly displayedFrames_: Set<number>;
   private isLoading_: boolean;
   private loadingPaused_: boolean;
   private framesToLoadInOrderIndex_: number;
@@ -82,6 +84,7 @@ class FrameSequenceBg implements IEffect {
     this.container_ = container;
     this.loadingPaused_ = !startLoadingImmediately;
     this.isLoading_ = false;
+    this.displayedFrames_ = new Set();
 
     this.init_();
   }
@@ -268,16 +271,17 @@ class FrameSequenceBg implements IEffect {
     return ['background-image', `url(${this.imageUrlsInOrder_[frame]})`];
   }
 
-  clearFrames_(rawExceptions: Set<number> = null) {
-    const exceptions = rawExceptions || new Set();
+  clearFrames_(exceptions: Set<number> = null) {
+    let framesToClear: Set<number>;
+    if (exceptions) {
+      framesToClear = subtract(this.displayedFrames_, exceptions);
+    } else {
+      framesToClear = this.displayedFrames_;
+    }
     renderLoop.anyMutate(() => {
-      for (let i = 0; i < this.frameElements_.length; i++) {
-        if (exceptions.has(i)) {
-          continue;
-        }
-
-        this.frameElements_[i].style.display = 'none';
-      }
+      framesToClear.forEach((frame) => {
+        this.frameElements_[frame].style.display = 'none';
+      });
     });
   }
 
@@ -286,6 +290,7 @@ class FrameSequenceBg implements IEffect {
       return;
     }
     renderLoop.anyMutate(() => {
+      this.displayedFrames_.add(frame);
       this.frameElements_[frame].style.display = 'block';
       this.frameElements_[frame].style.opacity = opacity;
     });
