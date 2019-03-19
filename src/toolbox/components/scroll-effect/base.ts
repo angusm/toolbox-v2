@@ -10,6 +10,14 @@ import {TScrollEffectCallbackMap} from "./types/t-scroll-effect-callback-map";
 import {TScrollEffectCallback} from "./types/t-scroll-effect-callback";
 import {flatten} from "../../utils/array/flatten";
 import {TScrollEffectDistanceValue} from "./types/t-scroll-effect-distance-value";
+import {Dimensions} from "../../utils/cached-vectors/dimensions";
+
+/**
+ * Dimensions of the window. Used to let scroll effects trigger on resize even
+ * if they would otherwise be culled.
+ * @hidden
+ */
+const windowDimensions = Dimensions.getSingleton();
 
 /**
  * These are the default option values provided to ScrollEffect unless otherwise
@@ -266,9 +274,19 @@ class ScrollEffect {
    * @private
    */
   private shouldRun_(optionalRunValue?: ScrollEffectRunValue): boolean {
+
+    // Always run if the windows dimensions have changed
+    if (windowDimensions.hasChanged()) {
+      return this.isConditionMet_(); // But still respect manual conditions
+    }
+
     const runValue = optionalRunValue || this.getRunValue_();
     return runValue.distance !== runValue.lastRunDistance && (
       this.condition_ === null || this.condition_());
+  }
+
+  private isConditionMet_() {
+    return this.condition_ === null || this.condition_();
   }
 
   private getDistanceValue_(value: TScrollEffectDistanceValue): number {
