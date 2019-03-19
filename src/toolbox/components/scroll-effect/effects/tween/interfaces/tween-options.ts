@@ -1,8 +1,10 @@
 import {KeyframeStyle} from "../keyframe-style";
+import {TEasingFunction} from "../types/t-easing-function";
 
 interface ITweenOptions {
-  styleTarget: HTMLElement,
-  keyframeStyle: KeyframeStyle
+  styleTarget?: HTMLElement,
+  keyframeStyle?: KeyframeStyle,
+  easingFunction?: TEasingFunction,
 }
 
 export {ITweenOptions};

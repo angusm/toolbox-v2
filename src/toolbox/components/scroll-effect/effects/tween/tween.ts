@@ -5,12 +5,16 @@ import {Animation} from "./animation";
 import {KeyframeStyle} from "./keyframe-style";
 import {TKeyframesConfig} from "./types/t-keyframes-config";
 import {ITweenOptions} from "./interfaces/tween-options";
+import {TEasingFunction} from "./types/t-easing-function";
+
+const linearEasing = (v: number) => v;
 
 /**
  * Default values provided to Tween for optional parameters.
  * @hidden
  */
 const defaultOptions: ITweenOptions = {
+  easingFunction: (distanceAsPercent: number) => distanceAsPercent,
   keyframeStyle: KeyframeStyle.PERCENT,
   styleTarget: null,
 };
@@ -29,6 +33,10 @@ class Tween implements IEffect {
 
   /**
    * Creates a new instance of the tween effect.
+   *
+   * @param easingFunction Function translating current percent distance
+   *
+   * Only used if keyframeStyle is set to PERCENT.
    *
    * @param keyframes The frames which should be tweened between.
    *
@@ -68,6 +76,7 @@ class Tween implements IEffect {
   constructor(
     keyframes: TKeyframesConfig,
     {
+      easingFunction = defaultOptions.easingFunction,
       keyframeStyle = defaultOptions.keyframeStyle,
       styleTarget = defaultOptions.styleTarget,
     }: ITweenOptions = defaultOptions
@@ -76,7 +85,9 @@ class Tween implements IEffect {
     this.styleTarget_ = styleTarget;
     this.cachedGetDistanceFn_ =
       keyframeStyle === KeyframeStyle.PERCENT ?
-        (distanceAsPx: number, distanceAsPercent: number) => distanceAsPercent :
+        (distanceAsPx: number, distanceAsPercent: number) => {
+          return easingFunction(distanceAsPercent);
+        } :
         (distanceAsPx: number, distanceAsPercent: number) => distanceAsPx;
   }
 
