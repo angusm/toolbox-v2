@@ -18,6 +18,7 @@ const propertyToTweenableValue =
     ['border-radius', CssCalcFormula],
     ['bottom', CssCalcFormula],
     ['color', Color],
+    ['max-height', CssCalcFormula],
     ['height', CssCalcFormula],
     ['left', CssCalcFormula],
     ['margin-bottom', CssCalcFormula],
@@ -31,6 +32,7 @@ const propertyToTweenableValue =
     ['padding-top', CssCalcFormula],
     ['right', CssCalcFormula],
     ['top', CssCalcFormula],
+    ['max-width', CssCalcFormula],
     ['width', CssCalcFormula],
   ]);
 
