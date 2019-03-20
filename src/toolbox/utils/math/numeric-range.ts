@@ -1,5 +1,4 @@
 import {IRange} from "../interfaces/range";
-import {getSign} from "./get-sign";
 
 class NumericRange implements IRange<number>{
   private readonly min_: number;

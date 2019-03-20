@@ -10,7 +10,6 @@ import {min} from "../../../utils/array/min";
 import {NumericRange} from "../../../utils/math/numeric-range";
 import {subtract} from "../../../utils/set/subtract";
 import {UserAgent} from "../../../utils/user-agent/user-agent";
-import {Chrome} from "../../../utils/user-agent/browser/chrome";
 import {Firefox} from "../../../utils/user-agent/browser/firefox";
 
 // Expected cap, drop it in half just to be safe
