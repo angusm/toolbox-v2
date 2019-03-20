@@ -11,6 +11,7 @@ import {NumericRange} from "../../../utils/math/numeric-range";
 import {subtract} from "../../../utils/set/subtract";
 import {UserAgent} from "../../../utils/user-agent/user-agent";
 import {Chrome} from "../../../utils/user-agent/browser/chrome";
+import {Firefox} from "../../../utils/user-agent/browser/firefox";
 
 // Expected cap, drop it in half just to be safe
 const Z_INDEX_CAP = 2147483647 / 2;
@@ -260,7 +261,7 @@ class FrameSequenceBg implements IEffect {
       percentToIndex(distanceAsPercent, this.imageUrlsInOrder_);
 
     if (this.lastTargetFrame_ === targetFrame) {
-      if (this.zIndex_ >= Z_INDEX_CAP && CURRENT_BROWSER !== Chrome) {
+      if (this.zIndex_ >= Z_INDEX_CAP && CURRENT_BROWSER === Firefox) {
         this.resetZIndexes_(); // Clean up z-indexes if they've gotten up there
       }
     } else {
@@ -302,11 +303,7 @@ class FrameSequenceBg implements IEffect {
       framesToClear = this.displayedFrames_;
     }
     renderLoop.anyMutate(() => {
-      if (CURRENT_BROWSER !== Chrome) {
-        // framesToClear.forEach((frame) => {
-        //   this.frameElements_[frame].style.zIndex = '0';
-        // });
-      } else {
+      if (CURRENT_BROWSER !== Firefox) {
         framesToClear.forEach((frame) => {
           this.frameElements_[frame].style.display = 'none';
         });
@@ -321,7 +318,7 @@ class FrameSequenceBg implements IEffect {
     renderLoop.anyMutate(() => {
       this.displayedFrames_.add(frame);
       this.frameElements_[frame].style.opacity = opacity;
-      if (CURRENT_BROWSER !== Chrome) {
+      if (CURRENT_BROWSER === Firefox) {
         this.frameElements_[frame].style.zIndex = `${++this.zIndex_}`;
       }
       this.frameElements_[frame].style.display = 'block';
