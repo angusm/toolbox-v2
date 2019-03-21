@@ -14,6 +14,8 @@ import {CssNumber} from "../../../../utils/dom/style/css-number";
 const propertyToTweenableValue =
   new Map<string, ITweenableValueStatic>([
     ['background-color', Color],
+    ['background-position-x', CssCalcFormula],
+    ['background-position-y', CssCalcFormula],
     ['border-color', Color],
     ['border-radius', CssCalcFormula],
     ['bottom', CssCalcFormula],
