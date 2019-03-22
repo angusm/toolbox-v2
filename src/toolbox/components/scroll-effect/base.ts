@@ -201,7 +201,7 @@ class ScrollEffect {
     renderLoop.scrollMeasure(() => this.handleScroll_());
 
     // Setup a force run once we're loaded if we aren't already
-    window.addEventListener('load', () => this.forceRun());
+    window.addEventListener('load', () => this.triggerRun());
   }
 
   private static mapCallbacksFromCallbackOptions_(
@@ -236,14 +236,9 @@ class ScrollEffect {
       return;
     }
 
+    this.triggerRun();
     renderLoop.scrollMeasure(() => {
       renderLoop.scrollCleanup(() => this.handleScroll_());
-
-      const runValue = this.getRunValue_();
-      if (this.shouldRun_(runValue)) {
-        this.runEffectsAndCallbacks_(runValue);
-      }
-      this.lastRunDistance_ = runValue.distance;
     });
   }
 
@@ -257,11 +252,17 @@ class ScrollEffect {
       return; // Run already being forced.
     }
     this.forceRun_ = true;
+    this.triggerRun();
+    renderLoop.cleanup(() => this.forceRun_ = false);
+  }
+
+  public triggerRun(): void {
     renderLoop.measure(() => {
       const runValue = this.getRunValue_();
-      this.runEffectsAndCallbacks_(runValue);
+      if (this.shouldRun_(runValue)) {
+        this.runEffectsAndCallbacks_(runValue);
+      }
       this.lastRunDistance_ = runValue.distance;
-      renderLoop.cleanup(() => this.forceRun_ = false);
     });
   }
 
@@ -277,6 +278,9 @@ class ScrollEffect {
    * @private
    */
   private shouldRun_(optionalRunValue?: ScrollEffectRunValue): boolean {
+    if (this.forceRun_) {
+      return true;
+    }
 
     // Always run if the windows dimensions have changed
     if (windowDimensions.hasChanged()) {
@@ -285,7 +289,7 @@ class ScrollEffect {
 
     const runValue = optionalRunValue || this.getRunValue_();
     return runValue.distance !== runValue.lastRunDistance && (
-      this.condition_ === null || this.condition_());
+      this.isConditionMet_());
   }
 
   private isConditionMet_() {
