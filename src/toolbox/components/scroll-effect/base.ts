@@ -199,6 +199,9 @@ class ScrollEffect {
       this.lastRunDistance_ = runValue.distance;
     });
     renderLoop.scrollMeasure(() => this.handleScroll_());
+
+    // Setup a force run once we're loaded if we aren't already
+    window.addEventListener('load', () => this.forceRun());
   }
 
   private static mapCallbacksFromCallbackOptions_(

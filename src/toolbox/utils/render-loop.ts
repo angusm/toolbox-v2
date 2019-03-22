@@ -119,6 +119,8 @@ class RenderLoop {
 
   private setupScrollListener_() {
     window.addEventListener(
+      'load', this.scrollHandler_, thirdScrollEventListenerParam);
+    window.addEventListener(
       'scroll', this.scrollHandler_, thirdScrollEventListenerParam);
     window.addEventListener(
       'resize', this.scrollHandler_, thirdScrollEventListenerParam);
