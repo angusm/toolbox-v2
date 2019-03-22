@@ -18,10 +18,18 @@ class JsScroll {
 
   public init(): void {
     if (this.initializationCount_ === 0) {
-      window.addEventListener(
-        'wheel', this.wheelHandler_, thirdEventListenerParam);
+      if (document.readyState === 'complete') {
+        this.addEventListener_();
+      } else {
+        window.addEventListener('load', () => this.addEventListener_());
+      }
     }
     this.initializationCount_++;
+  }
+
+  private addEventListener_() {
+      window.addEventListener(
+        'wheel', this.wheelHandler_, thirdEventListenerParam);
   }
 
   private scrollManually_(e: WheelEvent): void {
