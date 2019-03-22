@@ -112,7 +112,12 @@ class FrameSequenceBg implements IEffect {
 
   private init_() {
     this.setupFrames_();
-    this.startLoadingImages_();
+
+    if (document.readyState === 'complete') {
+      this.startLoadingImages_();
+    } else {
+      window.addEventListener('load', () => this.startLoadingImages_());
+    }
   }
 
   private setupFrames_() {
