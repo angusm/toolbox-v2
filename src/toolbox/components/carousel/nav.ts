@@ -2,8 +2,6 @@ import {Carousel} from './carousel';
 import {DynamicDefaultMap} from '../../utils/map/dynamic-default';
 import {areArrayValuesEqual} from '../../utils/array/are-array-values-equal';
 import {renderLoop} from '../../utils/render-loop';
-import {addDomEventListener} from "../../utils/dom/event/add-dom-event-listener";
-import {EventType} from "../../utils/dom/event/event-type";
 
 class DefaultClass {
   public static ACTIVE_NAV_ITEM = 'active';
@@ -20,6 +18,12 @@ class CarouselNav {
   private navItems_: DynamicDefaultMap<HTMLElement, HTMLElement>;
   private renderCache_: Map<symbol, HTMLElement[]>;
 
+  /**
+   * @param carousel Carousel to create the nav for
+   * @param navElement HTMLElement to place navigation buttons in
+   * @param activeCssClass Class applied to button for the current active slide.
+   * @param createNavItemFn Function returning HTML element to use as a button.
+   */
   constructor(
     carousel: Carousel,
     navElement: HTMLElement,

@@ -31,6 +31,21 @@ class Carousel implements ICarousel {
   private lastActiveSlide_: HTMLElement;
   private destroyed_: boolean;
 
+  /**
+   * @param container Parent element of slides.
+   * Element that acts as the carousel, in which all slides are contained.
+   * Does not need to be the direct parent.
+   *
+   * @param slides HTMLElements containing slide content.
+   * 
+   * @param onTransitionCallbacks Functions run when the active slide changes.
+   * @param activeCssClass Class to apply to active slide.
+   * @param beforeCssClass Class to apply to slides before active slide.
+   * @param afterCssClass Class to apply to slides after active slide.
+   * @param allowLooping Whether the carousel should be allowed to loop.
+   * @param transition How the Carousel should transition.
+   * Please see the transitions folder inside the carousel folder for options.
+   */
   constructor(
     container: HTMLElement,
     slides: HTMLElement[],
