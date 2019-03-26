@@ -93,8 +93,27 @@ class CarouselNav {
     slide: HTMLElement, carousel: Carousel
   ): HTMLElement   {
     const element = document.createElement('li');
-    element.addEventListener('click', () => carousel.transitionToSlide(slide));
+    CarouselNav.addTransitionToSlideListener(element, slide, carousel);
     return element;
+  }
+
+
+  /**
+   * @param target The element that when clicked will trigger a transition.
+   * Transition is triggered to the given slide.
+   *
+   * @param slideToTransitionTo The slide that should be transitioned to.
+   * Is transitioned to when the given target is interacted with. (clicked)
+   *
+   * @param carousel The carousel in which all this transitioning happens.
+   */
+  public static addTransitionToSlideListener(
+    target: HTMLElement,
+    slideToTransitionTo: HTMLElement,
+    carousel: Carousel
+  ) {
+    target.addEventListener(
+      'click', () => carousel.transitionToSlide(slideToTransitionTo));
   }
 }
 
