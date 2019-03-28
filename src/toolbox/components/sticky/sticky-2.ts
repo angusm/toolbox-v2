@@ -5,33 +5,22 @@ import {Vector2d} from "../../utils/math/geometry/vector-2d";
 import {getVisibleDistanceBetweenElements} from "../../utils/dom/position/get-visible-distance-between-elements";
 import {getVisibleDistanceFromRoot} from "../../utils/dom/position/get-visible-distance-from-root";
 import {getCommonPositionedParentElement} from "../../utils/dom/position/get-common-positioned-parent-element";
-
-/**
- * Positions the the element could be sticking to within the container.
- *
- * How the target element is positioned by sticky will change depending on
- * whether its container is showing its top, middle or bottom most prominently.
- *
- * @hidden
- */
-class ContainerPosition {
-  public static TOP: Symbol = Symbol('top');
-  public static MIDDLE: Symbol = Symbol('middle');
-  public static BOTTOM: Symbol = Symbol('bottom');
-}
+import {eventHandler} from "../../utils/event/event-handler";
+import {Sticky2ContainerPosition} from "./sticky-2-container-position";
+import {Sticky2Positioned} from "./sticky-2-positioned";
 
 /**
  * Contains values measured from the DOM for sticky updates.
  */
 class MeasureValue {
-  public readonly position: ContainerPosition;
+  public readonly position: Sticky2ContainerPosition;
   public readonly cloneStyle: CSSStyleDeclaration;
   public readonly cloneDistanceFromFrame: Vector2d;
   public readonly cloneDistanceFromRoot: Vector2d;
   public readonly maxDistance: number;
 
   constructor(
-    position: ContainerPosition,
+    position: Sticky2ContainerPosition,
     cloneStyle: CSSStyleDeclaration,
     cloneDistanceFromFrame: Vector2d,
     cloneDistanceFromRoot: Vector2d,
@@ -54,7 +43,7 @@ class Sticky2 {
   private readonly target_: HTMLElement;
   private readonly clone_: HTMLElement;
   private destroyed_: boolean;
-  private lastPosition_: ContainerPosition;
+  private lastPosition_: Sticky2ContainerPosition;
 
   /**
    * @param target The Element to position as if it were "position: sticky"'d
@@ -92,13 +81,13 @@ class Sticky2 {
 
   private static getPosition_(
     shouldPin: boolean, yPosition: number
-  ): ContainerPosition {
+  ): Sticky2ContainerPosition {
     if (shouldPin) {
-      return ContainerPosition.MIDDLE;
+      return Sticky2ContainerPosition.MIDDLE;
     } else if (yPosition < 0) {
-      return ContainerPosition.BOTTOM;
+      return Sticky2ContainerPosition.BOTTOM;
     } else {
-      return ContainerPosition.TOP;
+      return Sticky2ContainerPosition.TOP;
     }
   }
 
@@ -154,12 +143,12 @@ class Sticky2 {
     this.applyCloneStylesToTarget_(measureValue.cloneStyle);
 
     // Determine if the target should stick
-    if (measureValue.position === ContainerPosition.TOP) {
+    if (measureValue.position === Sticky2ContainerPosition.TOP) {
       this.target_.style.position = 'absolute';
       measureValue.cloneDistanceFromFrame
         .positionElementByTranslation(this.target_);
     }
-    else if (measureValue.position === ContainerPosition.MIDDLE) {
+    else if (measureValue.position === Sticky2ContainerPosition.MIDDLE) {
       this.target_.style.position = 'fixed';
       new Vector2d(
         measureValue.cloneDistanceFromRoot.x,
@@ -167,12 +156,14 @@ class Sticky2 {
       )
         .positionElementByTranslation(this.target_);
     }
-    else if (measureValue.position === ContainerPosition.BOTTOM) {
+    else if (measureValue.position === Sticky2ContainerPosition.BOTTOM) {
       this.target_.style.position = 'absolute';
       measureValue.cloneDistanceFromFrame
         .add(new Vector2d(0, measureValue.maxDistance))
         .positionElementByTranslation(this.target_);
     }
+    eventHandler.dispatchEvent(
+      new Sticky2Positioned(this, measureValue.position));
 
     this.lastPosition_ = measureValue.position;
   }
