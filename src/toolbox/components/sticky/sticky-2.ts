@@ -182,6 +182,7 @@ class Sticky2 {
 
   public destroy() {
     this.destroyed_ = true;
+    this.target_.parentElement.removeChild(this.clone_);
   }
 }
 
