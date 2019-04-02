@@ -49,16 +49,36 @@ class Sticky2 {
    * @param target The Element to position as if it were "position: sticky"'d
    *
    * @param container Element to treat as the target's offset parent.
-   *
    * Essentially the element that the target should be sticky'd to.
+   *
+   * @param cloneCssClass CSS Class to apply to cloned element (if any)
    */
-  constructor (target: HTMLElement, container: HTMLElement) {
+  constructor (
+    target: HTMLElement,
+    container: HTMLElement,
+    {
+      cloneCssClass = null,
+    }: {
+      cloneCssClass?: string,
+    } = {}
+  ) {
     this.container_ = container;
     this.target_ = target;
     this.lastPosition_ = null;
     this.destroyed_ = false;
-    this.clone_ = document.createElement(target.tagName);
+    this.clone_ = Sticky2.createClone_(target, cloneCssClass);
     this.init_();
+  }
+
+  private static createClone_(
+    target: HTMLElement,
+    cloneCssClass: string = null
+  ) {
+    const clone = document.createElement(target.tagName);
+    if (cloneCssClass !== null) {
+      clone.classList.add(cloneCssClass);
+    }
+    return clone;
   }
 
   private init_(): void {
