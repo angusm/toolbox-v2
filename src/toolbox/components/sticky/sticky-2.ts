@@ -78,14 +78,27 @@ class Sticky2 {
     if (cloneCssClass !== null) {
       clone.classList.add(cloneCssClass);
     }
+    clone.innerHTML = target.innerHTML;
+    clone.style.visibility = 'hidden';
+    Array.from(target.classList)
+      .forEach((className) => clone.classList.add(className));
+
+    Sticky2.applyCloneCssClass(clone, cloneCssClass);
     return clone;
   }
 
+  private static applyCloneCssClass(
+    element: Element, cloneCssClass: string = null
+  ) {
+    if (cloneCssClass === null) {
+      return;
+    }
+    element.classList.add(cloneCssClass);
+    Array.from(element.children)
+      .forEach((child) => Sticky2.applyCloneCssClass(child, cloneCssClass));
+  }
+
   private init_(): void {
-    this.clone_.innerHTML = this.target_.innerHTML;
-    this.clone_.style.visibility = 'hidden';
-    Array.from(this.target_.classList)
-      .forEach((className) => this.clone_.classList.add(className));
     this.target_.parentElement.insertBefore(this.clone_, this.target_);
     this.target_.style.position = 'absolute';
     this.target_.style.top = '0';
