@@ -48,20 +48,20 @@ const CURRENT_BROWSER = UserAgent.getBrowser();
 
 class FrameSequenceBg implements IEffect {
   private readonly imageUrlsInOrder_: string[];
-  private readonly framesToLoadInOrder_: number[];
-  private readonly framesToInterpolate_: number;
+  private readonly imageUrlIndicesToLoadInOrder_: number[];
+  private readonly numberOfFramesToInterpolate_: number;
   private readonly frameElements_: HTMLElement[];
-  private readonly loadedFrames_: Set<number>;
+  private readonly loadedImageUrlIndices_: Set<number>;
   private readonly container_: HTMLElement;
-  private readonly displayedFrames_: Set<number>;
-  private currentlyLoadingThreads_: number;
+  private readonly displayedFrameElementIndices_: Set<number>;
+  private readonly maximumParallelImageRequests_: number;
+  private currentParallelImageRequests_: number;
   private loadImageFunction_: (imageUrl: string) => Promise<HTMLImageElement>;
   private loadingPaused_: boolean;
-  private framesToLoadInOrderIndex_: number;
+  private imagesLoaded_: number;
   private zIndex_: number;
   private lastState_: TargetState;
   private lastTargetFrame_: number;
-  private maximumLoadingThreads_: number;
 
   /**
    * @param frames In order list of image URLs representing a sequence.
@@ -98,18 +98,18 @@ class FrameSequenceBg implements IEffect {
     this.imageUrlsInOrder_ = frames;
     this.frameElements_ =
       frames.map((frame, frameIndex) => createFrameFunction(frameIndex));
-    this.framesToLoadInOrder_ =
+    this.imageUrlIndicesToLoadInOrder_ =
       FrameSequenceBg.generateFrameLoadOrder(frames.length);
-    this.framesToLoadInOrderIndex_ = 0;
-    this.loadedFrames_ = new Set<number>();
+    this.imagesLoaded_ = 0;
+    this.loadedImageUrlIndices_ = new Set<number>();
     this.container_ = container;
     this.loadingPaused_ = !startLoadingImmediately;
-    this.displayedFrames_ = new Set();
+    this.displayedFrameElementIndices_ = new Set();
     this.zIndex_ = 1;
     this.loadImageFunction_ = loadImageFunction;
-    this.framesToInterpolate_ = framesToInterpolate;
-    this.maximumLoadingThreads_ = maximumLoadingThreads;
-    this.currentlyLoadingThreads_ = 0;
+    this.numberOfFramesToInterpolate_ = framesToInterpolate;
+    this.maximumParallelImageRequests_ = maximumLoadingThreads;
+    this.currentParallelImageRequests_ = 0;
 
     this.init_();
   }
@@ -126,7 +126,8 @@ class FrameSequenceBg implements IEffect {
   }
 
   private areAllLoadingThreadsInUse_(): boolean {
-    return this.currentlyLoadingThreads_ >= this.maximumLoadingThreads_;
+    return this.currentParallelImageRequests_ >=
+      this.maximumParallelImageRequests_;
   }
 
   private init_() {
@@ -153,7 +154,7 @@ class FrameSequenceBg implements IEffect {
   }
 
   private loadNextImage_() {
-    if (this.framesToLoadInOrderIndex_ >= this.framesToLoadInOrder_.length) {
+    if (this.imagesLoaded_ >= this.imageUrlIndicesToLoadInOrder_.length) {
       return; // We've loaded everything, let's chill.
     }
 
@@ -162,18 +163,18 @@ class FrameSequenceBg implements IEffect {
     }
 
     const frameToLoad =
-      this.framesToLoadInOrder_[this.framesToLoadInOrderIndex_];
+      this.imageUrlIndicesToLoadInOrder_[this.imagesLoaded_];
     this.loadImage_(frameToLoad);
   }
 
   private loadImage_(frameToLoad: number): Promise<void> {
     const frameUrl = this.imageUrlsInOrder_[frameToLoad];
-    this.currentlyLoadingThreads_++;
+    this.currentParallelImageRequests_++;
     return this.loadImageFunction_(frameUrl)
       .then(
         (loadedImage) => {
-          this.currentlyLoadingThreads_--;
-          this.loadedFrames_.add(frameToLoad);
+          this.currentParallelImageRequests_--;
+          this.loadedImageUrlIndices_.add(frameToLoad);
 
           // Update the elements with the background images
           setStylesFromMap(
@@ -195,23 +196,27 @@ class FrameSequenceBg implements IEffect {
             }
           }
 
-          this.framesToLoadInOrderIndex_++;
+          this.imagesLoaded_++;
           this.loadNextImage_();
         },
         () => {
-          this.currentlyLoadingThreads_--;
-          this.framesToLoadInOrderIndex_++;
+          this.currentParallelImageRequests_--;
+          this.imagesLoaded_++;
           this.loadNextImage_();
         });
   }
 
-  private requiresUpdateForNewFrame_(newFrame: number): boolean {
+  private requiresUpdateForNewFrame_(newFrameIndex: number): boolean {
+    const interpolatedNewFrame =
+      newFrameIndex * (this.numberOfFramesToInterpolate_ + 1);
     return (
-      this.lastState_.backFrame < newFrame &&
-      newFrame < this.lastState_.desiredFrame
+      newFrameIndex === 0 || newFrameIndex === this.imageUrlsInOrder_.length
     ) || (
-      this.lastState_.desiredFrame < newFrame &&
-      newFrame < this.lastState_.frontFrame
+      this.lastState_.backFrame < interpolatedNewFrame &&
+      interpolatedNewFrame < this.lastState_.desiredFrame
+    ) || (
+      this.lastState_.desiredFrame < interpolatedNewFrame &&
+      interpolatedNewFrame < this.lastState_.frontFrame
     );
   }
 
@@ -267,7 +272,7 @@ class FrameSequenceBg implements IEffect {
   }
 
   private getLoadedFramesByCondition_(condition: (v: number) => boolean) {
-    return Array.from(this.loadedFrames_).filter(condition);
+    return Array.from(this.loadedImageUrlIndices_).filter(condition);
   }
 
   /**
@@ -280,7 +285,7 @@ class FrameSequenceBg implements IEffect {
     target: HTMLElement, distance: number, distanceAsPercent: number
   ): void {
     const frameCountWithInterpolation =
-      (this.imageUrlsInOrder_.length * (this.framesToInterpolate_ + 1) - 1);
+      (this.imageUrlsInOrder_.length * (this.numberOfFramesToInterpolate_ + 1) - 1);
     const targetFrame =
       new NumericRange(0, frameCountWithInterpolation)
         .getPercentAsValue(distanceAsPercent);
@@ -295,7 +300,7 @@ class FrameSequenceBg implements IEffect {
     } else {
       if (
         !this.isInterpolatedFrame_(targetFrame) &&
-        this.loadedFrames_.has(nonInterpolatedFrameNumber)
+        this.loadedImageUrlIndices_.has(nonInterpolatedFrameNumber)
       ) {
         this.updateWithLoadedFrame_(nonInterpolatedFrameNumber);
       } else {
@@ -307,11 +312,11 @@ class FrameSequenceBg implements IEffect {
   }
 
   private getNonInterpolatedFrame_(frameNumber: number): number {
-    return frameNumber / (this.framesToInterpolate_ + 1);
+    return frameNumber / (this.numberOfFramesToInterpolate_ + 1);
   }
 
   private isInterpolatedFrame_(frameNumber: number): boolean {
-    return frameNumber % (this.framesToInterpolate_ + 1) !== 0;
+    return frameNumber % (this.numberOfFramesToInterpolate_ + 1) !== 0;
   }
 
   private resetZIndexes_() {
@@ -337,9 +342,9 @@ class FrameSequenceBg implements IEffect {
   private clearFrames_(exceptions: Set<number> = null) {
     let framesToClear: Set<number>;
     if (exceptions) {
-      framesToClear = subtract(this.displayedFrames_, exceptions);
+      framesToClear = subtract(this.displayedFrameElementIndices_, exceptions);
     } else {
-      framesToClear = this.displayedFrames_;
+      framesToClear = this.displayedFrameElementIndices_;
     }
     renderLoop.anyMutate(() => {
       if (CURRENT_BROWSER !== Firefox) {
@@ -355,7 +360,7 @@ class FrameSequenceBg implements IEffect {
       return;
     }
     renderLoop.anyMutate(() => {
-      this.displayedFrames_.add(frame);
+      this.displayedFrameElementIndices_.add(frame);
       this.frameElements_[frame].style.opacity = opacity;
       if (CURRENT_BROWSER === Firefox) {
         this.frameElements_[frame].style.zIndex = `${++this.zIndex_}`;
@@ -409,7 +414,7 @@ class FrameSequenceBg implements IEffect {
   }
 
   destroy() {
-    this.loadedFrames_.clear();
+    this.loadedImageUrlIndices_.clear();
     this.frameElements_
       .forEach((frameElement) => this.container_.removeChild(frameElement));
   }
