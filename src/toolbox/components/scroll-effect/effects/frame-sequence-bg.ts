@@ -55,6 +55,7 @@ class FrameSequenceBg implements IEffect {
   private readonly container_: HTMLElement;
   private readonly displayedFrames_: Set<number>;
   private isLoading_: boolean;
+  private loadImageFunction_: (imageUrl: string) => Promise<HTMLImageElement>;
   private loadingPaused_: boolean;
   private framesToLoadInOrderIndex_: number;
   private zIndex_: number;
@@ -66,6 +67,8 @@ class FrameSequenceBg implements IEffect {
    * @param container Non-statically positioned HTML element to contain frames.
    * @param createFrameFunction Used to create front/back frames.
    * @param startLoadingImmediately Whether to immediately start loading images.
+   * @param loadImageFunction Function to load a given image from its url.
+   * Defaults to Toolbox's loadImage.
    *
    * Inner frames are positioned absolutely, so the container should be
    * positioned using fixed, absolute or relative.
@@ -76,9 +79,11 @@ class FrameSequenceBg implements IEffect {
     {
       createFrameFunction = () => document.createElement('div'),
       startLoadingImmediately = true,
+      loadImageFunction = loadImage,
     }: {
       createFrameFunction?: (frame: number) => HTMLElement,
       startLoadingImmediately?: boolean,
+      loadImageFunction?: (url: string) => Promise<HTMLImageElement>,
     } = {}
   ) {
     this.lastState_ = null;
@@ -95,6 +100,7 @@ class FrameSequenceBg implements IEffect {
     this.isLoading_ = false;
     this.displayedFrames_ = new Set();
     this.zIndex_ = 1;
+    this.loadImageFunction_ = loadImageFunction;
 
     this.init_();
   }
@@ -151,7 +157,7 @@ class FrameSequenceBg implements IEffect {
   private loadImage_(frameToLoad: number): Promise<void> {
     const frameUrl = this.imageUrlsInOrder_[frameToLoad];
     this.isLoading_ = true;
-    return loadImage(frameUrl)
+    return this.loadImageFunction_(frameUrl)
       .then(
         (loadedImage) => {
           this.isLoading_ = false;
