@@ -54,13 +54,14 @@ class FrameSequenceBg implements IEffect {
   private readonly loadedFrames_: Set<number>;
   private readonly container_: HTMLElement;
   private readonly displayedFrames_: Set<number>;
-  private isLoading_: boolean;
+  private currentlyLoadingThreads_: number;
   private loadImageFunction_: (imageUrl: string) => Promise<HTMLImageElement>;
   private loadingPaused_: boolean;
   private framesToLoadInOrderIndex_: number;
   private zIndex_: number;
   private lastState_: TargetState;
   private lastTargetFrame_: number;
+  private maximumLoadingThreads_: number;
 
   /**
    * @param frames In order list of image URLs representing a sequence.
@@ -70,6 +71,7 @@ class FrameSequenceBg implements IEffect {
    * @param loadImageFunction Function to load a given image from its url.
    * Defaults to Toolbox's loadImage.
    * @param framesToInterpolate Number of cross-fade frames to interpolate
+   * @param maximumLoadingThreads Number of images to load at once
    *
    * Inner frames are positioned absolutely, so the container should be
    * positioned using fixed, absolute or relative.
@@ -82,11 +84,13 @@ class FrameSequenceBg implements IEffect {
       startLoadingImmediately = true,
       loadImageFunction = loadImage,
       framesToInterpolate = 0,
+      maximumLoadingThreads = 12,
     }: {
       createFrameFunction?: (frame: number) => HTMLElement,
       startLoadingImmediately?: boolean,
       loadImageFunction?: (url: string) => Promise<HTMLImageElement>,
       framesToInterpolate?: number,
+      maximumLoadingThreads?: number,
     } = {}
   ) {
     this.lastState_ = null;
@@ -100,11 +104,12 @@ class FrameSequenceBg implements IEffect {
     this.loadedFrames_ = new Set<number>();
     this.container_ = container;
     this.loadingPaused_ = !startLoadingImmediately;
-    this.isLoading_ = false;
     this.displayedFrames_ = new Set();
     this.zIndex_ = 1;
     this.loadImageFunction_ = loadImageFunction;
     this.framesToInterpolate_ = framesToInterpolate;
+    this.maximumLoadingThreads_ = maximumLoadingThreads;
+    this.currentlyLoadingThreads_ = 0;
 
     this.init_();
   }
@@ -115,9 +120,13 @@ class FrameSequenceBg implements IEffect {
 
   public startLoading(): void {
     this.loadingPaused_ = false;
-    if (!this.isLoading_) {
+    if (!this.areAllLoadingThreadsInUse_()) {
       this.loadNextImage_();
     }
+  }
+
+  private areAllLoadingThreadsInUse_(): boolean {
+    return this.currentlyLoadingThreads_ >= this.maximumLoadingThreads_;
   }
 
   private init_() {
@@ -154,17 +163,16 @@ class FrameSequenceBg implements IEffect {
 
     const frameToLoad =
       this.framesToLoadInOrder_[this.framesToLoadInOrderIndex_];
-    this.isLoading_ = true;
-    this.loadImage_(frameToLoad).then(() => this.isLoading_ = false);
+    this.loadImage_(frameToLoad);
   }
 
   private loadImage_(frameToLoad: number): Promise<void> {
     const frameUrl = this.imageUrlsInOrder_[frameToLoad];
-    this.isLoading_ = true;
+    this.currentlyLoadingThreads_++;
     return this.loadImageFunction_(frameUrl)
       .then(
         (loadedImage) => {
-          this.isLoading_ = false;
+          this.currentlyLoadingThreads_--;
           this.loadedFrames_.add(frameToLoad);
 
           // Update the elements with the background images
@@ -191,7 +199,7 @@ class FrameSequenceBg implements IEffect {
           this.loadNextImage_();
         },
         () => {
-          this.isLoading_ = false;
+          this.currentlyLoadingThreads_--;
           this.framesToLoadInOrderIndex_++;
           this.loadNextImage_();
         });
