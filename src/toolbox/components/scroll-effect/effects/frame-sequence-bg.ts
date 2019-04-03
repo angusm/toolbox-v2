@@ -11,6 +11,7 @@ import {NumericRange} from "../../../utils/math/numeric-range";
 import {subtract} from "../../../utils/set/subtract";
 import {UserAgent} from "../../../utils/user-agent/user-agent";
 import {Firefox} from "../../../utils/user-agent/browser/firefox";
+import {frame} from "../../../utils/frame";
 
 // Expected cap, drop it in half just to be safe
 const Z_INDEX_CAP = 2147483647 / 2;
@@ -50,6 +51,7 @@ const CURRENT_BROWSER = UserAgent.getBrowser();
 class FrameSequenceBg implements IEffect {
   private readonly imageUrlsInOrder_: string[];
   private readonly framesToLoadInOrder_: number[];
+  private readonly framesToInterpolate_: number;
   private readonly frameElements_: HTMLElement[];
   private readonly loadedFrames_: Set<number>;
   private readonly container_: HTMLElement;
@@ -80,10 +82,12 @@ class FrameSequenceBg implements IEffect {
       createFrameFunction = () => document.createElement('div'),
       startLoadingImmediately = true,
       loadImageFunction = loadImage,
+      framesToInterpolate = 0,
     }: {
       createFrameFunction?: (frame: number) => HTMLElement,
       startLoadingImmediately?: boolean,
       loadImageFunction?: (url: string) => Promise<HTMLImageElement>,
+      framesToInterpolate?: number,
     } = {}
   ) {
     this.lastState_ = null;
@@ -101,6 +105,7 @@ class FrameSequenceBg implements IEffect {
     this.displayedFrames_ = new Set();
     this.zIndex_ = 1;
     this.loadImageFunction_ = loadImageFunction;
+    this.framesToInterpolate_ = framesToInterpolate;
 
     this.init_();
   }
@@ -177,7 +182,7 @@ class FrameSequenceBg implements IEffect {
 
             } else {
               if (this.requiresUpdateForNewFrame_(frameToLoad)) {
-                this.updateWithMissingFrame_(
+                this.updateWithInterpolatedFrame_(
                   this.lastState_.distanceAsPercent, desiredFrame);
               }
             }
@@ -267,25 +272,42 @@ class FrameSequenceBg implements IEffect {
   public run(
     target: HTMLElement, distance: number, distanceAsPercent: number
   ): void {
+    const frameCountWithInterpolation =
+      (this.imageUrlsInOrder_.length * (this.framesToInterpolate_ + 1) - 1);
     const targetFrame =
-      percentToIndex(distanceAsPercent, this.imageUrlsInOrder_);
+      new NumericRange(0, frameCountWithInterpolation)
+        .getPercentAsValue(distanceAsPercent);
+
+    const nonInterpolatedFrameNumber =
+      this.getNonInterpolatedFrame_(targetFrame);
 
     if (this.lastTargetFrame_ === targetFrame) {
       if (this.zIndex_ >= Z_INDEX_CAP && CURRENT_BROWSER === Firefox) {
         this.resetZIndexes_(); // Clean up z-indexes if they've gotten up there
       }
     } else {
-      if (this.loadedFrames_.has(targetFrame)) {
-        this.updateWithLoadedFrame_(targetFrame);
+      if (
+        !this.isInterpolatedFrame_(targetFrame) &&
+        this.loadedFrames_.has(nonInterpolatedFrameNumber)
+      ) {
+        this.updateWithLoadedFrame_(nonInterpolatedFrameNumber);
       } else {
-        this.updateWithMissingFrame_(distanceAsPercent, targetFrame);
+        this.updateWithInterpolatedFrame_(distanceAsPercent, targetFrame);
       }
     }
 
     renderLoop.cleanup(() => this.lastTargetFrame_ = targetFrame);
   }
 
-  resetZIndexes_() {
+  private getNonInterpolatedFrame_(frameNumber: number): number {
+    return frameNumber / (this.framesToInterpolate_ + 1);
+  }
+
+  private isInterpolatedFrame_(frameNumber: number): boolean {
+    return frameNumber % (this.framesToInterpolate_ + 1) !== 0;
+  }
+
+  private resetZIndexes_() {
     this.frameElements_.forEach((frameElement) => {
       const newIndex = parseInt('0' + frameElement.style.zIndex) - Z_INDEX_CAP;
       renderLoop.anyMutate(() => {
@@ -295,17 +317,17 @@ class FrameSequenceBg implements IEffect {
     renderLoop.cleanup(() => this.zIndex_ = 0);
   }
 
-  updateWithLoadedFrame_(targetFrame: number): void {
+  private updateWithLoadedFrame_(targetFrame: number): void {
     this.lastState_ = null;
     this.clearFrames_(new Set([targetFrame]));
     this.setFrameStyle_(targetFrame, '1');
   }
 
-  getBackgroundImageStyle_(frame: number): [string, string] {
+  private getBackgroundImageStyle_(frame: number): [string, string] {
     return ['background-image', `url(${this.imageUrlsInOrder_[frame]})`];
   }
 
-  clearFrames_(exceptions: Set<number> = null) {
+  private clearFrames_(exceptions: Set<number> = null) {
     let framesToClear: Set<number>;
     if (exceptions) {
       framesToClear = subtract(this.displayedFrames_, exceptions);
@@ -321,7 +343,7 @@ class FrameSequenceBg implements IEffect {
     });
   }
 
-  setFrameStyle_(frame: number, opacity: string): void {
+  private setFrameStyle_(frame: number, opacity: string): void {
     if (typeof frame === 'undefined') {
       return;
     }
@@ -339,15 +361,15 @@ class FrameSequenceBg implements IEffect {
    * Updates back/front frames with a cross fade to accommodate a missing frame.
    * @param target
    * @param distanceAsPercent
-   * @param targetFrame
+   * @param targetInterpolatedFrame
    * @private
    */
-  updateWithMissingFrame_(
+  private updateWithInterpolatedFrame_(
     distanceAsPercent: number,
-    targetFrame: number
+    targetInterpolatedFrame: number
   ): void {
-    const frontFrame = this.getNextLoadedFrame_(targetFrame);
-    const backFrame = this.getPreviousLoadedFrame_(targetFrame);
+    const frontFrame = this.getNextLoadedFrame_(targetInterpolatedFrame);
+    const backFrame = this.getPreviousLoadedFrame_(targetInterpolatedFrame);
 
     const opacity =
       this.getFrontFrameCrossfadeOpacity_(
@@ -357,10 +379,10 @@ class FrameSequenceBg implements IEffect {
     this.updateBackFrameWithMissingFrame_(backFrame);
     this.updateFrontFrameWithMissingFrame_(frontFrame, opacity);
     this.lastState_ =
-      new TargetState(targetFrame, backFrame, frontFrame, distanceAsPercent);
+      new TargetState(targetInterpolatedFrame, backFrame, frontFrame, distanceAsPercent);
   }
 
-  getFrontFrameCrossfadeOpacity_(
+  private getFrontFrameCrossfadeOpacity_(
     distanceAsPercent: number, frontFrame: number, backFrame: number
   ): number {
     const frontPercent = frontFrame / this.imageUrlsInOrder_.length;
@@ -369,11 +391,13 @@ class FrameSequenceBg implements IEffect {
     return percentageRange.getValueAsPercent(distanceAsPercent);
   }
 
-  updateBackFrameWithMissingFrame_(frame: number): void {
+  private updateBackFrameWithMissingFrame_(frame: number): void {
     this.setFrameStyle_(frame, '1');
   }
 
-  updateFrontFrameWithMissingFrame_(frame: number, opacity: number): void {
+  private updateFrontFrameWithMissingFrame_(
+    frame: number, opacity: number
+  ): void {
     this.setFrameStyle_(frame, `${opacity}`);
   }
 
