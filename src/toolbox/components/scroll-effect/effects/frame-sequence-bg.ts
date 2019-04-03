@@ -1,6 +1,5 @@
 import {renderLoop} from "../../../utils/render-loop";
 import {IEffect} from "./i-effect";
-import {percentToIndex} from "../../../utils/array/percent-to-index";
 import {flatten} from "../../../utils/array/flatten";
 import {zip} from "../../../utils/array/zip";
 import {loadImage} from "../../../utils/loading/load-image";
@@ -11,7 +10,6 @@ import {NumericRange} from "../../../utils/math/numeric-range";
 import {subtract} from "../../../utils/set/subtract";
 import {UserAgent} from "../../../utils/user-agent/user-agent";
 import {Firefox} from "../../../utils/user-agent/browser/firefox";
-import {frame} from "../../../utils/frame";
 
 // Expected cap, drop it in half just to be safe
 const Z_INDEX_CAP = 2147483647 / 2;
@@ -71,6 +69,7 @@ class FrameSequenceBg implements IEffect {
    * @param startLoadingImmediately Whether to immediately start loading images.
    * @param loadImageFunction Function to load a given image from its url.
    * Defaults to Toolbox's loadImage.
+   * @param framesToInterpolate Number of cross-fade frames to interpolate
    *
    * Inner frames are positioned absolutely, so the container should be
    * positioned using fixed, absolute or relative.
@@ -337,7 +336,7 @@ class FrameSequenceBg implements IEffect {
     renderLoop.anyMutate(() => {
       if (CURRENT_BROWSER !== Firefox) {
         framesToClear.forEach((frame) => {
-          this.frameElements_[frame].style.display = 'none';
+          this.frameElements_[frame].style.opacity = '0';
         });
       }
     });
