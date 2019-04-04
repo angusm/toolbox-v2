@@ -162,34 +162,34 @@ class FrameSequenceBg implements IEffect {
       return; // Loading's been paused, take a break.
     }
 
-    const frameToLoad =
+    const imageUrlIndexToLoad =
       this.imageUrlIndicesToLoadInOrder_[this.imagesLoaded_];
-    this.loadImage_(frameToLoad);
+    this.loadImage_(imageUrlIndexToLoad);
   }
 
-  private loadImage_(frameToLoad: number): Promise<void> {
-    const frameUrl = this.imageUrlsInOrder_[frameToLoad];
+  private loadImage_(imageUrlIndexToLoad: number): Promise<void> {
+    const frameUrl = this.imageUrlsInOrder_[imageUrlIndexToLoad];
     this.currentParallelImageRequests_++;
     return this.loadImageFunction_(frameUrl)
       .then(
         (loadedImage) => {
           this.currentParallelImageRequests_--;
-          this.loadedImageUrlIndices_.add(frameToLoad);
+          this.loadedImageUrlIndices_.add(imageUrlIndexToLoad);
 
           // Update the elements with the background images
           setStylesFromMap(
-            this.frameElements_[frameToLoad],
-            new Map([this.getBackgroundImageStyle_(frameToLoad)]));
+            this.frameElements_[imageUrlIndexToLoad],
+            new Map([this.getBackgroundImageStyle_(imageUrlIndexToLoad)]));
 
           if (this.lastState_) {
             const desiredFrame = this.lastState_.desiredFrame;
 
-            if (desiredFrame === frameToLoad) {
+            if (desiredFrame === imageUrlIndexToLoad) {
               this.updateWithLoadedFrame_(desiredFrame);
               this.lastState_ = null;
 
             } else {
-              if (this.requiresUpdateForNewFrame_(frameToLoad)) {
+              if (this.requiresUpdateForNewFrame_(imageUrlIndexToLoad)) {
                 this.updateWithInterpolatedFrame_(
                   this.lastState_.distanceAsPercent, desiredFrame);
               }
@@ -284,8 +284,9 @@ class FrameSequenceBg implements IEffect {
   public run(
     target: HTMLElement, distance: number, distanceAsPercent: number
   ): void {
+    const interpolationMultiplier = this.numberOfFramesToInterpolate_ + 1;
     const frameCountWithInterpolation =
-      (this.imageUrlsInOrder_.length * (this.numberOfFramesToInterpolate_ + 1) - 1);
+      (this.imageUrlsInOrder_.length * interpolationMultiplier) - 1;
     const targetFrame =
       new NumericRange(0, frameCountWithInterpolation)
         .getPercentAsValue(distanceAsPercent);
