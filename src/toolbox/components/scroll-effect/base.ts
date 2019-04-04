@@ -331,7 +331,8 @@ class ScrollEffect {
   private getRunValue_(): ScrollEffectRunValue {
     const distance = this.getRunDistance_();
     const lastRunDistance = this.lastRunDistance_;
-    const percent = this.getDistanceRange_().getValueAsPercent(distance);
+    const rawPercent = this.getDistanceRange_().getValueAsPercent(distance);
+    const percent = isNaN(rawPercent) ? 0 : rawPercent;
     const lastRunDistancePercent =
       lastRunDistance !== null ?
         this.getDistanceRange_().getValueAsPercent(lastRunDistance) : 0;
