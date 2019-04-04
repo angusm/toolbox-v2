@@ -247,7 +247,7 @@ class FrameSequenceBg implements IEffect {
     ];
   }
 
-  private getPreviousLoadedFrame_(targetFrame: number): number {
+  private getPreviousLoadedImageUrlIndex_(targetFrame: number): number {
     return this.getClosestFrame_(
       this.getPreviousLoadedFrames_(targetFrame), targetFrame);
   }
@@ -256,7 +256,7 @@ class FrameSequenceBg implements IEffect {
     return this.getLoadedFramesByCondition_((frame) => frame < targetFrame);
   }
 
-  private getNextLoadedFrame_(targetFrame: number): number {
+  private getNextLoadedImageUrlIndex_(targetFrame: number): number {
     return this.getClosestFrame_(
       this.getNextLoadedFrames_(targetFrame), targetFrame);
   }
@@ -380,19 +380,26 @@ class FrameSequenceBg implements IEffect {
     distanceAsPercent: number,
     targetInterpolatedFrame: number
   ): void {
-    const frontFrame = this.getNextLoadedFrame_(targetInterpolatedFrame);
-    const backFrame = this.getPreviousLoadedFrame_(targetInterpolatedFrame);
+    const targetImageUrlIndex =
+      this.getNonInterpolatedFrame_(targetInterpolatedFrame);
+    const frontImageUrlIndex =
+      this.getNextLoadedImageUrlIndex_(targetImageUrlIndex);
+    const backImageUrlIndex =
+      this.getPreviousLoadedImageUrlIndex_(targetImageUrlIndex);
 
     const opacity =
       this.getFrontFrameCrossfadeOpacity_(
-        distanceAsPercent, frontFrame, backFrame);
+        distanceAsPercent, frontImageUrlIndex, backImageUrlIndex);
 
-    this.clearFrames_(new Set([backFrame, frontFrame]));
-    this.updateBackFrameWithMissingFrame_(backFrame);
-    this.updateFrontFrameWithMissingFrame_(frontFrame, opacity);
+    this.clearFrames_(new Set([backImageUrlIndex, frontImageUrlIndex]));
+    this.updateBackFrameWithMissingFrame_(backImageUrlIndex);
+    this.updateFrontFrameWithMissingFrame_(frontImageUrlIndex, opacity);
     this.lastState_ =
       new TargetState(
-        targetInterpolatedFrame, backFrame, frontFrame, distanceAsPercent);
+        targetInterpolatedFrame,
+        backImageUrlIndex,
+        frontImageUrlIndex,
+        distanceAsPercent);
   }
 
   private getFrontFrameCrossfadeOpacity_(
