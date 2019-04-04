@@ -56,6 +56,7 @@ class FrameSequenceBg implements IEffect {
   private readonly displayedFrameElementIndices_: Set<number>;
   private readonly maximumParallelImageRequests_: number;
   private readonly backupFrames_: ArrayMap<number, string>;
+  private readonly zIndexCap_: number;
   private imageUrlsInOrder_: string[];
   private currentParallelImageRequests_: number;
   private loadImageFunction_: (imageUrl: string) => Promise<HTMLImageElement>;
@@ -74,6 +75,7 @@ class FrameSequenceBg implements IEffect {
    * Defaults to Toolbox's loadImage.
    * @param framesToInterpolate Number of cross-fade frames to interpolate
    * @param maximumLoadingThreads Number of images to load at once
+   * @param zIndexCap Maximum ZIndex level to use.
    *
    * Inner frames are positioned absolutely, so the container should be
    * positioned using fixed, absolute or relative.
@@ -87,12 +89,14 @@ class FrameSequenceBg implements IEffect {
       loadImageFunction = loadImage,
       framesToInterpolate = 0,
       maximumLoadingThreads = 12,
+      zIndexCap = Z_INDEX_CAP,
     }: {
       createFrameFunction?: (frame: number) => HTMLElement,
       startLoadingImmediately?: boolean,
       loadImageFunction?: (url: string) => Promise<HTMLImageElement>,
       framesToInterpolate?: number,
       maximumLoadingThreads?: number,
+      zIndexCap?: number,
     } = {}
   ) {
     this.backupFrames_ = new ArrayMap<number, string>();
@@ -113,6 +117,7 @@ class FrameSequenceBg implements IEffect {
     this.numberOfFramesToInterpolate_ = framesToInterpolate;
     this.maximumParallelImageRequests_ = maximumLoadingThreads;
     this.currentParallelImageRequests_ = 0;
+    this.zIndexCap_ = zIndexCap;
 
     this.init_();
   }
@@ -147,7 +152,11 @@ class FrameSequenceBg implements IEffect {
   }
 
   private setupFrames_() {
-    const defaultStyles = styleStringToMap(DEFAULT_FRAME_STYLE);
+    const frameStyle =
+      CURRENT_BROWSER === Firefox ?
+        DEFAULT_FRAME_STYLE :
+        `${DEFAULT_FRAME_STYLE}; display: none;`;
+    const defaultStyles = styleStringToMap(frameStyle);
     this.frameElements_
       .forEach((frame) => {
         setStylesFromMap(frame, defaultStyles);
@@ -312,14 +321,12 @@ class FrameSequenceBg implements IEffect {
     const nonInterpolatedFrameNumber =
       this.getNonInterpolatedFrame_(targetFrame);
 
-    if (this.lastTargetFrame_ === targetFrame) {
-      if (this.zIndex_ >= Z_INDEX_CAP && CURRENT_BROWSER === Firefox) {
-        this.resetZIndexes_(); // Clean up z-indexes if they've gotten up there
-      }
-    } else {
-        const loadedImageUrl =
-          !this.isInterpolatedFrame_(targetFrame) ?
-            this.getLoadedImageUrlForIndex_(nonInterpolatedFrameNumber) : null;
+    this.resetZIndexes_();
+
+    if (this.lastTargetFrame_ !== targetFrame) {
+      const loadedImageUrl =
+        !this.isInterpolatedFrame_(targetFrame) ?
+          this.getLoadedImageUrlForIndex_(nonInterpolatedFrameNumber) : null;
 
       if (loadedImageUrl !== null) {
         this.updateWithLoadedFrame_(nonInterpolatedFrameNumber);
@@ -356,13 +363,19 @@ class FrameSequenceBg implements IEffect {
   }
 
   private resetZIndexes_() {
+    if (this.zIndex_ < this.zIndexCap_) {
+      return;
+    }
+    const subtraction = this.zIndex_ - 4;
+    this.zIndex_ = 4;
+
     this.frameElements_.forEach((frameElement) => {
-      const newIndex = parseInt('0' + frameElement.style.zIndex) - Z_INDEX_CAP;
+      const newIndex =
+        Math.max(0, parseInt('0' + frameElement.style.zIndex) - subtraction);
       renderLoop.anyMutate(() => {
         frameElement.style.zIndex = `${newIndex}`;
       });
     });
-    renderLoop.cleanup(() => this.zIndex_ = 0);
   }
 
   private updateWithLoadedFrame_(targetFrame: number): void {
@@ -393,6 +406,9 @@ class FrameSequenceBg implements IEffect {
   }
 
   private clearFrames_(exceptions: Set<number> = null) {
+    if (CURRENT_BROWSER === Firefox) {
+      return;
+    }
     let framesToClear: Set<number>;
     if (exceptions) {
       framesToClear = subtract(this.displayedFrameElementIndices_, exceptions);
@@ -400,11 +416,10 @@ class FrameSequenceBg implements IEffect {
       framesToClear = this.displayedFrameElementIndices_;
     }
     renderLoop.anyMutate(() => {
-      if (CURRENT_BROWSER !== Firefox) {
-        framesToClear.forEach((frame) => {
-          this.frameElements_[frame].style.opacity = '0';
-        });
-      }
+      framesToClear.forEach((frame) => {
+        this.frameElements_[frame].style.opacity = '0';
+        this.frameElements_[frame].style.display = 'none';
+      });
     });
   }
 
@@ -417,6 +432,8 @@ class FrameSequenceBg implements IEffect {
       this.frameElements_[frame].style.opacity = opacity;
       if (CURRENT_BROWSER === Firefox) {
         this.frameElements_[frame].style.zIndex = `${++this.zIndex_}`;
+      } else {
+        this.frameElements_[frame].style.display = 'block';
       }
     });
   }
