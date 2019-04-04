@@ -14,7 +14,7 @@ import {Firefox} from "../../../utils/user-agent/browser/firefox";
 // Expected cap, drop it in half just to be safe
 const Z_INDEX_CAP = 2147483647 / 2;
 const DEFAULT_FRAME_STYLE = `
-  display: none;
+  opacity: 0;
   position: absolute;
   top: 0;
   left: 0;
@@ -288,8 +288,9 @@ class FrameSequenceBg implements IEffect {
     const frameCountWithInterpolation =
       (this.imageUrlsInOrder_.length * interpolationMultiplier) - 1;
     const targetFrame =
-      new NumericRange(0, frameCountWithInterpolation)
-        .getPercentAsValue(distanceAsPercent);
+      Math.round(
+        new NumericRange(0, frameCountWithInterpolation)
+          .getPercentAsValue(distanceAsPercent));
 
     const nonInterpolatedFrameNumber =
       this.getNonInterpolatedFrame_(targetFrame);
@@ -366,13 +367,11 @@ class FrameSequenceBg implements IEffect {
       if (CURRENT_BROWSER === Firefox) {
         this.frameElements_[frame].style.zIndex = `${++this.zIndex_}`;
       }
-      this.frameElements_[frame].style.display = 'block';
     });
   }
 
   /**
    * Updates back/front frames with a cross fade to accommodate a missing frame.
-   * @param target
    * @param distanceAsPercent
    * @param targetInterpolatedFrame
    * @private
@@ -392,7 +391,8 @@ class FrameSequenceBg implements IEffect {
     this.updateBackFrameWithMissingFrame_(backFrame);
     this.updateFrontFrameWithMissingFrame_(frontFrame, opacity);
     this.lastState_ =
-      new TargetState(targetInterpolatedFrame, backFrame, frontFrame, distanceAsPercent);
+      new TargetState(
+        targetInterpolatedFrame, backFrame, frontFrame, distanceAsPercent);
   }
 
   private getFrontFrameCrossfadeOpacity_(
