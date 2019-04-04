@@ -10,6 +10,7 @@ import {NumericRange} from "../../../utils/math/numeric-range";
 import {subtract} from "../../../utils/set/subtract";
 import {UserAgent} from "../../../utils/user-agent/user-agent";
 import {Firefox} from "../../../utils/user-agent/browser/firefox";
+import {ArrayMap} from "../../../utils/map/array";
 
 // Expected cap, drop it in half just to be safe
 const Z_INDEX_CAP = 2147483647 / 2;
@@ -47,14 +48,15 @@ class TargetState {
 const CURRENT_BROWSER = UserAgent.getBrowser();
 
 class FrameSequenceBg implements IEffect {
-  private readonly imageUrlsInOrder_: string[];
   private readonly imageUrlIndicesToLoadInOrder_: number[];
   private readonly numberOfFramesToInterpolate_: number;
   private readonly frameElements_: HTMLElement[];
-  private readonly loadedImageUrlIndices_: Set<number>;
+  private readonly loadedImageUrls_: Set<string>;
   private readonly container_: HTMLElement;
   private readonly displayedFrameElementIndices_: Set<number>;
   private readonly maximumParallelImageRequests_: number;
+  private readonly backupFrames_: ArrayMap<number, string>;
+  private imageUrlsInOrder_: string[];
   private currentParallelImageRequests_: number;
   private loadImageFunction_: (imageUrl: string) => Promise<HTMLImageElement>;
   private loadingPaused_: boolean;
@@ -93,6 +95,7 @@ class FrameSequenceBg implements IEffect {
       maximumLoadingThreads?: number,
     } = {}
   ) {
+    this.backupFrames_ = new ArrayMap<number, string>();
     this.lastState_ = null;
     this.lastTargetFrame_ = null;
     this.imageUrlsInOrder_ = frames;
@@ -101,7 +104,7 @@ class FrameSequenceBg implements IEffect {
     this.imageUrlIndicesToLoadInOrder_ =
       FrameSequenceBg.generateFrameLoadOrder(frames.length);
     this.imagesLoaded_ = 0;
-    this.loadedImageUrlIndices_ = new Set<number>();
+    this.loadedImageUrls_ = new Set<string>();
     this.container_ = container;
     this.loadingPaused_ = !startLoadingImmediately;
     this.displayedFrameElementIndices_ = new Set();
@@ -132,7 +135,10 @@ class FrameSequenceBg implements IEffect {
 
   private init_() {
     this.setupFrames_();
+    this.startLoadingImagesWhenReady_();
+  }
 
+  private startLoadingImagesWhenReady_() {
     if (document.readyState === 'complete') {
       this.startLoadingImages_();
     } else {
@@ -174,7 +180,7 @@ class FrameSequenceBg implements IEffect {
       .then(
         (loadedImage) => {
           this.currentParallelImageRequests_--;
-          this.loadedImageUrlIndices_.add(imageUrlIndexToLoad);
+          this.loadedImageUrls_.add(this.getImageUrl_(imageUrlIndexToLoad));
 
           // Update the elements with the background images
           setStylesFromMap(
@@ -249,16 +255,17 @@ class FrameSequenceBg implements IEffect {
 
   private getPreviousLoadedImageUrlIndex_(targetFrame: number): number {
     return this.getClosestFrame_(
-      this.getPreviousLoadedFrames_(targetFrame), targetFrame);
+      this.getPreviousLoadedImageUrlIndices_(targetFrame), targetFrame);
   }
 
-  private getPreviousLoadedFrames_(targetFrame: number): number[] {
-    return this.getLoadedFramesByCondition_((frame) => frame < targetFrame);
+  private getPreviousLoadedImageUrlIndices_(targetFrame: number): number[] {
+    return this.getLoadedImageUrlIndicesByCondition_(
+      (frame) => frame < targetFrame);
   }
 
-  private getNextLoadedImageUrlIndex_(targetFrame: number): number {
+  private getNextLoadedImageUrlIndex_(imageUrlIndex: number): number {
     return this.getClosestFrame_(
-      this.getNextLoadedFrames_(targetFrame), targetFrame);
+      this.getNextLoadedImageUrlIndices_(imageUrlIndex), imageUrlIndex);
   }
 
   private getClosestFrame_(
@@ -267,12 +274,22 @@ class FrameSequenceBg implements IEffect {
     return min(candidateFrames, (frame) => Math.abs(targetFrame - frame));
   }
 
-  private getNextLoadedFrames_(targetFrame: number): number[] {
-    return this.getLoadedFramesByCondition_((frame) => frame > targetFrame);
+  private getNextLoadedImageUrlIndices_(imageUrlIndex: number): number[] {
+    return this.getLoadedImageUrlIndicesByCondition_(
+      (frame) => frame > imageUrlIndex);
   }
 
-  private getLoadedFramesByCondition_(condition: (v: number) => boolean) {
-    return Array.from(this.loadedImageUrlIndices_).filter(condition);
+  private getLoadedImageUrlIndices_() {
+    return Array.from(
+      new Set(
+        Array.from(this.loadedImageUrls_)
+          .map((imageUrl) => this.getImageUrlIndex_(imageUrl))));
+  }
+
+  private getLoadedImageUrlIndicesByCondition_(
+    condition: (v: number) => boolean
+  ): number[] {
+    return this.getLoadedImageUrlIndices_().filter(condition);
   }
 
   /**
@@ -300,10 +317,11 @@ class FrameSequenceBg implements IEffect {
         this.resetZIndexes_(); // Clean up z-indexes if they've gotten up there
       }
     } else {
-      if (
-        !this.isInterpolatedFrame_(targetFrame) &&
-        this.loadedImageUrlIndices_.has(nonInterpolatedFrameNumber)
-      ) {
+        const loadedImageUrl =
+          !this.isInterpolatedFrame_(targetFrame) ?
+            this.getLoadedImageUrlForIndex_(nonInterpolatedFrameNumber) : null;
+
+      if (loadedImageUrl !== null) {
         this.updateWithLoadedFrame_(nonInterpolatedFrameNumber);
       } else {
         this.updateWithInterpolatedFrame_(distanceAsPercent, targetFrame);
@@ -311,6 +329,22 @@ class FrameSequenceBg implements IEffect {
     }
 
     renderLoop.cleanup(() => this.lastTargetFrame_ = targetFrame);
+  }
+
+  private hasLoadedImageUrlForIndex_(imageUrlIndex: number): boolean {
+    return this.getLoadedImageUrlForIndex_(imageUrlIndex) !== null;
+  }
+
+  private getLoadedImageUrlForIndex_(imageUrlIndex: number): string {
+    const bestUrl = this.imageUrlsInOrder_[imageUrlIndex];
+    if (this.loadedImageUrls_.has(bestUrl)) {
+      return bestUrl;
+    } else {
+      const loadedBackupUrl =
+        this.backupFrames_.get(imageUrlIndex)
+          .find((imageUrl) => this.loadedImageUrls_.has(imageUrl));
+      return loadedBackupUrl || null;
+    }
   }
 
   private getNonInterpolatedFrame_(frameNumber: number): number {
@@ -337,8 +371,25 @@ class FrameSequenceBg implements IEffect {
     this.setFrameStyle_(targetFrame, '1');
   }
 
-  private getBackgroundImageStyle_(frame: number): [string, string] {
-    return ['background-image', `url(${this.imageUrlsInOrder_[frame]})`];
+  private getBackgroundImageStyle_(imageUrlIndex: number): [string, string] {
+    return [
+      'background-image', `url(${this.imageUrlsInOrder_[imageUrlIndex]})`];
+  }
+
+  private getImageUrl_(imageUrlIndex: number): string {
+    return this.imageUrlsInOrder_[imageUrlIndex];
+  }
+
+  private getImageUrlIndex_(imageUrl: string): number {
+    const baseIndex = this.imageUrlsInOrder_.indexOf(imageUrl);
+    if (baseIndex !== -1) {
+      return baseIndex;
+    } else {
+      return Array.from(this.backupFrames_.keys())
+        .find((index) => {
+          return this.backupFrames_.get(index).indexOf(imageUrl) !== -1;
+        });
+    }
   }
 
   private clearFrames_(exceptions: Set<number> = null) {
@@ -421,8 +472,34 @@ class FrameSequenceBg implements IEffect {
     this.setFrameStyle_(frame, `${opacity}`);
   }
 
+  /**
+   * Used to update frames while allowing previously loaded frames to be used
+   * as a backup. Useful when dynamically setting quality/width of images.c
+   * @param frames
+   */
+  public replaceFramesInPlace(frames: string[]) {
+    if (frames.length !== this.imageUrlsInOrder_.length) {
+      throw new Error(
+        'Can only replaceFramesInPlace if frame count is constant');
+    }
+
+    // Note we do not update imageUrlIndicesToLoadInOrder_ since it should be
+    // the same if the length doesn't change.
+
+    this.imageUrlsInOrder_
+      .forEach((imageUrl, index) => {
+        if (this.loadedImageUrls_.has(imageUrl)) {
+          this.backupFrames_.get(index).push(imageUrl);
+        }
+      });
+    this.imageUrlsInOrder_ = frames;
+    this.imagesLoaded_ = 0;
+    this.startLoadingImagesWhenReady_();
+  }
+
   destroy() {
-    this.loadedImageUrlIndices_.clear();
+    this.loadedImageUrls_.clear();
+    this.backupFrames_.clear();
     this.frameElements_
       .forEach((frameElement) => this.container_.removeChild(frameElement));
   }
