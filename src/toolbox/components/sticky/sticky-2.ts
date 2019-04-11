@@ -40,7 +40,8 @@ class MeasureValue {
   }
 
   public equals(measureValue: MeasureValue): boolean {
-    return this.padding === measureValue.padding &&
+    return measureValue &&
+      this.padding === measureValue.padding &&
       this.width === measureValue.width &&
       this.height === measureValue.height &&
       this.border === measureValue.border;
@@ -216,7 +217,7 @@ class Sticky2 {
 
   private applyCloneStylesToTarget_(measureValue: MeasureValue): void {
     // Avoid redundant checks
-    if (this.lastMeasureValue_.equals(measureValue)) {
+    if (measureValue.equals(this.lastMeasureValue_)) {
       return;
     }
 
