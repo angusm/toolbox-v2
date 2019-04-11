@@ -6,7 +6,7 @@ function getFirstPositionedParentElement(element: HTMLElement): HTMLElement {
     if (isPositioned(candidate)) {
       return candidate;
     }
-    candidate = element.parentElement;
+    candidate = candidate.parentElement;
   }
   return null;
 }

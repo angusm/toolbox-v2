@@ -14,7 +14,6 @@ import {getFirstPositionedParentElement} from "../../utils/dom/position/get-firs
  */
 class MeasureValue {
   public readonly position: Sticky2ContainerPosition;
-  public readonly cloneStyle: CSSStyleDeclaration;
   public readonly cloneDistanceFromFrame: Vector2d;
   public readonly cloneDistanceFromRoot: Vector2d;
   public readonly maxDistance: number;
