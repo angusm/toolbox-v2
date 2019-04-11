@@ -44,16 +44,14 @@ class TransitionTarget {
 
 class SlideToDraggableMap extends DynamicDefaultMap<HTMLElement, PhysicallyDraggable> {
   constructor(physical2d: Physical2d = null) {
-    const fixedYDraggableConstraint = new DraggableFixedYConstraint();
+    const physicallyDraggableConfig =
+      {
+        draggableConstraints: [new DraggableFixedYConstraint()],
+        physical2d: physical2d,
+      };
 
     const defaultFn = (slide: HTMLElement) => {
-      return new PhysicallyDraggable(
-        slide,
-        {
-          draggableConstraints: [fixedYDraggableConstraint],
-          physical2d: physical2d,
-        }
-      );
+      return new PhysicallyDraggable(slide, physicallyDraggableConfig);
     };
     super([], Map, defaultFn);
   }
@@ -83,14 +81,6 @@ class PhysicalSlide implements ITransition {
   public init(activeSlide: HTMLElement, carousel: ICarousel): void {
     PhysicalSlide.initActiveSlide_(activeSlide, carousel);
     this.initDraggableSlides_(carousel);
-  }
-
-  private static getTranslationFromCenter_(
-    target: HTMLElement, carousel: ICarousel
-  ): Vector2d {
-    const distance =
-      getVisibleDistanceBetweenElementCenters(target, carousel.getContainer());
-    return new Vector2d(distance.x, 0);
   }
 
   private static initActiveSlide_(
@@ -127,10 +117,18 @@ class PhysicalSlide implements ITransition {
         });
   }
 
+  private static getTranslationFromCenter_(
+    target: HTMLElement, carousel: ICarousel
+  ): Vector2d {
+    const distance =
+      getVisibleDistanceBetweenElementCenters(target, carousel.getContainer());
+    return new Vector2d(distance.x, 0);
+  }
+
   public renderLoop(carousel: ICarousel): void {
     renderLoop.measure(() => {
       if (!carousel.isBeingInteractedWith()) {
-        if (this.transitionTargets_.has(carousel)) {
+        if(this.transitionTargets_.has(carousel)) {
           this.transitionToTarget_(carousel);
         } else {
           this.adjustSplit_(carousel);
@@ -139,7 +137,7 @@ class PhysicalSlide implements ITransition {
     });
   }
 
-  private getDistanceToCenter_(
+  private static getDistanceToCenter_(
     target: HTMLElement, carousel: ICarousel
   ): number {
     const distanceFromCenter =
@@ -148,12 +146,15 @@ class PhysicalSlide implements ITransition {
   }
 
   private transitionToTarget_(carousel: ICarousel) {
+    this.adjustSplit_(carousel);
+
     const target = this.transitionTargets_.get(carousel);
     const targetSlide = target.getTarget();
     const remainingTime =
       target.getTargetTime().valueOf() - new Date().valueOf();
 
-    const distanceToCenter = this.getDistanceToCenter_(targetSlide, carousel);
+    const distanceToCenter =
+      PhysicalSlide.getDistanceToCenter_(targetSlide, carousel);
 
     const draggable = this.draggableBySlide_.get(targetSlide);
     const breakForce = draggable.getBreakForce();
@@ -185,11 +186,11 @@ class PhysicalSlide implements ITransition {
     draggable.setVelocity(new Vector2d(adjustedVelocity, 0));
   }
 
-  private getHalves_(
+  private static getHalves_(
     carousel: ICarousel, targetSlide: HTMLElement
   ): [HTMLElement[], HTMLElement[]] {
     if (carousel.allowsLooping()) {
-      return splitEvenlyOnItem(carousel.getSlides(), targetSlide);
+      return splitEvenlyOnItem(carousel.getSlides(), targetSlide, true);
     } else {
       return <[HTMLElement[], HTMLElement[]]>split(
         carousel.getSlides(), targetSlide);
@@ -201,12 +202,45 @@ class PhysicalSlide implements ITransition {
     target: HTMLElement = null,
     adjustment: Vector2d = ZERO_VECTOR_2D
   ): void {
-    const targetSlide = target ? target : carousel.getActiveSlide();
-    const halves = this.getHalves_(carousel, targetSlide);
-    const slidesBefore = halves[0];
-    const slidesAfter = halves[1];
-    this.adjustSlides_(targetSlide, slidesBefore.reverse(), -1, adjustment);
-    this.adjustSlides_(targetSlide, slidesAfter, 1, adjustment);
+
+    // if (carousel.allowsLooping()) {
+    //   // If the main element is off screen then we need to reset the adjustment
+    //   // by a viewport width.
+    //   if (!isVisible(target)) {
+    //
+    //   }
+    // }
+
+    const activeSlide = carousel.getActiveSlide();
+    const targetSlide = target ? target : activeSlide;
+
+    const [slidesBeforeActive, slidesAfterActive] =
+      PhysicalSlide.getHalves_(carousel, activeSlide);
+    const reOrderedSlides =
+      [...slidesBeforeActive, activeSlide, ...slidesAfterActive];
+
+    const activeIndex = reOrderedSlides.indexOf(activeSlide);
+    const targetIndex = reOrderedSlides.indexOf(targetSlide);
+    const diff = activeIndex - targetIndex;
+
+    const [slidesBefore, slidesAfter] =
+      PhysicalSlide.getHalves_(carousel, targetSlide);
+
+    if (diff !== 0) {
+      const shiftFunction =
+        diff > 0 ?
+          () => slidesAfter.push(slidesBefore.shift()) :
+          () => slidesBefore.unshift(slidesAfter.pop());
+
+      const absDiff =
+        Math.min(Math.abs(diff), slidesBefore.length, slidesAfter.length);
+      for (let i = 0; i < absDiff; i++) {
+        shiftFunction();
+      }
+    }
+
+    this.adjustSlidesBefore_(targetSlide, slidesBefore, adjustment);
+    this.adjustSlidesAfter_(targetSlide, slidesAfter, adjustment);
   }
 
   private getSlideAdjustments_(
@@ -244,6 +278,23 @@ class PhysicalSlide implements ITransition {
     return desiredDistance - currentOffset.x;
   }
 
+  private adjustSlidesBefore_(
+    activeSlide: HTMLElement,
+    slides: HTMLElement[],
+    additionalTranslation: Vector2d
+  ) {
+    this.adjustSlides_(
+      activeSlide, slides.reverse(), -1, additionalTranslation);
+  }
+
+  private adjustSlidesAfter_(
+    activeSlide: HTMLElement,
+    slides: HTMLElement[],
+    additionalTranslation: Vector2d
+  ) {
+    this.adjustSlides_(activeSlide, slides, 1, additionalTranslation);
+  }
+
   private adjustSlides_(
     activeSlide: HTMLElement,
     slides: HTMLElement[],
@@ -260,6 +311,7 @@ class PhysicalSlide implements ITransition {
   }
 
   private startInteraction_(event: DragStart, carousel: ICarousel): void {
+    this.transitionTargets_.delete(carousel);
     carousel.startInteraction(SLIDE_INTERACTION);
   }
 
@@ -271,7 +323,8 @@ class PhysicalSlide implements ITransition {
 
     setTimeout(() => {
       const activeSlide = this.getActiveSlide(carousel);
-      const distance = this.getDistanceToCenter_(activeSlide, carousel);
+      const distance =
+        PhysicalSlide.getDistanceToCenter_(activeSlide, carousel);
       const velocity = draggable.getVelocity().x;
       const velocitySign = getSign(velocity);
       const distanceSign = getSign(distance);
@@ -285,7 +338,7 @@ class PhysicalSlide implements ITransition {
           carousel.next();
         }
       }
-    }, 100);
+    }, 300);
   }
 
   public transition(target: HTMLElement, carousel: ICarousel): void {

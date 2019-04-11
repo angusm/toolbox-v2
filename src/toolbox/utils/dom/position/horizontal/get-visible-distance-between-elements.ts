@@ -1,12 +1,10 @@
 import {getVisibleDistanceFromRoot} from './get-visible-distance-from-root';
-import {Vector2d} from '../../math/geometry/vector-2d';
 
 function getVisibleDistanceBetweenElements(
   a: HTMLElement, b: HTMLElement = null
-): Vector2d {
+): number {
   if (b !== null) {
-    return getVisibleDistanceFromRoot(a)
-      .subtract(getVisibleDistanceFromRoot(b));
+    return getVisibleDistanceFromRoot(a) - getVisibleDistanceFromRoot(b);
   } else {
     return getVisibleDistanceFromRoot(a);
   }

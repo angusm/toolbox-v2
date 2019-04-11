@@ -22,7 +22,7 @@ interface IPhysical2dConfig {
 
 const defaultPhysical2dConfig = {
   acceleration: ZERO_VECTOR_2D,
-  breakForce: .999,
+  breakForce: .9995,
   constraints: <IConstraint2d[]>[],
   decelerationExponent: .9,
   deceleration: ZERO_VECTOR_2D,

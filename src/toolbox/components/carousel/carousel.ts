@@ -8,6 +8,7 @@ import {removeClassIfPresent} from "../../utils/dom/class/remove-class-if-presen
 import {CarouselSyncManager} from './sync-manager';
 import {NumericRange} from "../../utils/math/numeric-range";
 import {CssClassesOnly} from "./transitions/css-classes-only";
+import {splitEvenlyOnItem} from "../../utils/array/split-evenly-on-item";
 
 const defaultTransition: ITransition = new CssClassesOnly();
 const INTERACTION: symbol = Symbol('interaction');
@@ -37,7 +38,7 @@ class Carousel implements ICarousel {
    * Does not need to be the direct parent.
    *
    * @param slides HTMLElements containing slide content.
-   * 
+   *
    * @param onTransitionCallbacks Functions run when the active slide changes.
    * @param activeCssClass Class to apply to active slide.
    * @param beforeCssClass Class to apply to slides before active slide.
@@ -142,12 +143,26 @@ class Carousel implements ICarousel {
     const slidesBefore = this.getSlidesBefore(activeSlide);
     const slidesAfter = this.getSlidesAfter(activeSlide);
 
+    const beforeClasses =
+      this.slides_.map((slide, index) => `${this.beforeCssClass_}--${index}`);
+    const afterClasses =
+      this.slides_.map((slide, index) => `${this.afterCssClass_}--${index}`);
+
+    const removeProblemClasses = (slide: HTMLElement) => {
+      beforeClasses.forEach(
+        (problemClass) => removeClassIfPresent(slide, problemClass));
+      afterClasses.forEach(
+        (problemClass) => removeClassIfPresent(slide, problemClass));
+    };
+
     addClassIfMissing(activeSlide, this.activeClass_);
+    removeProblemClasses(activeSlide);
     removeClassIfPresent(activeSlide, this.beforeCssClass_);
     removeClassIfPresent(activeSlide, this.afterCssClass_);
 
-    slidesBefore
+    slidesBefore.reverse()
       .forEach((slide, index) => {
+        removeProblemClasses(slide);
         removeClassIfPresent(slide, this.activeClass_);
         addClassIfMissing(slide, this.beforeCssClass_);
         removeClassIfPresent(slide, this.afterCssClass_);
@@ -156,6 +171,7 @@ class Carousel implements ICarousel {
 
     slidesAfter
       .forEach((slide, index) => {
+        removeProblemClasses(slide);
         removeClassIfPresent(slide, this.activeClass_);
         removeClassIfPresent(slide, this.beforeCssClass_);
         addClassIfMissing(slide, this.afterCssClass_);
@@ -208,11 +224,19 @@ class Carousel implements ICarousel {
   }
 
   public getSlidesBefore(slide: HTMLElement): HTMLElement[] {
-    return this.getSlides().slice(0, this.getSlides().indexOf(slide));
+    if (this.allowsLooping()) {
+      return splitEvenlyOnItem(this.getSlides(), slide, true)[0];
+    } else {
+      return this.getSlides().slice(0, this.getSlides().indexOf(slide));
+    }
   }
 
   public getSlidesAfter(slide: HTMLElement): HTMLElement[] {
-    return this.getSlides().slice(this.getSlides().indexOf(slide) + 1);
+    if (this.allowsLooping()) {
+      return splitEvenlyOnItem(this.getSlides(), slide, true)[1];
+    } else {
+      return this.getSlides().slice(this.getSlides().indexOf(slide) + 1);
+    }
   }
 
   public next(): void {

@@ -1,6 +1,6 @@
 import {Scroll} from '../../cached-vectors/scroll';
 import {Vector2d} from '../../math/geometry/vector-2d';
-import {getStyle} from "../style/get-style";
+import {getStyle} from '../style/get-style';
 
 const scroll: Scroll = Scroll.getSingleton();
 
