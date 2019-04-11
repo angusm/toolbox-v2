@@ -18,7 +18,6 @@ class MultiValueMap<K, V> extends MapWrapper<K[], V> {
     this.valueToUid_ =
       DynamicDefaultMap.usingFunction<K, number>((value: K) => this.uid_++);
 
-    // The empty array in this value serves solely as a unique ID
     this.internalKeyToArray_ = new Map<string, K[]>();
 
     this.populateFromIterable(iterable);
@@ -35,7 +34,7 @@ class MultiValueMap<K, V> extends MapWrapper<K[], V> {
   private getInternalKey_(keys: K[]): K[] {
     const stringId = keys.map((key) => this.valueToUid_.get(key)).join('-');
     if (!this.internalKeyToArray_.has(stringId)) {
-      this.internalKeyToArray_.set(stringId, keys);
+      this.internalKeyToArray_.set(stringId, keys.slice());
     }
     return this.internalKeyToArray_.get(stringId);
   }

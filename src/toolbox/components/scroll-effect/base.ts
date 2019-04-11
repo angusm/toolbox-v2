@@ -322,13 +322,13 @@ class ScrollEffect {
     const result: TScrollEffectCallback[] = [];
     const entries = callbacksMap.entries();
 
-    let nextEntry;
-    while (nextEntry = entries.next()) {
+    let nextEntry = entries.next();
+    while (!nextEntry.done) {
       let [triggerRange, callbacks] = nextEntry.value;
-      if (triggerRange.getOverlap(runRange) === null) {
-        continue;
+      if (triggerRange.getOverlap(runRange) !== null) {
+        result.push(...callbacks);
       }
-      result.push(...callbacks);
+      nextEntry = entries.next();
     }
 
     return result;
@@ -374,10 +374,8 @@ class ScrollEffect {
       ScrollEffect.getCallbacks(
         runValue.getRunRange(), this.distanceCallbacks_);
 
-    const allCallbacks =
-      flatten([percentCallbacksToRun, distanceCallbacksToRun]);
-
-    this.runCallbacks_(allCallbacks, runValue);
+    this.runCallbacks_(
+      percentCallbacksToRun.concat(distanceCallbacksToRun), runValue);
   }
 
   private runEffects_(runValue: ScrollEffectRunValue) {
