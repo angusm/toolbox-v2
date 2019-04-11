@@ -4,21 +4,13 @@ import {hexToInt} from '../hex-to-int';
 import {max} from '../iterable/max';
 import {trim} from '../string/trim';
 import {getStyle} from "../dom/style/get-style";
-import {MultiValueMap} from "../map/multi-value";
-import {zip} from "../array/zip";
-import {sum} from "../math/sum";
 import {RGB} from "./rgb";
 import {ICssStyleValueInstance} from "../dom/style/interfaces/css-style-value";
 import {IMeasurableInstance} from "../math/interfaces/measurable";
-import {splitEvenlyOnItem} from "../array/split-evenly-on-item";
-import {getSubarraysOfLength} from "../array/get-subarrays-of-length";
 import {Dimensions2d} from "../math/geometry/dimensions-2d";
 import {flatten} from "../array/flatten";
 
 const HEX_VALUES = '0123456789abcdefABCDEF';
-
-const colorInstances = new MultiValueMap<number, Color>();
-
 
 class Color implements ICssStyleValueInstance, IMeasurableInstance {
   ['constructor']: typeof Color; // For checking interface static methods
@@ -28,14 +20,8 @@ class Color implements ICssStyleValueInstance, IMeasurableInstance {
   constructor(
     red: number = 0, green: number = 0, blue: number = 0, alpha: number = 1
   ) {
-    if (colorInstances.has([red, green, blue, alpha])) {
-      return colorInstances.get([red, green, blue, alpha]);
-    } else {
-      this.rgb_ = new RGB(red, green, blue);
-      this.alpha_ = alpha;
-      colorInstances.set([red, green, blue, alpha], this);
-      return this;
-    }
+    this.rgb_ = new RGB(red, green, blue);
+    this.alpha_ = alpha;
   }
 
   public static fromImageData(imageData: ImageData) {

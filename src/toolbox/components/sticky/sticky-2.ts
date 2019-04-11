@@ -4,10 +4,10 @@ import {renderLoop} from "../../utils/render-loop";
 import {Vector2d} from "../../utils/math/geometry/vector-2d";
 import {getVisibleDistanceBetweenElements} from "../../utils/dom/position/get-visible-distance-between-elements";
 import {getVisibleDistanceFromRoot} from "../../utils/dom/position/get-visible-distance-from-root";
-import {getCommonPositionedParentElement} from "../../utils/dom/position/get-common-positioned-parent-element";
 import {eventHandler} from "../../utils/event/event-handler";
 import {Sticky2ContainerPosition} from "./sticky-2-container-position";
 import {Sticky2Positioned} from "./sticky-2-positioned";
+import {getFirstPositionedParentElement} from "../../utils/dom/position/get-first-positioned-parent-element";
 
 /**
  * Contains values measured from the DOM for sticky updates.
@@ -18,6 +18,10 @@ class MeasureValue {
   public readonly cloneDistanceFromFrame: Vector2d;
   public readonly cloneDistanceFromRoot: Vector2d;
   public readonly maxDistance: number;
+  public readonly padding: string;
+  public readonly width: string;
+  public readonly height: string;
+  public readonly border: string;
 
   constructor(
     position: Sticky2ContainerPosition,
@@ -27,10 +31,20 @@ class MeasureValue {
     maxDistance: number
   ) {
     this.position = position;
-    this.cloneStyle = cloneStyle;
     this.cloneDistanceFromFrame = cloneDistanceFromFrame;
     this.cloneDistanceFromRoot = cloneDistanceFromRoot;
     this.maxDistance = maxDistance;
+    this.padding = cloneStyle.padding;
+    this.width = cloneStyle.width;
+    this.height = cloneStyle.height;
+    this.border = cloneStyle.border;
+  }
+
+  public equals(measureValue: MeasureValue): boolean {
+    return this.padding === measureValue.padding &&
+      this.width === measureValue.width &&
+      this.height === measureValue.height &&
+      this.border === measureValue.border;
   }
 }
 
@@ -42,8 +56,9 @@ class Sticky2 {
   private readonly container_: HTMLElement;
   private readonly target_: HTMLElement;
   private readonly clone_: HTMLElement;
+  private readonly commonFrame_: HTMLElement;
   private destroyed_: boolean;
-  private lastPosition_: Sticky2ContainerPosition;
+  private lastMeasureValue_: MeasureValue;
 
   /**
    * @param target The Element to position as if it were "position: sticky"'d
@@ -64,9 +79,10 @@ class Sticky2 {
   ) {
     this.container_ = container;
     this.target_ = target;
-    this.lastPosition_ = null;
+    this.lastMeasureValue_ = null;
     this.destroyed_ = false;
     this.clone_ = Sticky2.createClone_(target, cloneCssClass);
+    this.commonFrame_ = getFirstPositionedParentElement(this.target_);
     this.init_();
   }
 
@@ -157,10 +173,8 @@ class Sticky2 {
     const shouldPin = new NumericRange(0, maxDistance).contains(-yPosition);
     const position = Sticky2.getPosition_(shouldPin, yPosition);
 
-    const commonFrame =
-      getCommonPositionedParentElement(this.clone_, this.target_);
     const cloneDistanceFromFrame =
-      getVisibleDistanceBetweenElements(this.clone_, commonFrame);
+      getVisibleDistanceBetweenElements(this.clone_, this.commonFrame_);
     const cloneDistanceFromRoot = getVisibleDistanceFromRoot(this.clone_);
     const cloneStyle = window.getComputedStyle(this.clone_);
 
@@ -173,7 +187,7 @@ class Sticky2 {
   }
 
   private mutate_(measureValue: MeasureValue): void {
-    this.applyCloneStylesToTarget_(measureValue.cloneStyle);
+    this.applyCloneStylesToTarget_(measureValue);
 
     // Determine if the target should stick
     if (measureValue.position === Sticky2ContainerPosition.TOP) {
@@ -198,19 +212,19 @@ class Sticky2 {
     eventHandler.dispatchEvent(
       new Sticky2Positioned(this, measureValue.position));
 
-    this.lastPosition_ = measureValue.position;
+    this.lastMeasureValue_ = measureValue;
   }
 
-  private applyCloneStylesToTarget_(cloneStyles: CSSStyleDeclaration): void {
-    this.target_.style.margin = '0';
-    this.target_.style.top = '0';
-    this.target_.style.bottom = '0';
-    this.target_.style.left = '0';
-    this.target_.style.right = '0';
-    this.target_.style.padding = cloneStyles.padding;
-    this.target_.style.width = cloneStyles.width;
-    this.target_.style.height = cloneStyles.height;
-    this.target_.style.border = cloneStyles.border;
+  private applyCloneStylesToTarget_(measureValue: MeasureValue): void {
+    // Avoid redundant checks
+    if (this.lastMeasureValue_.equals(measureValue)) {
+      return;
+    }
+
+    this.target_.style.padding = measureValue.padding;
+    this.target_.style.width = measureValue.width;
+    this.target_.style.height = measureValue.height;
+    this.target_.style.border = measureValue.border;
   }
 
   public destroy() {

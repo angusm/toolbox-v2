@@ -319,13 +319,19 @@ class ScrollEffect {
   private static getCallbacks(
     runRange: NumericRange, callbacksMap: TParsedCallbackMap
   ): TScrollEffectCallback[] {
-    return flatten(
-      Array.from(callbacksMap.entries())
-        .filter(([triggerRange, callbacks]) => {
-          return triggerRange.getOverlap(runRange) !== null;
-        })
-        .map(([triggerRange, callbacks]) => callbacks)
-    );
+    const result: TScrollEffectCallback[] = [];
+    const entries = callbacksMap.entries();
+
+    let nextEntry;
+    while (nextEntry = entries.next()) {
+      let [triggerRange, callbacks] = nextEntry.value;
+      if (triggerRange.getOverlap(runRange) === null) {
+        continue;
+      }
+      result.push(...callbacks);
+    }
+
+    return result;
   }
 
   private getRunValue_(): ScrollEffectRunValue {
