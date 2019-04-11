@@ -57,13 +57,19 @@ class Keyframe {
       return this.getTransformValue_(adjacentKeyframe);
 
     // Conditional caching for performance.
-    } else if (typeof this.value_ === 'string') {
+    } else if (this.isDynamicValue()) {
       this.cachedValue_ = getTweenableValue(this.property_, this.getRawValue());
       return this.cachedValue_;
-
     } else {
       return getTweenableValue(this.property_, this.getRawValue());
     }
+  }
+
+  /**
+   * Determines if value of keyframe is not constant.
+   */
+  public isDynamicValue(): boolean {
+    return typeof this.value_ === 'string';
   }
 
   public getRawValue(): string {

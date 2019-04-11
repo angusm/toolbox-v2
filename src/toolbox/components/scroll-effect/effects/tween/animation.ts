@@ -41,17 +41,15 @@ class Animation {
   public getPropertyValueMapFromPosition(
     position: number
   ): Map<string, ITweenableValueInstance> {
-    const pairs: [string, ITweenableValueInstance][] = [];
+    const result = new Map<string, ITweenableValueInstance>();
 
     this.keyframePairsByProperty_.forEach(
         (keyframePairs, property) => {
-          pairs.push([
-            property,
-            KeyframePair.getValueFromRanges(position, keyframePairs)
-          ]);
+          result.set(
+            property, KeyframePair.getValueFromRanges(position, keyframePairs));
         });
 
-    return new Map<string, ITweenableValueInstance>(pairs);
+    return result;
   }
 
   public static fromKeyframesConfig(config: TKeyframesConfig): Animation {

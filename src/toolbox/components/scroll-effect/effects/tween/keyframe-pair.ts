@@ -10,6 +10,7 @@ class KeyframePair {
   private readonly positionRange_: NumericRange;
   private readonly keyframeA_: Keyframe;
   private readonly keyframeB_: Keyframe;
+  private readonly getValueRange_: () => MeasurableRange;
 
   /**
    * @param keyframeA First keyframe in the pair.
@@ -20,6 +21,8 @@ class KeyframePair {
       = new NumericRange(keyframeA.getPosition(), keyframeB.getPosition());
     this.keyframeA_ = keyframeA;
     this.keyframeB_ = keyframeB;
+    this.getValueRange_ =
+      KeyframePair.createGetValueRangeFunction_(keyframeA, keyframeB);
   }
 
   /**
@@ -47,10 +50,27 @@ class KeyframePair {
       this.getValueRange_().getPercentAsValue(percent));
   }
 
-  private getValueRange_(): MeasurableRange {
-    return new MeasurableRange(
-      this.keyframeA_.getValue(this.keyframeB_),
-      this.keyframeB_.getValue(this.keyframeA_));
+  private static createGetValueRangeFunction_(
+    keyframeA: Keyframe, keyframeB: Keyframe
+  ): () => MeasurableRange {
+    // If the values are dynamic then the Measurable range will need to be
+    // recreated every time
+    if (keyframeA.isDynamicValue() || keyframeB.isDynamicValue()) {
+      return () => {
+        return new MeasurableRange(
+          keyframeA.getValue(keyframeB),
+          keyframeB.getValue(keyframeA));
+      };
+
+    // If the values are static, we can cache it and always return the same
+    // instance.
+    } else {
+      const measurableRange =
+        new MeasurableRange(
+          keyframeA.getValue(keyframeB),
+          keyframeB.getValue(keyframeA));
+      return () => measurableRange;
+    }
   }
 
   /**
