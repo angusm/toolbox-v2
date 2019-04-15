@@ -96,8 +96,8 @@ class Draggable implements IDraggable {
     if (!delta.getLength()) {
       return;
     }
-    eventHandler.dispatchEvent(new Drag(this, this.element_, delta));
     translate2d(this.element_, delta);
+    eventHandler.dispatchEvent(new Drag(this, this.element_, delta));
   }
 
   private getDelta_(): Vector2d {

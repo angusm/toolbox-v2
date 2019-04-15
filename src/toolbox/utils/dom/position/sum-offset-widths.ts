@@ -1,7 +1,7 @@
-import {sum} from "../../math/sum";
+import {sumOffsetWidthsFromArray} from "./sum-offset-widths-from-array";
 
 function sumOffsetWidths(...els: HTMLElement[]): number {
-  return sum(...els.map((el) => el.offsetWidth));
+  return sumOffsetWidthsFromArray(els);
 }
 
 export {sumOffsetWidths};

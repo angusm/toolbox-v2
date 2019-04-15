@@ -38,6 +38,14 @@ class Matrix {
     return this.ty;
   }
 
+  public getTranslateX(): number {
+    return this.tx;
+  }
+
+  public getTranslateY(): number {
+    return this.ty;
+  }
+
   public translate(vector: {x: number, y: number}): Matrix {
     const newX = this.tx + vector.x;
     const newY = this.ty + vector.y;

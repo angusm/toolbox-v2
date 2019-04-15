@@ -4,7 +4,7 @@ import {DragStart}  from '../../draggable/events/drag-start';
 import {FixedYConstraint}  from '../../../utils/math/geometry/2d-constraints/fixed-y';
 import {Vector2d}  from '../../../utils/math/geometry/vector-2d';
 import {eventHandler}  from '../../../utils/event/event-handler';
-import {getVisibleDistanceBetweenElementCenters}  from '../../../utils/dom/position/get-visible-distance-between-element-centers';
+import {getVisibleDistanceBetweenElementCenters}  from '../../../utils/dom/position/horizontal/get-visible-distance-between-element-centers';
 import {renderLoop}  from '../../../utils/render-loop';
 import {translate2d}  from '../../../utils/dom/position/translate-2d';
 import {ICarousel, ITransition} from "../interfaces";
@@ -12,17 +12,21 @@ import {getClosestToCenter} from "../../../utils/dom/position/get-closest-to-cen
 import {PhysicallyDraggable} from "../../draggable/physically-draggable";
 import {DraggableFixedYConstraint} from "../../draggable/constraints/fixed-y";
 import {DynamicDefaultMap} from "../../../utils/map/dynamic-default";
-import {Slide} from "./slide";
-import {splitEvenlyOnItem} from "../../../utils/array/split-evenly-on-item";
-import {sumOffsetWidths} from "../../../utils/dom/position/sum-offset-widths";
 import {Physical2d} from "../../physical/physical-2d";
 import {getSign} from "../../../utils/math/get-sign";
-import {split} from "../../../utils/array/split";
 import {ZERO_VECTOR_2D} from "../../../utils/math/geometry/zero-vector-2d";
 import {IPhysicalSlideConfig} from "./i-physical-slide-config";
+import {MatrixService} from "../../../utils/dom/position/matrix-service";
+import {loopSlice} from "../../../utils/array/loop-slice";
+import {sumOffsetWidthsFromArray} from "../../../utils/dom/position/sum-offset-widths-from-array";
+import {getVisibleDistanceFromRoot} from '../../../utils/dom/position/horizontal/get-visible-distance-from-root';
+import {wrapIndex} from "../../../utils/array/wrap-index";
 
 const MAX_DRAG_VELOCITY = 10000;
 const SLIDE_INTERACTION = Symbol('Physical Slide Interaction');
+
+// Micro-optimization
+const matrixService = MatrixService.getSingleton();
 
 class TransitionTarget {
   private readonly target_: HTMLElement;
@@ -79,19 +83,12 @@ class PhysicalSlide implements ITransition {
   }
 
   public init(activeSlide: HTMLElement, carousel: ICarousel): void {
-    PhysicalSlide.initActiveSlide_(activeSlide, carousel);
+    this.initActiveSlide_(activeSlide, carousel);
     this.initDraggableSlides_(carousel);
   }
 
-  private static initActiveSlide_(
-    target: HTMLElement, carousel: ICarousel
-  ): void {
-    renderLoop.measure(() => {
-      const translation =
-        PhysicalSlide.getTranslationFromCenter_(target, carousel);
-      translate2d(target, translation);
-      Slide.transitionAroundActiveSlide(target, carousel, translation);
-    });
+  private initActiveSlide_(target: HTMLElement, carousel: ICarousel): void {
+    renderLoop.measure(() => this.transition(target, carousel));
   }
 
   private initDraggableSlides_(carousel: ICarousel): void {
@@ -117,14 +114,6 @@ class PhysicalSlide implements ITransition {
         });
   }
 
-  private static getTranslationFromCenter_(
-    target: HTMLElement, carousel: ICarousel
-  ): Vector2d {
-    const distance =
-      getVisibleDistanceBetweenElementCenters(target, carousel.getContainer());
-    return new Vector2d(distance.x, 0);
-  }
-
   public renderLoop(carousel: ICarousel): void {
     renderLoop.measure(() => {
       if (!carousel.isBeingInteractedWith()) {
@@ -142,7 +131,7 @@ class PhysicalSlide implements ITransition {
   ): number {
     const distanceFromCenter =
       getVisibleDistanceBetweenElementCenters(target, carousel.getContainer());
-    return -distanceFromCenter.x
+    return -distanceFromCenter;
   }
 
   private transitionToTarget_(carousel: ICarousel) {
@@ -186,128 +175,153 @@ class PhysicalSlide implements ITransition {
     draggable.setVelocity(new Vector2d(adjustedVelocity, 0));
   }
 
-  private static getHalves_(
-    carousel: ICarousel, targetSlide: HTMLElement
-  ): [HTMLElement[], HTMLElement[]] {
-    if (carousel.allowsLooping()) {
-      return splitEvenlyOnItem(carousel.getSlides(), targetSlide, true);
-    } else {
-      return <[HTMLElement[], HTMLElement[]]>split(
-        carousel.getSlides(), targetSlide);
+  private adjustSlideForLoop_(carousel: ICarousel, slide: HTMLElement): void {
+    if (!carousel.allowsLooping()) {
+      return; // Never adjust non-looping carousels
+    }
+
+    const totalWidth =
+      carousel.getSlides()
+        .reduce((total, slide) => total + slide.offsetWidth, 0);
+
+    const distanceFromCenter =
+      getVisibleDistanceBetweenElementCenters(slide) +
+      matrixService.getAlteredXTranslation(slide);
+    const distanceFromCenterSign = getSign(distanceFromCenter);
+    const isOffscreen = Math.abs(distanceFromCenter) > (totalWidth / 2);
+
+    // Reset during drag if the drag has gone exceedingly far
+    if (isOffscreen) {
+      const xTranslation = -totalWidth * distanceFromCenterSign;
+      const translatedDistanceFromCenter =
+        (window.innerHeight * distanceFromCenterSign) +
+        distanceFromCenter + xTranslation;
+
+      if (
+        Math.abs(translatedDistanceFromCenter) <
+        Math.abs(distanceFromCenter)
+      ) {
+        this.draggableBySlide_.get(slide)
+          .adjustNextFrame(new Vector2d(xTranslation, 0));
+      }
     }
   }
 
   private adjustSplit_(
     carousel: ICarousel,
     target: HTMLElement = null,
-    adjustment: Vector2d = ZERO_VECTOR_2D
+    dragAdjustment: Vector2d = ZERO_VECTOR_2D
   ): void {
-
-    // if (carousel.allowsLooping()) {
-    //   // If the main element is off screen then we need to reset the adjustment
-    //   // by a viewport width.
-    //   if (!isVisible(target)) {
-    //
-    //   }
-    // }
-
-    const activeSlide = carousel.getActiveSlide();
-    const targetSlide = target ? target : activeSlide;
-
-    const [slidesBeforeActive, slidesAfterActive] =
-      PhysicalSlide.getHalves_(carousel, activeSlide);
-    const reOrderedSlides =
-      [...slidesBeforeActive, activeSlide, ...slidesAfterActive];
-
-    const activeIndex = reOrderedSlides.indexOf(activeSlide);
-    const targetIndex = reOrderedSlides.indexOf(targetSlide);
-    const diff = activeIndex - targetIndex;
-
-    const [slidesBefore, slidesAfter] =
-      PhysicalSlide.getHalves_(carousel, targetSlide);
-
-    if (diff !== 0) {
-      const shiftFunction =
-        diff > 0 ?
-          () => slidesAfter.push(slidesBefore.shift()) :
-          () => slidesBefore.unshift(slidesAfter.pop());
-
-      const absDiff =
-        Math.min(Math.abs(diff), slidesBefore.length, slidesAfter.length);
-      for (let i = 0; i < absDiff; i++) {
-        shiftFunction();
-      }
+    // No matter what we need to loop adjust the target if we have one
+    if (target !== null) {
+      this.adjustSlideForLoop_(carousel, target);
     }
 
-    this.adjustSlidesBefore_(targetSlide, slidesBefore, adjustment);
-    this.adjustSlidesAfter_(targetSlide, slidesAfter, adjustment);
+    const targetSlide = target ? target : carousel.getActiveSlide();
+    const distancesFromTarget =
+      this.getDistancesFromTarget_(carousel, targetSlide);
+    const slideLeftEdgeDistanceFromLeftEdge =
+      getVisibleDistanceFromRoot(targetSlide);
+    const slideRightEdgeDistanceFromWindowLeftEdge =
+      slideLeftEdgeDistanceFromLeftEdge + targetSlide.offsetWidth;
+
+    const slides = carousel.getSlides();
+    const nonTargetSlides = slides.filter((slide) => slide !== targetSlide);
+    const targetSlideIndex = carousel.getSlideIndex(targetSlide);
+    const slidesToAdjust = new Set(nonTargetSlides);
+    const slideCount = slides.length;
+
+    let distanceOnLeftToCover = Math.max(slideLeftEdgeDistanceFromLeftEdge, 0);
+    let distanceOnRightToCover =
+      Math.min(
+        window.innerWidth,
+        window.innerWidth - slideRightEdgeDistanceFromWindowLeftEdge);
+    let leftIndex = targetSlideIndex;
+    let rightIndex = targetSlideIndex;
+
+    while (slidesToAdjust.size > 0) {
+      if (distanceOnLeftToCover > distanceOnRightToCover) {
+        leftIndex = wrapIndex(leftIndex - 1, slideCount);
+        if (leftIndex === targetSlideIndex) {
+          continue;
+        }
+        const slideToAdjust = slides[leftIndex];
+        if (!slidesToAdjust.has(slideToAdjust)) {
+          continue;
+        }
+        this.adjustSlideForSplit_(
+          carousel, targetSlide, slideToAdjust, distancesFromTarget, -1);
+        distanceOnLeftToCover -= slideToAdjust.offsetWidth;
+        slidesToAdjust.delete(slideToAdjust);
+      } else {
+        rightIndex = wrapIndex(rightIndex + 1, slideCount);
+        if (rightIndex === targetSlideIndex) {
+          continue;
+        }
+        const slideToAdjust = slides[rightIndex];
+        if (!slidesToAdjust.has(slideToAdjust)) {
+          continue;
+        }
+        this.adjustSlideForSplit_(
+          carousel, targetSlide, slideToAdjust, distancesFromTarget, 1);
+        distanceOnRightToCover -= slideToAdjust.offsetWidth;
+        slidesToAdjust.delete(slideToAdjust);
+      }
+    }
   }
 
-  private getSlideAdjustments_(
-    activeSlide: HTMLElement, slides: HTMLElement[], direction: number
+  private adjustSlideForSplit_(
+    carousel: ICarousel,
+    targetSlide: HTMLElement,
+    slide: HTMLElement,
+    distancesFromTarget: Map<HTMLElement, number>,
+    direction: number
+  ): void {
+    const targetOffset =
+      this.getTargetSplitOffset_(carousel, targetSlide, slide, direction);
+    const distance = distancesFromTarget.get(slide);
+
+    const difference = targetOffset - distance;
+    if (difference !== 0) {
+      this.draggableBySlide_.get(slide)
+        .adjustNextFrame(new Vector2d(difference, 0));
+    }
+  }
+
+  private getDistancesFromTarget_(
+    carousel: ICarousel, targetSlide: HTMLElement
   ): Map<HTMLElement, number> {
-    let previousSlides: HTMLElement[] = [];
-    return slides
-      .reduce(
-        (map, slide) => {
-          const adjustment =
-            this.getSlideAdjustment_(
-              slide, activeSlide, previousSlides, direction);
-          previousSlides = [...previousSlides, slide];
-          map.set(slide, adjustment);
-          return map;
-        },
-        new Map<HTMLElement, number>()
-      );
+    const distancesFromTarget = new Map<HTMLElement, number>();
+    carousel.getSlides().forEach(
+      (slide) => {
+        const distance =
+          getVisibleDistanceBetweenElementCenters(slide, targetSlide) -
+          matrixService.getAlteredXTranslation(targetSlide) +
+          matrixService.getAlteredXTranslation(slide);
+        distancesFromTarget.set(slide, distance);
+      });
+    return distancesFromTarget;
   }
 
-  private getSlideAdjustment_(
-    slideToAdjust: HTMLElement,
-    activeSlide: HTMLElement,
-    previousSlides: HTMLElement[],
+  private getTargetSplitOffset_(
+    carousel: ICarousel,
+    targetSlide: HTMLElement,
+    slide: HTMLElement,
     direction: number
   ): number {
-    const multiplier = getSign(direction);
-    const currentOffset =
-      getVisibleDistanceBetweenElementCenters(slideToAdjust, activeSlide);
-    const desiredDistance =
-      multiplier * (
-      slideToAdjust.offsetWidth / 2 +
-      activeSlide.offsetWidth / 2 +
-      sumOffsetWidths(...previousSlides));
-    return desiredDistance - currentOffset.x;
-  }
-
-  private adjustSlidesBefore_(
-    activeSlide: HTMLElement,
-    slides: HTMLElement[],
-    additionalTranslation: Vector2d
-  ) {
-    this.adjustSlides_(
-      activeSlide, slides.reverse(), -1, additionalTranslation);
-  }
-
-  private adjustSlidesAfter_(
-    activeSlide: HTMLElement,
-    slides: HTMLElement[],
-    additionalTranslation: Vector2d
-  ) {
-    this.adjustSlides_(activeSlide, slides, 1, additionalTranslation);
-  }
-
-  private adjustSlides_(
-    activeSlide: HTMLElement,
-    slides: HTMLElement[],
-    direction: number,
-    additionalTranslation: Vector2d
-  ): void {
-      this.getSlideAdjustments_(activeSlide, slides, direction).forEach(
-        (adjustment, slide) => {
-          this.draggableBySlide_
-            .get(slide)
-            .adjustNextFrame(
-              new Vector2d(adjustment + additionalTranslation.x, 0));
-        });
+    if (targetSlide === slide) {
+      return 0;
+    }
+    const inBetweenSlides =
+      loopSlice(
+        carousel.getSlides(),
+        carousel.getSlideIndex(slide) - direction,
+        carousel.getSlideIndex(targetSlide),
+        -direction);
+    const inBetweenWidth = sumOffsetWidthsFromArray(inBetweenSlides);
+    const halfSlideWidth = slide.offsetWidth / 2;
+    const halfTargetSlideWidth = targetSlide.offsetWidth / 2;
+    return (halfSlideWidth + inBetweenWidth + halfTargetSlideWidth) * direction;
   }
 
   private startInteraction_(event: DragStart, carousel: ICarousel): void {
@@ -366,7 +380,7 @@ class PhysicalSlide implements ITransition {
   public hasTransitionedTo(slide: HTMLElement, carousel: ICarousel): boolean {
     const distance =
       getVisibleDistanceBetweenElementCenters(slide, carousel.getContainer());
-    return distance.x === 0
+    return distance === 0
   }
 }
 

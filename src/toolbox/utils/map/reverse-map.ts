@@ -1,9 +1,15 @@
 function reverseMap<K, V>(map: Map<K, V>): Map<V, K> {
   const MapClass: typeof Map = <typeof Map>map.constructor;
-  const entries: [K, V][] = Array.from(map.entries());
-  const reversedEntries: [V, K][] =
-    entries.map<[V, K]>(([key, value]) => [value, key]);
-  return new MapClass<V,K>(reversedEntries);
+  const entries = map.entries();
+
+  let nextEntry = entries.next();
+  const reversedMap = new MapClass<V, K>();
+  while (!nextEntry.done) {
+    const [key, value] = nextEntry.value;
+    reversedMap.set(value, key);
+    nextEntry = entries.next();
+  }
+  return reversedMap;
 }
 
 export {reverseMap}

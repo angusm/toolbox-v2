@@ -9,6 +9,10 @@ import {CarouselSyncManager} from './sync-manager';
 import {NumericRange} from "../../utils/math/numeric-range";
 import {CssClassesOnly} from "./transitions/css-classes-only";
 import {splitEvenlyOnItem} from "../../utils/array/split-evenly-on-item";
+import {DynamicDefaultMap} from "../../utils/map/dynamic-default";
+import {subtract} from "../../utils/set/subtract";
+import {removeClassesIfPresent} from "../../utils/dom/class/remove-classes-if-present";
+import {addClassesIfMissing} from "../../utils/dom/class/add-classes-if-missing";
 
 const defaultTransition: ITransition = new CssClassesOnly();
 const INTERACTION: symbol = Symbol('interaction');
@@ -19,14 +23,19 @@ const CssClass = Object.freeze({
 });
 
 class Carousel implements ICarousel {
-  private readonly activeClass_: string;
+  private readonly activeCssClass_: string;
+  private readonly activeCssClassSet_: Set<string>;
   private readonly beforeCssClass_: string;
+  private readonly beforeCssClassMap_: DynamicDefaultMap<number, Set<string>>;
   private readonly afterCssClass_: string;
+  private readonly afterCssClassMap_: DynamicDefaultMap<number, Set<string>>;
   private readonly container_: HTMLElement;
   private readonly slides_: HTMLElement[];
   private readonly transition_: ITransition;
   private readonly allowLooping_: boolean;
   private readonly onTransitionCallbacks_: ((carousel: ICarousel) => void)[];
+  private readonly slideCssClasses_:
+    DynamicDefaultMap<HTMLElement, Set<string>>;
   private transitionTarget_: HTMLElement;
   private interactions_: symbol[];
   private lastActiveSlide_: HTMLElement;
@@ -66,7 +75,7 @@ class Carousel implements ICarousel {
       transition?: ITransition,
     } = {}
   ) {
-    this.activeClass_ = activeCssClass;
+    this.activeCssClass_ = activeCssClass;
     this.beforeCssClass_ = beforeCssClass;
     this.afterCssClass_ = afterCssClass;
     this.allowLooping_ = allowLooping;
@@ -78,6 +87,25 @@ class Carousel implements ICarousel {
     this.transitionTarget_ = null;
     this.interactions_ = [];
     this.destroyed_ = false;
+    this.slideCssClasses_ =
+      DynamicDefaultMap.usingFunction<HTMLElement, Set<string>>(
+        () => new Set<string>());
+
+    /** Mapped Set caches to avoid allocation churn */
+    this.activeCssClassSet_ = new Set([activeCssClass]);
+    this.beforeCssClassMap_ =
+      DynamicDefaultMap.usingFunction<number, Set<string>>(
+        (index) => {
+          return new Set(
+            [this.beforeCssClass_, `${this.beforeCssClass_}--${index}`]);
+        });
+    this.afterCssClassMap_ =
+      DynamicDefaultMap.usingFunction<number, Set<string>>(
+        (index) => {
+          return new Set(
+            [this.afterCssClass_, `${this.afterCssClass_}--${index}`]);
+        });
+
 
     this.init_();
   }
@@ -143,39 +171,25 @@ class Carousel implements ICarousel {
     const slidesBefore = this.getSlidesBefore(activeSlide);
     const slidesAfter = this.getSlidesAfter(activeSlide);
 
-    const beforeClasses =
-      this.slides_.map((slide, index) => `${this.beforeCssClass_}--${index}`);
-    const afterClasses =
-      this.slides_.map((slide, index) => `${this.afterCssClass_}--${index}`);
+    const adjustCssClasses =
+      (slide: HTMLElement, cssClassesToKeep: Set<string>) => {
+        const currentCssClasses = this.slideCssClasses_.get(slide);
+        const classesToRemove = subtract(currentCssClasses, cssClassesToKeep);
+        this.slideCssClasses_.set(slide, cssClassesToKeep);
+        removeClassesIfPresent(slide, Array.from(classesToRemove));
+        addClassesIfMissing(slide, Array.from(cssClassesToKeep));
+      };
 
-    const removeProblemClasses = (slide: HTMLElement) => {
-      beforeClasses.forEach(
-        (problemClass) => removeClassIfPresent(slide, problemClass));
-      afterClasses.forEach(
-        (problemClass) => removeClassIfPresent(slide, problemClass));
-    };
-
-    addClassIfMissing(activeSlide, this.activeClass_);
-    removeProblemClasses(activeSlide);
-    removeClassIfPresent(activeSlide, this.beforeCssClass_);
-    removeClassIfPresent(activeSlide, this.afterCssClass_);
+    adjustCssClasses(activeSlide, this.activeCssClassSet_);
 
     slidesBefore.reverse()
       .forEach((slide, index) => {
-        removeProblemClasses(slide);
-        removeClassIfPresent(slide, this.activeClass_);
-        addClassIfMissing(slide, this.beforeCssClass_);
-        removeClassIfPresent(slide, this.afterCssClass_);
-        addClassIfMissing(slide, `${this.beforeCssClass_}--${index}`);
+        adjustCssClasses(slide, this.beforeCssClassMap_.get(index));
       });
 
     slidesAfter
       .forEach((slide, index) => {
-        removeProblemClasses(slide);
-        removeClassIfPresent(slide, this.activeClass_);
-        removeClassIfPresent(slide, this.beforeCssClass_);
-        addClassIfMissing(slide, this.afterCssClass_);
-        addClassIfMissing(slide, `${this.afterCssClass_}--${index}`);
+        adjustCssClasses(slide, this.afterCssClassMap_.get(index));
       });
   }
 
@@ -194,7 +208,7 @@ class Carousel implements ICarousel {
   }
 
   public getActiveClass(): string {
-    return this.activeClass_;
+    return this.activeCssClass_;
   }
 
   public getActiveSlideIndex(): number {

@@ -1,10 +1,10 @@
 import {renderLoop} from "../../render-loop";
 
-function removeClassIfPresent(
+function removeClassesIfPresent(
   element: Element,
-  ...classesToRemove: string[]
+  classesToRemove: string[]
 ): void {
   renderLoop.mutate(() => element.classList.remove(...classesToRemove));
 }
 
-export {removeClassIfPresent};
+export {removeClassesIfPresent};

@@ -1,26 +1,21 @@
 import {Physical2d} from "../physical-2d";
-import {renderLoop} from "../../../utils/render-loop";
 import {Vector2d} from "../../../utils/math/geometry/vector-2d";
-import {Matrix} from "../../../utils/dom/position/matrix";
-import {ZERO_VECTOR_2D} from "../../../utils/math/geometry/zero-vector-2d";
+import {renderLoop} from "../../../utils/render-loop";
+import {translate2d} from "../../../utils/dom/position/translate-2d";
 
 class PhysicallyPositionedElement2d {
   private readonly target_: HTMLElement;
   private readonly physical2d_: Physical2d;
 
-  private nextFrameAdjustment_: Vector2d;
-
   constructor(target: HTMLElement, physical2d: Physical2d) {
     this.target_ = target;
     this.physical2d_ = physical2d;
-
-    this.nextFrameAdjustment_ = ZERO_VECTOR_2D;
 
     this.init_();
   }
 
   public adjustNextFrame(adjustment: Vector2d): void {
-    this.nextFrameAdjustment_ = this.nextFrameAdjustment_.add(adjustment);
+    renderLoop.measure(() => translate2d(this.target_, adjustment));
   }
 
   private init_() {
@@ -29,22 +24,10 @@ class PhysicallyPositionedElement2d {
 
   private render_() {
     renderLoop.measure(() => {
-      renderLoop.cleanup(() => {
-        this.nextFrameAdjustment_ = ZERO_VECTOR_2D;
-        this.render_()
-      });
+      renderLoop.cleanup(() => this.render_());
 
-      const targetMatrix = Matrix.fromElementTransform(this.target_);
-
-      renderLoop.mutate(() => {
-        const velocity = this.physical2d_.getLastAppliedVelocity();
-        const adjustedDelta = velocity.add(this.nextFrameAdjustment_);
-        if (adjustedDelta.getLength() !== 0) {
-          targetMatrix
-            .translate(adjustedDelta)
-            .applyToElementTransform(this.target_);
-        }
-      });
+      const velocity = this.physical2d_.getLastAppliedVelocity();
+      translate2d(this.target_, velocity);
     });
   }
 
