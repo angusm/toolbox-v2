@@ -321,24 +321,22 @@ class PhysicalSlide implements ITransition {
     draggable
       .setVelocity(event.getEndVelocity().clampLength(MAX_DRAG_VELOCITY));
 
-    setTimeout(() => {
-      const activeSlide = this.getActiveSlide(carousel);
-      const distance =
-        PhysicalSlide.getDistanceToCenter_(activeSlide, carousel);
-      const velocity = draggable.getVelocity().x;
-      const velocitySign = getSign(velocity);
-      const distanceSign = getSign(distance);
+    const activeSlide = this.getActiveSlide(carousel);
+    const distance =
+      PhysicalSlide.getDistanceToCenter_(activeSlide, carousel);
+    const velocity = draggable.getVelocity().x;
+    const velocitySign = getSign(velocity);
+    const distanceSign = getSign(distance);
 
-      if (distance === 0 || distanceSign === velocitySign) {
-        carousel.transitionToSlide(activeSlide);
+    if (distance === 0 || distanceSign === velocitySign || velocity === 0) {
+      carousel.transitionToSlide(activeSlide);
+    } else {
+      if (velocitySign === 1) {
+        carousel.previous();
       } else {
-        if (velocitySign === 1) {
-          carousel.previous();
-        } else {
-          carousel.next();
-        }
+        carousel.next();
       }
-    }, 300);
+    }
   }
 
   public transition(target: HTMLElement, carousel: ICarousel): void {
