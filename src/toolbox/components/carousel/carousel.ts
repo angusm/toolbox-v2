@@ -3,8 +3,6 @@ import {isVisible} from '../../utils/dom/position/is-visible';
 import {removeFirstInstance} from '../../utils/array/remove-first-instance';
 import {renderLoop} from '../../utils/render-loop';
 import {toBool} from "../../utils/to-bool";
-import {addClassIfMissing} from "../../utils/dom/class/add-class-if-missing";
-import {removeClassIfPresent} from "../../utils/dom/class/remove-class-if-present";
 import {CarouselSyncManager} from './sync-manager';
 import {NumericRange} from "../../utils/math/numeric-range";
 import {CssClassesOnly} from "./transitions/css-classes-only";
@@ -311,6 +309,7 @@ class Carousel implements ICarousel {
 
   destroy() {
     this.destroyed_ = true;
+    CarouselSyncManager.getSingleton().destroyCarousel(this);
   }
 }
 

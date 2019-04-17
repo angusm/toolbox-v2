@@ -44,6 +44,18 @@ class CarouselSyncManager {
       .forEach(
         (syncedCarousel) => syncedCarousel.transitionToIndex(index, false));
   }
+
+  public destroyCarousel(carousel: ICarousel) {
+    this.syncedCarousels_
+      .forEach((carouselSet) => carouselSet.delete(carousel));
+    this.syncedCarousels_ =
+      this.syncedCarousels_
+        .filter((carouselSet) => carouselSet.size > 0);
+  }
+
+  public destroy() {
+    this.syncedCarousels_ = [];
+  }
 }
 
 export {CarouselSyncManager};
