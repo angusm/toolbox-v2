@@ -8,7 +8,6 @@ import {removeFirstInstance} from "../../utils/array/remove-first-instance";
 import {GetDistanceFn} from "./types/get-distance-fn";
 import {TScrollEffectCallbackMap} from "./types/t-scroll-effect-callback-map";
 import {TScrollEffectCallback} from "./types/t-scroll-effect-callback";
-import {flatten} from "../../utils/array/flatten";
 import {TScrollEffectDistanceValue} from "./types/t-scroll-effect-distance-value";
 import {Dimensions} from "../../utils/cached-vectors/dimensions";
 

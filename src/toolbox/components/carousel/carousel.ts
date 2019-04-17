@@ -161,6 +161,10 @@ class Carousel implements ICarousel {
         if (activeSlide) {
           renderLoop.mutate(() => this.updateClasses_(activeSlide));
         }
+
+        // Sync other carousels.
+        CarouselSyncManager.getSingleton()
+          .transitionToIndex(this, this.getSlideIndex(activeSlide));
       }
     });
   }
