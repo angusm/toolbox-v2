@@ -88,7 +88,7 @@ class PhysicalSlide implements ITransition {
   }
 
   private initActiveSlide_(target: HTMLElement, carousel: ICarousel): void {
-    renderLoop.measure(() => this.transition(target, carousel));
+    renderLoop.measure(() => this.transition(target, carousel, 0));
   }
 
   private initDraggableSlides_(carousel: ICarousel): void {
@@ -353,7 +353,14 @@ class PhysicalSlide implements ITransition {
     }
   }
 
-  public transition(target: HTMLElement, carousel: ICarousel): void {
+  public transition(
+    target: HTMLElement,
+    carousel: ICarousel,
+    optTransitionTime: number = null,
+  ): void {
+    const transitionTime =
+      optTransitionTime === null ? this.transitionTime_ : optTransitionTime;
+
     if (
       this.transitionTargets_.has(carousel) &&
       this.transitionTargets_.get(carousel).getTarget() === target
@@ -363,7 +370,7 @@ class PhysicalSlide implements ITransition {
 
     const transitionTarget =
       new TransitionTarget(
-        target, new Date(new Date().valueOf() + this.transitionTime_));
+        target, new Date(new Date().valueOf() + transitionTime));
 
     this.transitionTargets_.set(carousel, transitionTarget);
 
