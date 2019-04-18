@@ -1,9 +1,9 @@
 import {CachedElementVector} from './cached-element-vector';
 import {Vector2d} from '../math/geometry/vector-2d';
-import {getScrollElement} from "../dom/position/get-scroll-element";
 import {Dimensions} from "./dimensions";
 import {zip} from "../array/zip";
 import {renderLoop} from "../render-loop";
+import {SCROLL_ELEMENT} from "../dom/position/scroll-element";
 
 class Scroll extends CachedElementVector<Vector2d> {
   protected static VectorClass: typeof Vector2d = Vector2d;
@@ -24,7 +24,7 @@ class Scroll extends CachedElementVector<Vector2d> {
     if (this.element) {
       return this.element.scrollLeft;
     } else {
-      return window.pageXOffset || getScrollElement().scrollLeft;
+      return window.pageXOffset || SCROLL_ELEMENT.scrollLeft;
     }
   }
 
@@ -32,13 +32,13 @@ class Scroll extends CachedElementVector<Vector2d> {
     if (this.element) {
       return this.element.scrollTop;
     } else {
-      return window.pageYOffset || getScrollElement().scrollTop;
+      return window.pageYOffset || SCROLL_ELEMENT.scrollTop;
     }
   }
 
   public getScrollPercent(): Vector2d {
     const scrollableDimensions: number[] =
-      Dimensions.getForElement(getScrollElement())
+      Dimensions.getForElement(SCROLL_ELEMENT)
         .getLastValue()
         .subtract(Dimensions.getForElement().getLastValue())
         .getValues();

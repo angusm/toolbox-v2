@@ -2,9 +2,14 @@ import {Numeric} from '../../types';
 import {Vector2d} from "../../math/geometry/vector-2d";
 import {renderLoop} from "../../render-loop";
 import {ArrayMap} from "../../map/array";
+import {ComputedStyleService} from "../style/computed-style-service";
 
 const matrixChangesByElement_: ArrayMap<HTMLElement, Matrix> = new ArrayMap();
 const preChangeMatrixByElement_: Map<HTMLElement, Matrix> = new Map();
+const STYLE_STRING_PREFIX = 'matrix(';
+const STYLE_STRING_PREFIX_LENGTH = STYLE_STRING_PREFIX.length;
+
+const computedStyleService = ComputedStyleService.getSingleton();
 
 class Matrix {
   readonly a: number;
@@ -70,18 +75,15 @@ class Matrix {
   }
 
   public static parseFromString(str: string): Matrix {
-    const valuesStr = str.split('matrix(').splice(-1)[0].split(')')[0];
-    const values = valuesStr.split(',').map((str) => str.trim());
-    if (!values.length || values[0] === 'none') {
+    if (str === 'none' || !str.length) {
       return new Matrix();
-    } else {
-      return new Matrix(...values);
     }
+    return new Matrix(...str.slice(STYLE_STRING_PREFIX_LENGTH, -1).split(','));
   }
 
   public static fromElementTransform(element: Element): Matrix {
     return Matrix.parseFromString(
-      window.getComputedStyle(element).transform);
+      computedStyleService.getComputedStyle(element).transform);
   }
 
   public toCSSString(): string {
@@ -106,29 +108,29 @@ class Matrix {
   // Applies all matrix changes to an element, allowing multiple effects to
   // collaborate on transform values for a single element
   private static mutateElementWithMatrixChanges(element: HTMLElement) {
-      renderLoop.mutate(() => {
-        const originalMatrix = preChangeMatrixByElement_.get(element);
-        const changes = matrixChangesByElement_.get(element);
+    renderLoop.mutate(() => {
+      const originalMatrix = preChangeMatrixByElement_.get(element);
+      const changes = matrixChangesByElement_.get(element);
 
-        // Do nothing if the changes have already been applied for this element
-        if (changes.length < 1) {
-          return;
-        }
+      // Do nothing if the changes have already been applied for this element
+      if (changes.length < 1) {
+        return;
+      }
 
-        matrixChangesByElement_.delete(element);
-        const finalMatrix =
-          changes.reduce(
-            (accumulationMatrix, changeMatrix) => {
-              return accumulationMatrix.applyDifference(changeMatrix);
-            },
-            originalMatrix);
-        finalMatrix.applyToElementTransform(element);
+      matrixChangesByElement_.delete(element);
+      const finalMatrix =
+        changes.reduce(
+          (accumulationMatrix, changeMatrix) => {
+            return accumulationMatrix.applyDifference(changeMatrix);
+          },
+          originalMatrix);
+      finalMatrix.applyToElementTransform(element);
 
-        renderLoop.cleanup(() => {
-          preChangeMatrixByElement_.clear();
-          matrixChangesByElement_.clear()
-        });
+      renderLoop.cleanup(() => {
+        preChangeMatrixByElement_.clear();
+        matrixChangesByElement_.clear()
       });
+    });
   }
 
   public applyDifference(differenceMatrix: Matrix): Matrix {

@@ -3,9 +3,9 @@ import {GetDistanceFn} from "./types/get-distance-fn";
 import {IScrollControlOptions} from "./types/scroll-control-options";
 import {NumericRange} from "../../utils/math/numeric-range";
 import {renderLoop} from "../../utils/render-loop";
-import {getScrollElement} from "../../utils/dom/position/get-scroll-element";
 import {TScrollEffectDistanceValue} from "../scroll-effect/types/t-scroll-effect-distance-value";
 import {TScrollControlDistanceValue} from "./types/t-scroll-control-distance-value";
+import {SCROLL_ELEMENT} from "../../utils/dom/position/scroll-element";
 
 const defaultOptions: IScrollControlOptions =
   {
@@ -102,7 +102,7 @@ class ScrollControl {
         return;
       }
 
-      const scrollTop = getScrollElement().scrollTop;
+      const scrollTop = SCROLL_ELEMENT.scrollTop;
       const currentValue = parseFloat(this.control_.value);
 
       // Do nothing if values match
@@ -123,9 +123,8 @@ class ScrollControl {
         return;
       }
 
-      renderLoop.mutate(() => {
-        getScrollElement().scrollTop = scrollTop + scrollDifference;
-      });
+      renderLoop.mutate(
+        () => SCROLL_ELEMENT.scrollTop = scrollTop + scrollDifference);
     });
   }
 

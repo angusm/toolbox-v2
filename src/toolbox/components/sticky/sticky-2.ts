@@ -7,6 +7,9 @@ import {eventHandler} from "../../utils/event/event-handler";
 import {Sticky2ContainerPosition} from "./sticky-2-container-position";
 import {Sticky2Positioned} from "./sticky-2-positioned";
 import {getFirstPositionedParentElement} from "../../utils/dom/position/get-first-positioned-parent-element";
+import {ComputedStyleService} from "../../utils/dom/style/computed-style-service";
+
+const computedStyleService = ComputedStyleService.getSingleton();
 
 /**
  * Contains values measured from the DOM for sticky updates.
@@ -180,7 +183,7 @@ class Sticky2 {
     const cloneDistanceFromFrame =
       cloneDistanceFromRoot.subtract(commonFrameDistancesFromRoot);
 
-    const cloneStyle = window.getComputedStyle(this.clone_);
+    const cloneStyle = computedStyleService.getComputedStyle(this.clone_);
 
     return new MeasureValue(
       position,

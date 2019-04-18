@@ -1,5 +1,7 @@
+import {SCROLL_ELEMENT} from "./scroll-element";
+
 function getScrollElement(): Element {
-  return document.scrollingElement || document.documentElement;
+  return SCROLL_ELEMENT;
 }
 
 export {getScrollElement};

@@ -14,7 +14,7 @@ class MatrixService {
         (element: HTMLElement) => Matrix.fromElementTransform(element));
     this.alteredMatrix_ =
       DynamicDefaultMap.usingFunction(
-        (element: HTMLElement) => Matrix.fromElementTransform(element));
+        (element: HTMLElement) => this.cleanMatrix_.get(element));
     this.init_();
   }
 

@@ -8,7 +8,7 @@ import {getVisibleDistanceBetweenElementCenters}  from '../../../utils/dom/posit
 import {renderLoop}  from '../../../utils/render-loop';
 import {translate2d}  from '../../../utils/dom/position/translate-2d';
 import {ICarousel, ITransition} from "../interfaces";
-import {getClosestToCenter} from "../../../utils/dom/position/get-closest-to-center";
+import {getClosestToCenter} from "../../../utils/dom/position/horizontal/get-closest-to-center";
 import {PhysicallyDraggable} from "../../draggable/physically-draggable";
 import {DraggableFixedYConstraint} from "../../draggable/constraints/fixed-y";
 import {DynamicDefaultMap} from "../../../utils/map/dynamic-default";
