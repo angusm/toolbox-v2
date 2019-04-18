@@ -39,15 +39,11 @@ class CarouselSyncManager {
     if (!syncedCarousels) {
       return;
     }
-    const entries = syncedCarousels.values();
-    let nextEntry = entries.next();
-    while (!nextEntry.done) {
-      const syncedCarousel = nextEntry.value;
+    syncedCarousels.forEach((syncedCarousel) => {
       if (syncedCarousel !== carousel) {
         syncedCarousel.transitionToIndex(index, true);
       }
-      nextEntry = entries.next();
-    }
+    });
   }
 
   public destroyCarousel(carousel: ICarousel) {

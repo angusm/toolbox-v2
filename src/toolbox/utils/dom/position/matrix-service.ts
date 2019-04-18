@@ -1,6 +1,7 @@
 import {Matrix} from './matrix';
 import {DynamicDefaultMap} from "../../map/dynamic-default";
 import {renderLoop} from "../../render-loop";
+import {forEach} from "../../iterable-iterator/for-each";
 
 class MatrixService {
   private static singleton_: MatrixService = null;
@@ -48,13 +49,11 @@ class MatrixService {
     renderLoop.anyMutate(() => {
       const entries = this.alteredMatrix_.entries();
 
-      let nextEntry = entries.next();
-      while (!nextEntry.done) {
-        const [element, alteredMatrix] = nextEntry.value;
-        alteredMatrix.applyToElementTransform(element);
-
-        nextEntry = entries.next();
-      }
+      forEach(
+        entries,
+        ([element, alteredMatrix]) => {
+          alteredMatrix.applyToElementTransform(element)
+        });
 
       renderLoop.anyCleanup(() => {
         this.cleanMatrix_.clear();

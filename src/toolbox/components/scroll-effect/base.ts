@@ -9,6 +9,7 @@ import {GetDistanceFn} from "./types/get-distance-fn";
 import {TScrollEffectCallbackMap} from "./types/t-scroll-effect-callback-map";
 import {TScrollEffectCallback} from "./types/t-scroll-effect-callback";
 import {TScrollEffectDistanceValue} from "./types/t-scroll-effect-distance-value";
+import {forEach} from "../../utils/iterable-iterator/for-each";
 
 /**
  * These are the default option values provided to ScrollEffect unless otherwise
@@ -305,14 +306,13 @@ class ScrollEffect {
     const result: TScrollEffectCallback[] = [];
     const entries = callbacksMap.entries();
 
-    let nextEntry = entries.next();
-    while (!nextEntry.done) {
-      let [triggerRange, callbacks] = nextEntry.value;
-      if (triggerRange.getOverlap(runRange) !== null) {
-        result.push(...callbacks);
-      }
-      nextEntry = entries.next();
-    }
+    forEach(
+      entries,
+      ([triggerRange, callbacks]) => {
+        if (triggerRange.getOverlap(runRange) !== null) {
+          result.push(...callbacks);
+        }
+      });
 
     return result;
   }
