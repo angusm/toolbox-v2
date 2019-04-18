@@ -5,9 +5,6 @@ import {Animation} from "./animation";
 import {KeyframeStyle} from "./keyframe-style";
 import {TKeyframesConfig} from "./types/t-keyframes-config";
 import {ITweenOptions} from "./interfaces/tween-options";
-import {TEasingFunction} from "./types/t-easing-function";
-
-const linearEasing = (v: number) => v;
 
 /**
  * Default values provided to Tween for optional parameters.
