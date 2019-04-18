@@ -194,11 +194,15 @@ class ScrollEffect {
   private init_(): void {
     this.effects_.forEach(
         (effect: IEffect) => ActiveEffects.get(effect).push(this));
-    this.triggerRun();
-    renderLoop.scrollMeasure(() => this.handleScroll_());
 
-    // Setup a force run once we're loaded if we aren't already
-    window.addEventListener('load', () => this.triggerRun());
+    // Setup a run once we're loaded if we aren't already
+    if (document.readyState === 'complete') {
+      renderLoop.measure(() => this.triggerRun());
+    } else {
+      window.addEventListener(
+        'load', () => renderLoop.measure(() => this.triggerRun()));
+    }
+    renderLoop.scrollMeasure(() => this.handleScroll_());
   }
 
   private static mapCallbacksFromCallbackOptions_(
@@ -233,8 +237,8 @@ class ScrollEffect {
       return;
     }
 
-    this.triggerRun();
     renderLoop.scrollMeasure(() => {
+      this.triggerRun();
       renderLoop.scrollCleanup(() => this.handleScroll_());
     });
   }
@@ -254,17 +258,11 @@ class ScrollEffect {
   }
 
   public triggerRun(): void {
-    renderLoop.measure(() => {
-      this.updateRunValue_();
-      if (this.shouldRun_()) {
-        this.runEffectsAndCallbacks_();
-      }
-    });
-  }
-
-  private runEffectsAndCallbacks_(): void {
-    this.runEffects_();
-    this.runCallbacksForPosition_();
+    this.updateRunValue_();
+    if (this.shouldRun_()) {
+      this.runEffects_();
+      this.runCallbacksForPosition_();
+    }
   }
 
   /**
