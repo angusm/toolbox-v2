@@ -1,18 +1,17 @@
 import {NumericRange} from '../../math/numeric-range';
-import {getVisibleDistanceBetweenElements} from './get-visible-distance-between-elements';
-import {Vector2d} from "../../math/geometry/vector-2d";
-import {getAncestorDimensions} from "./get-ancestor-dimensions";
+import {getVisibleDistanceBetweenElements} from './vertical/get-visible-distance-between-elements';
+import {getAncestorHeight} from "./vertical/get-ancestor-height";
 
 function getVisibleHeight(
   target: HTMLElement,
   container: HTMLElement = null
 ): number {
-  const distance: Vector2d =
+  const distance: number =
     getVisibleDistanceBetweenElements(target, container);
-  const containerHeight: number = getAncestorDimensions(container).height;
+  const containerHeight: number = getAncestorHeight(container);
   const visibleYRange: NumericRange = new NumericRange(0, containerHeight);
-  const startY: number = visibleYRange.clamp(distance.y);
-  const endY: number = visibleYRange.clamp(distance.y + target.offsetHeight);
+  const startY: number = visibleYRange.clamp(distance);
+  const endY: number = visibleYRange.clamp(distance + target.offsetHeight);
   return endY - startY;
 }
 
