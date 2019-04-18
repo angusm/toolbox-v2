@@ -9,14 +9,6 @@ import {GetDistanceFn} from "./types/get-distance-fn";
 import {TScrollEffectCallbackMap} from "./types/t-scroll-effect-callback-map";
 import {TScrollEffectCallback} from "./types/t-scroll-effect-callback";
 import {TScrollEffectDistanceValue} from "./types/t-scroll-effect-distance-value";
-import {Dimensions} from "../../utils/cached-vectors/dimensions";
-
-/**
- * Dimensions of the window. Used to let scroll effects trigger on resize even
- * if they would otherwise be culled.
- * @hidden
- */
-const windowDimensions = Dimensions.getSingleton();
 
 /**
  * These are the default option values provided to ScrollEffect unless otherwise
@@ -46,28 +38,40 @@ type TParsedCallbackMap = ArrayMap<NumericRange, TScrollEffectCallback>;
 class ScrollEffectRunValue {
   public readonly distance: number;
   public readonly distanceAsPercent: number;
-  public readonly lastRunDistance: number;
-  public readonly lastRunDistanceAsPercent: number;
+  public readonly lastRunValue: ScrollEffectRunValue;
+  public readonly windowInnerHeight: number;
+  public readonly windowInnerWidth: number;
 
   constructor(
     distance: number,
     distanceAsPercent: number,
-    lastRunDistance: number,
-    lastRunDistanceAsPercent: number,
+    lastRunValue: ScrollEffectRunValue,
   ) {
     this.distance = distance;
     this.distanceAsPercent = distanceAsPercent;
-    this.lastRunDistance = lastRunDistance;
-    this.lastRunDistanceAsPercent = lastRunDistanceAsPercent;
+    this.windowInnerHeight = window.innerHeight;
+    this.windowInnerWidth = window.innerWidth;
+    this.lastRunValue = lastRunValue;
+  }
+
+  public shouldTriggerRun(): boolean {
+    return this.lastRunValue === null ||
+      this.distance !== this.lastRunValue.distance ||
+      this.windowInnerHeight !== this.lastRunValue.windowInnerHeight ||
+      this.windowInnerWidth !== this.lastRunValue.windowInnerWidth;
   }
 
   public getRunRangeAsPercent(): NumericRange {
+    const lastDistanceAsPercent =
+      this.lastRunValue !== null ? this.lastRunValue.distanceAsPercent : 0;
     return NumericRange.fromUnorderedValues(
-      this.lastRunDistanceAsPercent, this.distanceAsPercent);
+      lastDistanceAsPercent, this.distanceAsPercent);
   }
 
   public getRunRange(): NumericRange {
-    return NumericRange.fromUnorderedValues(this.lastRunDistance, this.distance);
+    const lastDistance =
+      this.lastRunValue !== null ? this.lastRunValue.distance : 0;
+    return NumericRange.fromUnorderedValues(lastDistance, this.distance);
   }
 }
 
@@ -88,7 +92,7 @@ class ScrollEffect {
   private readonly effects_: Array<IEffect>;
   private destroyed_: boolean;
   private forceRun_: boolean;
-  private lastRunDistance_: number;
+  private runValue_: ScrollEffectRunValue;
 
   /**
    *
@@ -181,7 +185,7 @@ class ScrollEffect {
     this.startDistance_ = startDistance;
     this.endDistance_ = endDistance;
     this.effects_ = effects;
-    this.lastRunDistance_ = null;
+    this.runValue_ = null;
     this.destroyed_ = false;
     this.forceRun_ = false;
     this.init_();
@@ -190,13 +194,7 @@ class ScrollEffect {
   private init_(): void {
     this.effects_.forEach(
         (effect: IEffect) => ActiveEffects.get(effect).push(this));
-    renderLoop.measure(() => {
-      const runValue = this.getRunValue_();
-      if (this.shouldRun_(runValue)) {
-        this.runEffectsAndCallbacks_(runValue);
-      }
-      this.lastRunDistance_ = runValue.distance;
-    });
+    this.triggerRun();
     renderLoop.scrollMeasure(() => this.handleScroll_());
 
     // Setup a force run once we're loaded if we aren't already
@@ -257,17 +255,16 @@ class ScrollEffect {
 
   public triggerRun(): void {
     renderLoop.measure(() => {
-      const runValue = this.getRunValue_();
-      if (this.shouldRun_(runValue)) {
-        this.runEffectsAndCallbacks_(runValue);
+      this.updateRunValue_();
+      if (this.shouldRun_()) {
+        this.runEffectsAndCallbacks_();
       }
-      this.lastRunDistance_ = runValue.distance;
     });
   }
 
-  private runEffectsAndCallbacks_(runValue: ScrollEffectRunValue): void {
-    this.runEffects_(runValue);
-    this.runCallbacksForPosition_(runValue);
+  private runEffectsAndCallbacks_(): void {
+    this.runEffects_();
+    this.runCallbacksForPosition_();
   }
 
   /**
@@ -276,19 +273,12 @@ class ScrollEffect {
    *
    * @private
    */
-  private shouldRun_(optionalRunValue?: ScrollEffectRunValue): boolean {
+  private shouldRun_(): boolean {
     if (this.forceRun_) {
       return true;
     }
 
-    // Always run if the windows dimensions have changed
-    if (windowDimensions.hasChanged()) {
-      return this.isConditionMet_(); // But still respect manual conditions
-    }
-
-    const runValue = optionalRunValue || this.getRunValue_();
-    return runValue.distance !== runValue.lastRunDistance && (
-      this.isConditionMet_());
+    return this.isConditionMet_() && this.runValue_.shouldTriggerRun();
   }
 
   private isConditionMet_() {
@@ -296,11 +286,7 @@ class ScrollEffect {
   }
 
   private getDistanceValue_(value: TScrollEffectDistanceValue): number {
-    if (typeof value === 'number') {
-      return value;
-    } else {
-      return value(this.target_);
-    }
+    return  typeof value === 'number' ? value : value(this.target_);
   }
 
   private getStartDistance_(): number {
@@ -333,55 +319,49 @@ class ScrollEffect {
     return result;
   }
 
-  private getRunValue_(): ScrollEffectRunValue {
+  private updateRunValue_(): void {
     const distance = this.getRunDistance_();
-    const lastRunDistance = this.lastRunDistance_;
     const rawPercent = this.getDistanceRange_().getValueAsPercent(distance);
     const percent = isNaN(rawPercent) ? 0 : rawPercent;
-    const lastRunDistancePercent =
-      lastRunDistance !== null ?
-        this.getDistanceRange_().getValueAsPercent(lastRunDistance) : 0;
 
-    return new ScrollEffectRunValue(
-      distance,
-      percent,
-      lastRunDistance,
-      lastRunDistancePercent
-    )
+    this.runValue_ =
+      new ScrollEffectRunValue(distance, percent, this.runValue_);
   }
 
-  private runCallbacks_(
-    callbacks: TScrollEffectCallback[], runValue: ScrollEffectRunValue
-  ): void {
+  private runCallbacks_(callbacks: TScrollEffectCallback[]): void {
+    const lastRunValue = this.runValue_.lastRunValue;
+    const lastDistance = lastRunValue !== null ? lastRunValue.distance : null;
+    const lastDistanceAsPercent =
+      lastRunValue !== null ? lastRunValue.distanceAsPercent : null;
     callbacks
       .forEach(
         (callback) => callback(
           this.target_,
-          runValue.distance,
-          runValue.distanceAsPercent,
-          runValue.lastRunDistance,
-          runValue.lastRunDistanceAsPercent,
+          this.runValue_.distance,
+          this.runValue_.distanceAsPercent,
+          lastDistance,
+          lastDistanceAsPercent
         ));
 
   }
 
-  private runCallbacksForPosition_(runValue: ScrollEffectRunValue) {
+  private runCallbacksForPosition_(): void {
     const percentCallbacksToRun =
       ScrollEffect.getCallbacks(
-        runValue.getRunRangeAsPercent(), this.percentCallbacks_);
+        this.runValue_.getRunRangeAsPercent(), this.percentCallbacks_);
     const distanceCallbacksToRun =
       ScrollEffect.getCallbacks(
-        runValue.getRunRange(), this.distanceCallbacks_);
+        this.runValue_.getRunRange(), this.distanceCallbacks_);
 
     this.runCallbacks_(
-      percentCallbacksToRun.concat(distanceCallbacksToRun), runValue);
+      percentCallbacksToRun.concat(distanceCallbacksToRun));
   }
 
-  private runEffects_(runValue: ScrollEffectRunValue) {
+  private runEffects_(): void {
     const effectsRunFns =
       this.effects_.map((effect) => effect.run.bind(effect));
 
-    this.runCallbacks_(effectsRunFns, runValue);
+    this.runCallbacks_(effectsRunFns);
   }
 
   private getRunDistance_(): number {
