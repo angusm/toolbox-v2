@@ -2,7 +2,6 @@ import {NumericRange} from "../../utils/math/numeric-range";
 import {getVisibleYPosition} from "../../utils/dom/position/vertical/get-visible-y-position";
 import {renderLoop} from "../../utils/render-loop";
 import {Vector2d} from "../../utils/math/geometry/vector-2d";
-import {getVisibleDistanceBetweenElements} from "../../utils/dom/position/get-visible-distance-between-elements";
 import {getVisibleDistanceFromRoot} from "../../utils/dom/position/get-visible-distance-from-root";
 import {eventHandler} from "../../utils/event/event-handler";
 import {Sticky2ContainerPosition} from "./sticky-2-container-position";
@@ -173,9 +172,14 @@ class Sticky2 {
     const shouldPin = new NumericRange(0, maxDistance).contains(-yPosition);
     const position = Sticky2.getPosition_(shouldPin, yPosition);
 
-    const cloneDistanceFromFrame =
-      getVisibleDistanceBetweenElements(this.clone_, this.commonFrame_);
     const cloneDistanceFromRoot = getVisibleDistanceFromRoot(this.clone_);
+    const commonFrameDistancesFromRoot =
+      getVisibleDistanceFromRoot(this.commonFrame_);
+
+    // Re-use cloneDistanceFromRoot to improve performance
+    const cloneDistanceFromFrame =
+      cloneDistanceFromRoot.subtract(commonFrameDistancesFromRoot);
+
     const cloneStyle = window.getComputedStyle(this.clone_);
 
     return new MeasureValue(
