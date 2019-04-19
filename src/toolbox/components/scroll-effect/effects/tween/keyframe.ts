@@ -4,24 +4,24 @@
 import {TKeyframesConfig} from "./types/t-keyframes-config";
 import {styleStringToMap} from "../../../../utils/dom/style/style-string-to-map";
 import {flatten} from "../../../../utils/array/flatten";
-import {
-  ITweenableValueInstance,
-  ITweenableValueStatic
-} from "./interfaces/tweenable-value";
+import {ITweenableValueInstance} from "./interfaces/tweenable-value";
 import {propertyToTweenableValue} from "./property-to-tweenable-value";
 import {getTweenableValue} from "./get-tweenable-value";
 import {Transform} from "../../../../utils/dom/style/transform/transform";
+import {Filter} from "../../../../utils/dom/style/filter/filter";
 import {generateTweenableTransformClass} from "./generate-tweenable-transform-class";
 import {ITransformValueStatic} from "../../../../utils/dom/style/transform/transform-value/i-transform-value";
-import {TransformValueBase} from "../../../../utils/dom/style/transform/transform-value/transform-value-base";
-import {zip} from "../../../../utils/array/zip";
 import {TKeyframesConfigStyleValue} from "./types/t-keyframes-config-style-value";
 import {TKeyframesConfigPropertyStyleMap} from "./types/t-keyframes-config-property-style-map";
 import {DynamicDefaultMap} from "../../../../utils/map/dynamic-default";
+import {IFilterValueStatic} from "../../../../utils/dom/style/filter/filter-value/i-filter-value";
+import {generateTweenableFilterClass} from "./generate-tweenable-filter-class";
 
 type TPositionStylePair = [number, TKeyframesConfigPropertyStyleMap];
 type TPositionPropertyStyleMapPair = [number, TKeyframesConfigPropertyStyleMap];
 type TSortedPropertyStyleMaps = TPositionPropertyStyleMapPair[];
+
+const SPECIALLY_HANDLED_PROPERTIES = new Set(['filter', 'transform']);
 
 /**
  * Stores information on a Keyframe in a Tweenable animation.
@@ -53,6 +53,8 @@ class Keyframe {
   public getValue(adjacentKeyframe?: Keyframe): ITweenableValueInstance {
     if (this.cachedValue_ !== null) {
       return this.cachedValue_;
+    } else if (this.property_ === 'filter') {
+      return this.getFilterValue_(adjacentKeyframe);
     } else if (this.property_ === 'transform') {
       return this.getTransformValue_(adjacentKeyframe);
 
@@ -81,7 +83,8 @@ class Keyframe {
   }
 
   private static isValidTweenableProperty_(property: string): boolean {
-    return  propertyToTweenableValue.has(property) || property === 'transform';
+    return propertyToTweenableValue.has(property) ||
+      SPECIALLY_HANDLED_PROPERTIES.has(property);
   }
 
   private static parseStyleMap_(
@@ -161,12 +164,96 @@ class Keyframe {
     return transformClassesInOrder;
   }
 
+  private getSortedKeyframes_(adjacentKeyframe: Keyframe): [Keyframe, Keyframe] {
+    if (this.getPosition() > adjacentKeyframe.getPosition()) {
+      return [adjacentKeyframe, this];
+    } else {
+      return [this, adjacentKeyframe];
+    }
+  }
+
+  private static getFilterClassesInOrder_(
+    filters: Filter[]
+  ): IFilterValueStatic[] {
+    const orderedListsOfFilterClasses: IFilterValueStatic[][] =
+      filters.map((filter) => filter.getFilterValueClasses());
+
+    const filterClassesInOrder = [];
+    for (
+      let position = 0;
+      position < orderedListsOfFilterClasses.length;
+      position++
+    ) {
+      const classesForPosition = orderedListsOfFilterClasses[position];
+      for (
+        let classIndex = 0;
+        classIndex < classesForPosition.length;
+        classIndex++
+      ) {
+        const classToAdd = classesForPosition[classIndex];
+        filterClassesInOrder.push(classToAdd);
+
+        for (let k = 0; k < orderedListsOfFilterClasses.length; k++) {
+          const subsequentClassesForPosition =
+            orderedListsOfFilterClasses[k];
+
+          if (subsequentClassesForPosition[0] === classToAdd) {
+            orderedListsOfFilterClasses[k] =
+              subsequentClassesForPosition.slice(1);
+          }
+        }
+      }
+    }
+
+    return filterClassesInOrder;
+  }
+
+  private getFilterValue_(
+    adjacentKeyframe: Keyframe
+  ): ITweenableValueInstance {
+    const sortedKeyframes = this.getSortedKeyframes_(adjacentKeyframe);
+    const sortedFilters =
+      sortedKeyframes
+        .map((keyframe) => Filter.fromStyleString(keyframe.getRawValue()));
+
+    const primaryFilter = Filter.fromStyleString(this.getRawValue());
+
+    const filterClassesInOrder =
+      Keyframe.getFilterClassesInOrder_(sortedFilters);
+    const TweenableFilterClass =
+      generateTweenableFilterClass(filterClassesInOrder);
+
+    const filterValues = primaryFilter.getFilterValues();
+    const filterClasses = primaryFilter.getFilterValueClasses();
+    let numbers: number[] = [];
+    let currentFilterClassesIndex = 0;
+    let allFilterClassesIndex = 0;
+
+    while (allFilterClassesIndex < filterClassesInOrder.length) {
+      const anticipatedFilterClass =
+        filterClassesInOrder[allFilterClassesIndex];
+      const currentFilterClass = filterClasses[currentFilterClassesIndex];
+
+      if (anticipatedFilterClass === currentFilterClass) {
+        numbers = [
+          ...numbers,
+          ...filterValues[currentFilterClassesIndex].toNumbers()];
+        currentFilterClassesIndex++;
+      } else {
+        numbers = [
+          ...numbers,
+          ...anticipatedFilterClass.getDefaultValue().toNumbers()];
+      }
+      allFilterClassesIndex++;
+    }
+
+    return TweenableFilterClass.fromNumbers(...numbers);
+  }
+
   private getTransformValue_(
     adjacentKeyframe: Keyframe
   ): ITweenableValueInstance {
-    const sortedKeyframes =
-      [this, adjacentKeyframe]
-        .sort((a, b) => a.getPosition() - b.getPosition());
+    const sortedKeyframes = this.getSortedKeyframes_(adjacentKeyframe);
     const sortedTransforms =
       sortedKeyframes
         .map((keyframe) => Transform.fromStyleString(keyframe.getRawValue()));

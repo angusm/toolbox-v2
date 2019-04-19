@@ -1,6 +1,4 @@
 import {TransformValueBase} from "./transform-value-base";
-import {IMeasurableInstance} from "../../../../math/interfaces/measurable";
-import {ICssStyleValueInstance} from "../../interfaces/css-style-value";
 import {
   CSS_ROTATION_CALC_FORMULA_ALLOWED_UNITS,
   CssRotationCalcFormula

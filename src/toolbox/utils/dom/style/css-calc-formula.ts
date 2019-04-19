@@ -16,7 +16,10 @@ const CSS_CALC_FORMULA_ALLOWED_UNITS = [
   'vmin',
   'vmax',
   'em',
-  'rem'
+  'rem',
+  'deg',
+  'turn',
+  'rad'
 ];
 
 class CssCalcFormula implements IMeasurableInstance, ICssStyleValueInstance {
