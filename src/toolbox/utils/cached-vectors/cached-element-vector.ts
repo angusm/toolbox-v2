@@ -2,6 +2,8 @@ import {DynamicDefaultMap} from '../map/dynamic-default';
 import {MultiValueDynamicDefaultMap} from '../map/multi-value-dynamic-default';
 import {Vector} from '../math/geometry/vector';
 import {renderLoop} from '../render-loop';
+import {RenderFunction} from "../t-render-function";
+import {RenderFunctionID} from "../render-function-id";
 
 const VALUE_LIMIT: number = 2;
 
@@ -44,7 +46,7 @@ abstract class CachedElementVector<T extends Vector> {
   private init(): void {
     // Init values so that instances can be created during a measure step if
     // necessary.
-    renderLoop.premeasure(() => this.measureValues());
+    renderLoop.anyPremeasure(() => this.measureValues());
     this.render();
   }
 
@@ -72,11 +74,11 @@ abstract class CachedElementVector<T extends Vector> {
   }
 
   protected renderLoopCleanup_(fn: () => void): void {
-    renderLoop.cleanup(fn);
+    renderLoop.anyCleanup(fn);
   }
 
   protected renderLoopPremeasure_(fn: () => void): void {
-    renderLoop.premeasure(fn);
+    renderLoop.anyPremeasure(fn);
   }
 
   private measureValues(): void {

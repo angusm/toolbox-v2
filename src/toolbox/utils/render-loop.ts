@@ -1,5 +1,7 @@
 import {UserAgent} from "./user-agent/user-agent";
 import {IE} from "./user-agent/browser/ie";
+import {RenderFunction} from "./t-render-function";
+import {RenderFunctionID} from "./render-function-id";
 
 class RenderStep {
   public static readonly CLEANUP = Symbol('Cleanup');
@@ -9,6 +11,7 @@ class RenderStep {
   public static readonly MUTATE = Symbol('Mutate');
   public static readonly PRE_MEASURE = Symbol('Pre-measure');
   public static readonly SCROLL_PRE_MEASURE = Symbol('Scroll-measure');
+  public static readonly ANY_PRE_MEASURE = Symbol('Any-measure');
   public static readonly SCROLL_MEASURE = Symbol('Scroll-measure');
   public static readonly SCROLL_MUTATE = Symbol('Scroll-mutate');
   public static readonly ANY_MUTATE = Symbol('Any-mutate');
@@ -24,6 +27,7 @@ const ALL_STEP_ORDER: Array<symbol> = [
   RenderStep.FRAME_COUNT,
   RenderStep.PRE_MEASURE,
   RenderStep.SCROLL_PRE_MEASURE,
+  RenderStep.ANY_PRE_MEASURE,
   RenderStep.MEASURE,
   RenderStep.SCROLL_MEASURE,
   RenderStep.PHYSICS,
@@ -38,6 +42,7 @@ const ALL_STEP_ORDER: Array<symbol> = [
 const ANIMATION_FRAME_STEP_ORDER: Array<symbol> = [
   RenderStep.FRAME_COUNT,
   RenderStep.PRE_MEASURE,
+  RenderStep.ANY_PRE_MEASURE,
   RenderStep.MEASURE,
   RenderStep.PHYSICS,
   RenderStep.MUTATE,
@@ -48,6 +53,7 @@ const ANIMATION_FRAME_STEP_ORDER: Array<symbol> = [
 
 const SCROLL_STEP_ORDER: Array<symbol> = [
   RenderStep.SCROLL_PRE_MEASURE,
+  RenderStep.ANY_PRE_MEASURE,
   RenderStep.SCROLL_MEASURE,
   RenderStep.SCROLL_MUTATE,
   RenderStep.ANY_MUTATE,
@@ -55,19 +61,6 @@ const SCROLL_STEP_ORDER: Array<symbol> = [
   RenderStep.ANY_CLEANUP,
 ];
 
-class RenderFunctionID {
-  private readonly step_: symbol;
-
-  constructor(step: symbol) {
-    this.step_ = step;
-  }
-
-  get step() {
-    return this.step_;
-  }
-}
-
-type RenderFunction = () => void;
 type RenderFunctionMap = Map<RenderFunctionID, RenderFunction>;
 
 class RenderLoop {
@@ -164,6 +157,10 @@ class RenderLoop {
 
   public scrollCleanup(fn: RenderFunction): RenderFunctionID {
     return this.addFnToStep_(fn, RenderStep.SCROLL_CLEANUP);
+  }
+
+  public anyPremeasure(fn: RenderFunction): RenderFunctionID {
+    return this.addFnToStep_(fn, RenderStep.ANY_PRE_MEASURE);
   }
 
   public anyMutate(fn: RenderFunction): RenderFunctionID {
