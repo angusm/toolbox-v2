@@ -300,7 +300,7 @@ class ScrollEffect {
     return new NumericRange(this.getStartDistance_(), this.getEndDistance_());
   }
 
-  private static getCallbacks(
+  private static getCallbacks_(
     runRange: NumericRange, callbacksMap: TParsedCallbackMap
   ): TScrollEffectCallback[] {
     const result: TScrollEffectCallback[] = [];
@@ -309,7 +309,7 @@ class ScrollEffect {
     forEach(
       entries,
       ([triggerRange, callbacks]) => {
-        if (triggerRange.getOverlap(runRange) !== null) {
+        if (triggerRange.hasOverlap(runRange)) {
           result.push(...callbacks);
         }
       });
@@ -345,10 +345,10 @@ class ScrollEffect {
 
   private runCallbacksForPosition_(): void {
     const percentCallbacksToRun =
-      ScrollEffect.getCallbacks(
+      ScrollEffect.getCallbacks_(
         this.runValue_.getRunRangeAsPercent(), this.percentCallbacks_);
     const distanceCallbacksToRun =
-      ScrollEffect.getCallbacks(
+      ScrollEffect.getCallbacks_(
         this.runValue_.getRunRange(), this.distanceCallbacks_);
 
     this.runCallbacks_(

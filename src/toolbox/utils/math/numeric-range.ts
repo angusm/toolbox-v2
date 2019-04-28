@@ -74,13 +74,16 @@ class NumericRange implements IRange<number>{
   }
 
   public getOverlap(overlap: NumericRange): NumericRange {
-    if (this.max_ < overlap.getMin() || overlap.getMax() < this.min_) {
+    if (!this.hasOverlap(overlap)) {
       return null;
-    } else {
-      return new NumericRange(
-        Math.max(
-          this.min_, overlap.getMin()), Math.min(this.max_, overlap.getMax()));
     }
+    return new NumericRange(
+      Math.max(
+        this.min_, overlap.getMin()), Math.min(this.max_, overlap.getMax()));
+  }
+
+  public hasOverlap(overlap: NumericRange): boolean {
+    return this.max_ >= overlap.getMin() && overlap.getMax() >= this.min_;
   }
 
   public static fromRangeInput(rangeInput: HTMLInputElement): NumericRange {
