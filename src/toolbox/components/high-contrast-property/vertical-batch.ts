@@ -103,7 +103,7 @@ class VerticalBatchHighContrastProperty {
       .reduce(
         (mapping, background) => {
           const visibleRange = getVisibleYRange(background);
-          if (visibleRange.getOverlap(windowRange) !== null) {
+          if (visibleRange.hasOverlap(windowRange)) {
             mapping.set(visibleRange, background);
           }
           return mapping;
