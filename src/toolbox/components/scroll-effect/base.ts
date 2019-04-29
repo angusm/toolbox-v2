@@ -176,6 +176,10 @@ class ScrollEffect {
       effects = defaultOptions.effects,
     }: IScrollEffectOptions = defaultOptions,
   ) {
+    if (target === null) {
+      throw new Error('ScrollEffect requires a valid HTMLElement as a target');
+    }
+
     this.condition_ = condition;
     this.distanceCallbacks_ =
       ScrollEffect.mapCallbacksFromCallbackOptions_(distanceCallbacks);
