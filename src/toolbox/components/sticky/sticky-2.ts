@@ -236,7 +236,12 @@ class Sticky2 {
 
   public destroy() {
     this.destroyed_ = true;
-    this.target_.parentElement.removeChild(this.clone_);
+    if (
+      this.target_.parentElement &&
+      this.target_.parentElement.contains(this.clone_)
+    ) {
+      this.target_.parentElement.removeChild(this.clone_);
+    }
   }
 }
 
