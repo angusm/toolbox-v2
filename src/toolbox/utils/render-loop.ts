@@ -84,6 +84,7 @@ class RenderLoop {
     };
 
     this.scrollHandler_ = () => {
+      window.removeEventListener('load', this.scrollHandler_);
       window.removeEventListener('scroll', this.scrollHandler_);
       window.removeEventListener('resize', this.scrollHandler_);
       this.runScrollLoopAndSetupListener_();
@@ -172,9 +173,9 @@ class RenderLoop {
   }
 
   private addFnToStep_(fn: RenderFunction, step: symbol): RenderFunctionID {
-    const renderFn = new RenderFunctionID(step);
-    this.scheduledFns_.get(step).set(renderFn, fn);
-    return renderFn;
+    const renderFunctionID = new RenderFunctionID(step);
+    this.scheduledFns_.get(step).set(renderFunctionID, fn);
+    return renderFunctionID;
   }
 
   /**
@@ -220,8 +221,8 @@ class RenderLoop {
     this.setupScrollListener_();
   }
 
-  private runStepsInOrder_(stepOrder: Array<symbol>): void {
-    stepOrder.forEach((step) => this.runFnsForStep_(step));
+  private runStepsInOrder_(stepsInOrder: Array<symbol>): void {
+    stepsInOrder.forEach((step) => this.runFnsForStep_(step));
   }
 
   private runFnsForStep_(step: symbol): void {
