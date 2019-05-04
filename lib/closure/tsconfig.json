@@ -1,7 +1,0 @@
-{
-  "extends": "../../config/base",
-  "compilerOptions": {
-    "module": "commonjs",
-    "outDir": "toolbox"
-  },
-}

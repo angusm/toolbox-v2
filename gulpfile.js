@@ -1,24 +1,38 @@
 const gulp = require('gulp');
-const exec = require('child_process').exec;
+const exec = require('gulp-exec');
 const Server = require('karma').Server;
 
-const targets = ['closure', 'commonjs', 'es6'];
+const targets = ['commonjs', 'es6'];
 
-function getCompileCommand(target) {
-  if (target === 'closure') {
-    return 'cd ./lib/closure; tsickle';
-  } else {
-    return `tsc -p ./lib/${target}`;
-  }
-}
+targets.forEach(
+    (target) => {
+      gulp.task(
+          `clear-${target}`,
+          () => {
+            return gulp
+                .src(`./lib/${target}/toolbox`, {allowEmpty: true})
+                .pipe(exec(`rm -rf <%= file.path %>`));
+          });
+    });
 
-targets.forEach((target) => {
-  gulp.task(`clear-${target}`, () => exec(`rm -rf ./lib/${target}/toolbox`));
-  gulp.task(`compile-${target}`, () => exec(getCompileCommand(target)));
-});
+targets.forEach(
+    (target) => {
+      gulp.task(
+          `compile-${target}`,
+          () => {
+            return gulp
+                .src(`./lib/${target}`, {allowEmpty: true})
+                .pipe(exec(`tsc -p <%= file.path %>`));
+          });
+    });
 
-gulp.task('clear', targets.map((target) => `clear-${target}`));
-gulp.task('compile', targets.map((target) => `compile-${target}`));
+targets.forEach(
+    (target) => {
+      gulp.task(
+          `build-${target}`,
+          gulp.series(`clear-${target}`, `compile-${target}`));
+    });
+
 gulp.task('doc', () => exec(`typedoc; touch docs/.nojekyll`));
 gulp.task('test', (done) => {
   new Server({
@@ -27,4 +41,5 @@ gulp.task('test', (done) => {
   }, done).start();
 });
 
-gulp.task('default', ['clear', 'compile']);
+const buildTasks = targets.map((target) => `build-${target}`);
+gulp.task('default', gulp.parallel(...buildTasks));
