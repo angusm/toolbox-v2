@@ -34,7 +34,7 @@ class JsScroll {
 
   private scrollManually_(e: WheelEvent): void {
     e.preventDefault();
-    applyScroll(Vector2d.fromWheelEvent(e));
+    applyScroll(Vector2d.fromWheelEvent(e), <Element>e.target);
   }
 
   public destroy(): void {
