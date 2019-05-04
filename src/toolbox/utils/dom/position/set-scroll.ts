@@ -6,7 +6,7 @@ import {Vector2d} from "../../math/geometry/vector-2d";
 function setScroll(
   scrollPosition: Vector2d, element: Element = null
 ): void {
-  const scrollElement = element || getScrollElement();
+  const scrollElement = element !== null ? element : getScrollElement();
   setScrollLeft(scrollPosition.x, scrollElement);
   setScrollTop(scrollPosition.y, scrollElement);
 }

@@ -24,6 +24,14 @@ class Vector2d extends Vector {
     return this.getValues()[1];
   }
 
+  public zeroY(): Vector2d {
+    return new Vector2d(this.getX(), 0);
+  }
+
+  public zeroX(): Vector2d {
+    return new Vector2d(0, this.getY());
+  }
+
   public static fromElementOffset<T extends Vector2d>(element: HTMLElement): T {
     const offsetParent: HTMLElement = <HTMLElement>element.offsetParent;
     if (
