@@ -8,7 +8,14 @@ let scrollToApply = ZERO_VECTOR_2D;
 let currentScroll = Scroll.getSingleton();
 let setToRun = false;
 
-function applyScrollToScrollElement(vector: Vector2d): void {
+function applyScrollToScrollElement(
+  vector: Vector2d,
+  {
+    applyImmediately = false,
+  }: {
+    applyImmediately?: boolean
+  } = {}
+): void {
   scrollToApply = scrollToApply.add(vector);
   if (setToRun) {
     return;
@@ -16,11 +23,17 @@ function applyScrollToScrollElement(vector: Vector2d): void {
 
   setToRun = true;
 
-  renderLoop.anyMutate(() => {
+  const apply = () => {
     setScroll(currentScroll.getPosition().add(scrollToApply));
     scrollToApply = ZERO_VECTOR_2D;
     setToRun = false;
-  });
+  };
+
+  if (applyImmediately) {
+    apply();
+  } else {
+    renderLoop.anyMutate(apply);
+  }
 }
 
 export {applyScrollToScrollElement};

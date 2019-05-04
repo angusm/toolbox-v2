@@ -13,7 +13,10 @@ class JsScroll {
 
   constructor() {
     this.initializationCount_ = 0;
-    this.wheelHandler_ = (e) => this.scrollManually_(e);
+    this.wheelHandler_ = (e) => {
+      this.scrollManually_(e);
+      return false;
+    };
   }
 
   public init(): void {
@@ -28,13 +31,18 @@ class JsScroll {
   }
 
   private addEventListener_() {
-      window.addEventListener(
-        'wheel', this.wheelHandler_, thirdEventListenerParam);
+    window.addEventListener(
+      'wheel', this.wheelHandler_, thirdEventListenerParam);
   }
 
   private scrollManually_(e: WheelEvent): void {
     e.preventDefault();
-    applyScroll(Vector2d.fromWheelEvent(e), <Element>e.target);
+    applyScroll(
+      Vector2d.fromWheelEvent(e),
+      {
+        target: <Element>e.target,
+        applyImmediately: true,
+      });
   }
 
   public destroy(): void {

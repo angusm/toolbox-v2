@@ -28,9 +28,18 @@ function applyScrollMutate_() {
   setToRun = false;
 }
 
-function applyScroll(vector: Vector2d, target: Element = SCROLL_ELEMENT): void {
+function applyScroll(
+  vector: Vector2d,
+  {
+    target = SCROLL_ELEMENT,
+    applyImmediately = false,
+  }: {
+    target?: Element
+    applyImmediately?: boolean
+  } = {}
+): void {
   if (target === SCROLL_ELEMENT) {
-    applyScrollToScrollElement(vector);
+    applyScrollToScrollElement(vector, {applyImmediately: applyImmediately});
     return;
   }
 
@@ -42,7 +51,11 @@ function applyScroll(vector: Vector2d, target: Element = SCROLL_ELEMENT): void {
 
   if (!setToRun) {
     setToRun = true;
-    renderLoop.anyMutate(() => applyScrollMutate_());
+    if (applyImmediately) {
+      applyScrollMutate_();
+    } else {
+      renderLoop.anyMutate(applyScrollMutate_);
+    }
   }
 }
 
