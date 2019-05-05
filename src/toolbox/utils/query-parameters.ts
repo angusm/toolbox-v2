@@ -15,7 +15,7 @@ class QueryParameters {
   public static getQueryParams(): QueryParamMap {
     const url: string = QueryParameters.getUrl_();
 
-    const queryParamString: string = url.split('?').slice(-1)[0];
+    const queryParamString: string = QueryParameters.getQueryParamsString();
     if (url.indexOf('?') === -1 || !queryParamString) {
       return {};
     }
@@ -28,6 +28,11 @@ class QueryParameters {
           return result;
         },
         {});
+  }
+
+  public static getQueryParamsString(): string {
+    const url: string = QueryParameters.getUrl_();
+    return url.split('?').slice(-1)[0];
   }
 
   public static getParameterByName(rawName: string): string {
@@ -77,19 +82,24 @@ class QueryParameters {
   public static updateUrl(
     queryParams: QueryParamMap, reload:boolean = false
   ): void {
-    const paramsString =
+    const params =
       Object.keys(queryParams)
         .map((key) => [key, queryParams[key]].join('='))
         .join('&');
+    const paramsString = params.length > 0 ? `?${params}` : '';
+
+    if (paramsString === this.getQueryParamsString()) {
+      return; // Do nothing if we don't need to.
+    }
 
     if (!reload) {
       window.history.pushState(
         {'path': window.location.origin + window.location.pathname},
         '',
-        `${window.location.pathname}?${paramsString}`);
+        `${window.location.pathname}${paramsString}`);
     } else {
       window.location.href =
-        [window.location.origin, window.location.pathname, '?', paramsString]
+        [window.location.origin, window.location.pathname, paramsString]
           .join('');
     }
   }
