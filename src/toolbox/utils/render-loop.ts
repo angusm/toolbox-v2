@@ -100,7 +100,7 @@ class RenderLoop {
   private init_() {
     // Determine when we are loaded if we are not already
     if (!this.loaded_) {
-      window.addEventListener('DOMContentLoaded', () => this.loaded_ = true);
+      window.addEventListener('load', () => this.loaded_ = true);
     }
 
     // Manually setup map instead of using DynamicDefault to avoid performance
