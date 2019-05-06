@@ -1,10 +1,10 @@
-import {KeyframeStyle} from "../keyframe-style";
-import {TEasingFunction} from "../types/t-easing-function";
+import { KeyframeStyle } from '../keyframe-style';
+import { TEasingFunction } from '../types/t-easing-function';
 
 interface ITweenOptions {
-  styleTarget?: HTMLElement,
-  keyframeStyle?: KeyframeStyle,
-  easingFunction?: TEasingFunction,
+  styleTarget?: HTMLElement | SVGPathElement;
+  keyframeStyle?: KeyframeStyle;
+  easingFunction?: TEasingFunction;
 }
 
-export {ITweenOptions};
+export { ITweenOptions };
