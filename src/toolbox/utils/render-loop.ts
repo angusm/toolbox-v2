@@ -2,6 +2,7 @@ import {UserAgent} from "./user-agent/user-agent";
 import {IE} from "./user-agent/browser/ie";
 import {RenderFunction} from "./t-render-function";
 import {RenderFunctionID} from "./render-function-id";
+import {POST_LOAD_READY_STATES} from "./dom/post-load-ready-states";
 
 class RenderStep {
   public static readonly CLEANUP = Symbol('Cleanup');
@@ -70,6 +71,7 @@ class RenderLoop {
   private readonly runLoopCallback_: (timestamp: number) => void;
   private readonly scrollHandler_: () => void;
   private readonly scheduledFns_: Map<symbol, RenderFunctionMap>;
+  private loaded_: boolean;
   private lastRun_: number;
   private currentRun_: number;
 
@@ -83,6 +85,8 @@ class RenderLoop {
       this.runLoopAndSetupFrameCallback_(timestamp);
     };
 
+    this.loaded_ = POST_LOAD_READY_STATES.has(document.readyState);
+
     this.scrollHandler_ = () => {
       window.removeEventListener('load', this.scrollHandler_);
       window.removeEventListener('scroll', this.scrollHandler_);
@@ -94,6 +98,11 @@ class RenderLoop {
   }
 
   private init_() {
+    // Determine when we are loaded if we are not already
+    if (!this.loaded_) {
+      window.addEventListener('DOMContentLoaded', () => this.loaded_ = true);
+    }
+
     // Manually setup map instead of using DynamicDefault to avoid performance
     // overhead.
     ALL_STEP_ORDER.forEach((step) => this.scheduledFns_.set(step, new Map()));
@@ -186,7 +195,8 @@ class RenderLoop {
    */
   public runLoop(currentTime: number = null): void {
     this.currentRun_ = currentTime || performance.now();
-    this.runStepsInOrder_(ANIMATION_FRAME_STEP_ORDER);
+    this.runStepsInOrder_(
+      this.loaded_ ? ANIMATION_FRAME_STEP_ORDER : ALL_STEP_ORDER);
     this.lastRun_ = this.currentRun_;
   }
 
