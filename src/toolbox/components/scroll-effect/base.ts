@@ -86,7 +86,7 @@ class ScrollEffect {
   private readonly condition_: () => boolean;
   private readonly distanceCallbacks_: TParsedCallbackMap;
   private readonly percentCallbacks_: TParsedCallbackMap;
-  private readonly target_: HTMLElement;
+  private readonly target_: Element;
   private readonly getDistanceFunction_: GetDistanceFn;
   private readonly startDistance_: TScrollEffectDistanceValue;
   private readonly endDistance_: TScrollEffectDistanceValue;
@@ -165,7 +165,7 @@ class ScrollEffect {
    *
    */
   constructor(
-    target: HTMLElement,
+    target: Element,
     {
       condition = defaultOptions.condition,
       distanceCallbacks = defaultOptions.distanceCallbacks,

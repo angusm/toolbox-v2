@@ -1,6 +1,6 @@
 type TScrollEffectCallback =
   (
-    target: HTMLElement,
+    target: Element,
     distanceAsPx: number,
     distancePercent: number,
     lastRunDistanceAsPx?: number,
