@@ -4,7 +4,7 @@ function removeClassIfPresent(
   element: Element,
   ...classesToRemove: string[]
 ): void {
-  renderLoop.mutate(() => element.classList.remove(...classesToRemove));
+  renderLoop.anyMutate(() => element.classList.remove(...classesToRemove));
 }
 
 export {removeClassIfPresent};
