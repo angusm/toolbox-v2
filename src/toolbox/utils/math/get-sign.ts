@@ -1,5 +1,9 @@
-function getSign(value: number): number {
-  return value === 0 ? 0 : value / Math.abs(value);
-}
+const getSign: (x: number) => number =
+  !Math.sign ?
+    (x: number) => {
+      // Use MDN polyfill for math.sign
+      return (<number><unknown>(x > 0) - <number><unknown>(x < 0)) || +x;
+    } :
+    Math.sign;
 
 export {getSign};
