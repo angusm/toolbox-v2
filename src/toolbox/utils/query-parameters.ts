@@ -99,8 +99,12 @@ class QueryParameters {
         `${window.location.pathname}${paramsString}`);
     } else {
       window.location.href =
-        [window.location.origin, window.location.pathname, paramsString]
-          .join('');
+        [
+          window.location.origin,
+          window.location.pathname,
+          window.location.hash,
+          paramsString
+        ].join('');
     }
   }
 }
