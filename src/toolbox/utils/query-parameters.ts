@@ -92,19 +92,15 @@ class QueryParameters {
       return; // Do nothing if we don't need to.
     }
 
+    const pathWithHash = `${window.location.pathname}${window.location.hash}`;
     if (!reload) {
       window.history.pushState(
-        {'path': window.location.origin + window.location.pathname},
+        {'path': `${window.location.origin}${pathWithHash}`},
         '',
-        `${window.location.pathname}${paramsString}`);
+        `${pathWithHash}${paramsString}`);
     } else {
       window.location.href =
-        [
-          window.location.origin,
-          window.location.pathname,
-          window.location.hash,
-          paramsString
-        ].join('');
+        [window.location.origin, pathWithHash, paramsString].join('');
     }
   }
 }
