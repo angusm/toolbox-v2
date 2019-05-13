@@ -24,15 +24,17 @@ import {wrapIndex} from "../../../utils/array/wrap-index";
 
 const MAX_DRAG_VELOCITY = 10000;
 const SLIDE_INTERACTION = Symbol('Physical Slide Interaction');
+const DEFAULT_CONSTRAINT = new DraggableFixedYConstraint();
+const FIXED_Y_CONSTRAINT = new FixedYConstraint();
 
 // Micro-optimization
 const matrixService = MatrixService.getSingleton();
 
 class TransitionTarget {
   private readonly target_: HTMLElement;
-  private readonly targetTime_: Date;
+  private readonly targetTime_: number;
 
-  constructor(target: HTMLElement, targetTime: Date) {
+  constructor(target: HTMLElement, targetTime: number) {
     this.target_ = target;
     this.targetTime_ = targetTime;
   }
@@ -41,7 +43,7 @@ class TransitionTarget {
     return this.target_;
   }
 
-  public getTargetTime(): Date {
+  public getTargetTime(): number {
     return this.targetTime_;
   }
 }
@@ -50,7 +52,7 @@ class SlideToDraggableMap extends DynamicDefaultMap<HTMLElement, PhysicallyDragg
   constructor(physical2d: Physical2d = null) {
     const physicallyDraggableConfig =
       {
-        draggableConstraints: [new DraggableFixedYConstraint()],
+        draggableConstraints: [DEFAULT_CONSTRAINT],
         physical2d: physical2d,
       };
 
@@ -74,7 +76,7 @@ class PhysicalSlide implements ITransition {
   ) {
     const finalPhysical2d =
       physical2d === null ?
-        new Physical2d({constraints: [new FixedYConstraint()]}) :
+        new Physical2d({constraints: [FIXED_Y_CONSTRAINT]}) :
         physical2d;
 
     this.draggableBySlide_ = new SlideToDraggableMap(finalPhysical2d);
@@ -126,12 +128,15 @@ class PhysicalSlide implements ITransition {
     });
   }
 
-  private static getDistanceToCenter_(
+  private getDistanceToCenter_(
     target: HTMLElement, carousel: ICarousel
   ): number {
     const distanceFromCenter =
       getVisibleDistanceBetweenElementCenters(target, carousel.getContainer());
-    return -distanceFromCenter;
+    const nextAppliedVelocity =
+      this.draggableBySlide_.get(target)
+        .getPhysical2d().getLastAppliedVelocity().x;
+    return -distanceFromCenter - nextAppliedVelocity;
   }
 
   private transitionToTarget_(carousel: ICarousel) {
@@ -139,11 +144,9 @@ class PhysicalSlide implements ITransition {
 
     const target = this.transitionTargets_.get(carousel);
     const targetSlide = target.getTarget();
-    const remainingTime =
-      target.getTargetTime().valueOf() - new Date().valueOf();
+    const remainingTime = target.getTargetTime() - performance.now();
 
-    const distanceToCenter =
-      PhysicalSlide.getDistanceToCenter_(targetSlide, carousel);
+    const distanceToCenter = this.getDistanceToCenter_(targetSlide, carousel);
 
     const draggable = this.draggableBySlide_.get(targetSlide);
     const breakForce = draggable.getBreakForce();
@@ -151,10 +154,16 @@ class PhysicalSlide implements ITransition {
     // Make our lives easier and clear out acceleration
     draggable.setAcceleration(ZERO_VECTOR_2D);
 
+    // Formula taken by reversing Physical2d updates
+    // With no acceleration we only need to factor in the break factor
+    const breakFactor = Physical2d.getBreakFactor(breakForce, remainingTime);
+    const adjustedVelocity = distanceToCenter / (breakFactor / 1000);
+
     // If we're close enough, let's call it
     if (
       remainingTime <= renderLoop.getTargetFrameLength() * 1.1 ||
-      Math.abs(distanceToCenter) < 10) {
+      Math.abs(distanceToCenter) < 1
+    ) {
       draggable.setVelocity(ZERO_VECTOR_2D);
       carousel.getSlides()
         .forEach(
@@ -164,15 +173,9 @@ class PhysicalSlide implements ITransition {
             translate2d(slide, new Vector2d(distanceToCenter, 0));
           });
       this.transitionTargets_.delete(carousel);
-      return;
+    } else {
+      draggable.setVelocity(new Vector2d(adjustedVelocity, 0));
     }
-
-    // Formula taken from some math on paper based on how Physical2d updates
-    const breakFactor =
-      breakForce * (Math.pow(breakForce, remainingTime) - 1) / (breakForce - 1);
-    const adjustedVelocity = (distanceToCenter / breakFactor) / (1/1000);
-
-    draggable.setVelocity(new Vector2d(adjustedVelocity, 0));
   }
 
   private adjustSlideForLoop_(carousel: ICarousel, slide: HTMLElement): void {
@@ -336,8 +339,7 @@ class PhysicalSlide implements ITransition {
       .setVelocity(event.getEndVelocity().clampLength(MAX_DRAG_VELOCITY));
 
     const activeSlide = this.getActiveSlide(carousel);
-    const distance =
-      PhysicalSlide.getDistanceToCenter_(activeSlide, carousel);
+    const distance = this.getDistanceToCenter_(activeSlide, carousel);
     const velocity = draggable.getVelocity().x;
     const velocitySign = getSign(velocity);
     const distanceSign = getSign(distance);
@@ -369,8 +371,7 @@ class PhysicalSlide implements ITransition {
     }
 
     const transitionTarget =
-      new TransitionTarget(
-        target, new Date(new Date().valueOf() + transitionTime));
+      new TransitionTarget(target, performance.now() + transitionTime);
 
     this.transitionTargets_.set(carousel, transitionTarget);
 

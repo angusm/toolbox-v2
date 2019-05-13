@@ -2,13 +2,17 @@ import {Matrix} from './matrix';
 import {DynamicDefaultMap} from "../../map/dynamic-default";
 import {renderLoop} from "../../render-loop";
 import {forEach} from "../../iterable-iterator/for-each";
+import {IConstraint2d} from "../../math/geometry/2d-constraints/interface";
+import {SetMap} from "../../map/set-map";
 
 class MatrixService {
   private static singleton_: MatrixService = null;
   private cleanMatrix_: DynamicDefaultMap<HTMLElement, Matrix>;
   private alteredMatrix_: DynamicDefaultMap<HTMLElement, Matrix>;
+  private positionConstraints_: SetMap<HTMLElement, IConstraint2d>;
 
   constructor() {
+    this.positionConstraints_ = new SetMap<HTMLElement, IConstraint2d>();
     this.cleanMatrix_ =
       DynamicDefaultMap.usingFunction(
         (element: HTMLElement) => Matrix.fromElementTransform(element));
@@ -40,6 +44,20 @@ class MatrixService {
       this.getCleanMatrix(element).getTranslateY();
   }
 
+  public addPositionConstraint(
+    element: HTMLElement,
+    constraint: IConstraint2d
+  ): void {
+    this.positionConstraints_.get(element).add(constraint);
+  }
+
+  public removePositionConstraint(
+    element: HTMLElement,
+    constraint: IConstraint2d
+  ): void {
+    this.positionConstraints_.get(element).delete(constraint);
+  }
+
   public translate(element: HTMLElement, vector: {x: number, y: number}): void {
     this.alteredMatrix_.set(
       element, this.alteredMatrix_.get(element).translate(vector));
@@ -52,7 +70,10 @@ class MatrixService {
       forEach(
         entries,
         ([element, alteredMatrix]) => {
-          alteredMatrix.applyToElementTransform(element)
+          const constraints = this.positionConstraints_.get(element).values();
+          alteredMatrix
+            .applyPositionConstraintsFromIterableIterator(constraints)
+            .applyToElementTransform(element);
         });
 
       renderLoop.anyCleanup(() => {

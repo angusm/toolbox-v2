@@ -10,6 +10,7 @@ import {DragStart} from "./events/drag-start";
 import {DragEnd} from "./events/drag-end";
 import {Drag} from "./events/drag";
 import {PhysicallyPositionedElement2d} from "../physical/positioned/physically-positioned-element-2d";
+import {IConstraint2d} from "../../utils/math/geometry/2d-constraints/interface";
 
 interface IPhysicallyDraggableConfig {
   draggableConstraints?: IDraggableConstraint[],

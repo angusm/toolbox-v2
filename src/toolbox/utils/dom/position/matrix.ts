@@ -3,6 +3,8 @@ import {Vector2d} from "../../math/geometry/vector-2d";
 import {renderLoop} from "../../render-loop";
 import {ArrayMap} from "../../map/array";
 import {ComputedStyleService} from "../style/computed-style-service";
+import {IConstraint2d} from "../../math/geometry/2d-constraints/interface";
+import {reduce} from "../../iterable-iterator/reduce";
 
 const matrixChangesByElement_: ArrayMap<HTMLElement, Matrix> = new ArrayMap();
 const preChangeMatrixByElement_: Map<HTMLElement, Matrix> = new Map();
@@ -57,12 +59,44 @@ class Matrix {
     return new Matrix(this.a, this.b, this.c, this.d, newX, newY);
   }
 
+  public setPosition(position: Vector2d): Matrix {
+    return new Matrix(this.a, this.b, this.c, this.d, position.x, position.y);
+  }
+
   public setTranslateX(value: number): Matrix {
     return new Matrix(this.a, this.b, this.c, this.d, value, this.ty);
   }
 
   public setTranslateY(value: number): Matrix {
     return new Matrix(this.a, this.b, this.c, this.d, this.tx, value);
+  }
+
+  public applyPositionConstraint(constraint: IConstraint2d): Matrix {
+    const position = constraint.constrain(new Vector2d(this.tx, this.ty));
+    return this.setPosition(position);
+  }
+
+  public applyPositionConstraints(constraints: IConstraint2d[]): Matrix {
+    const position =
+      constraints.reduce(
+        (position: Vector2d, constraint: IConstraint2d) => {
+          return constraint.constrain(position);
+        },
+        new Vector2d(this.tx, this.ty));
+    return this.setPosition(position);
+  }
+
+  public applyPositionConstraintsFromIterableIterator(
+    constraints: IterableIterator<IConstraint2d>
+  ): Matrix {
+    const position =
+      reduce(
+        constraints,
+        (position: Vector2d, constraint: IConstraint2d) => {
+          return constraint.constrain(position);
+        },
+        new Vector2d(this.tx, this.ty));
+    return this.setPosition(position);
   }
 
   public set2dTranslation(translation: Vector2d) {

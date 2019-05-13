@@ -132,6 +132,14 @@ class Physical2d {
     });
   }
 
+  public static getBreakFactor(
+    breakForce: number, milliseconds: number
+  ): number {
+    const raisedBreakforce = Math.pow(breakForce, milliseconds);
+    // Using estimation formulas for exponent summation
+    return breakForce * (raisedBreakforce - 1) / (breakForce - 1);
+  }
+
   /**
    * NOTE: This code is intentionally a bit verbose for performance reasons.
    * @param milliseconds
@@ -164,8 +172,8 @@ class Physical2d {
     // }
 
     const raisedBreakforce = Math.pow(this.breakForce_, milliseconds);
-    const breakFactor = // Using estimation formulas for exponent summation
-      this.breakForce_ * (raisedBreakforce - 1) / (this.breakForce_ - 1);
+    const breakFactor =
+      Physical2d.getBreakFactor(this.breakForce_, milliseconds);
 
     const scaledAccelPerMs = this.acceleration_.scale(breakFactor/1000);
 
