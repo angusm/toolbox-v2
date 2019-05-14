@@ -11,6 +11,10 @@ abstract class Browser {
     return this.name_.toLowerCase().replace(/\s/, '-');
   }
 
+  public static getName(): string {
+    return this.name_;
+  }
+
   protected static getUaids_(): string[] {
     return this.uaidsWithOffsets_.map(([uaid, x]: [string, Offset[]]) => uaid);
   }
