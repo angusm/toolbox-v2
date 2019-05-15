@@ -112,6 +112,10 @@ class Carousel implements ICarousel {
     return this.allowLooping_;
   }
 
+  public getLastActiveSlide(): HTMLElement {
+    return this.lastActiveSlide_;
+  }
+
   private clearTransitionTarget_(): void {
     this.transitionTarget_ = null;
   }
@@ -215,6 +219,14 @@ class Carousel implements ICarousel {
 
   public getActiveSlideIndex(): number {
     return this.getSlideIndex(this.getActiveSlide());
+  }
+
+  public getFirstSlide(): HTMLElement {
+    return this.slides_[0];
+  }
+
+  public getLastSlide(): HTMLElement {
+    return this.slides_[this.slides_.length - 1];
   }
 
   public getSlideIndex(slide: HTMLElement): number {

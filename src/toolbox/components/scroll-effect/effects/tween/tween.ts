@@ -6,6 +6,7 @@ import { KeyframeStyle } from './keyframe-style';
 import { TKeyframesConfig } from './types/t-keyframes-config';
 import { ITweenOptions } from './interfaces/tween-options';
 
+
 /**
  * Default values provided to Tween for optional parameters.
  * @hidden
@@ -25,10 +26,8 @@ const defaultOptions: ITweenOptions = {
 class Tween implements IEffect {
   private readonly animation_: Animation;
   private readonly styleTarget_: ElementCSSInlineStyle;
-  private readonly cachedGetDistanceFn_: (
-    distanceAsPx: number,
-    distanceAsPercent: number
-  ) => number;
+  private readonly cachedGetDistanceFn_:
+    (distanceAsPx: number, distanceAsPercent: number) => number;
 
   /**
    * Creates a new instance of the tween effect.

@@ -21,6 +21,7 @@ import {loopSlice} from "../../../utils/array/loop-slice";
 import {sumOffsetWidthsFromArray} from "../../../utils/dom/position/sum-offset-widths-from-array";
 import {getVisibleDistanceFromRoot} from '../../../utils/dom/position/horizontal/get-visible-distance-from-root';
 import {wrapIndex} from "../../../utils/array/wrap-index";
+import {SCROLL_ELEMENT} from "../../../utils/dom/position/scroll-element";
 
 const MAX_DRAG_VELOCITY = 10000;
 const SLIDE_INTERACTION = Symbol('Physical Slide Interaction');
@@ -197,7 +198,7 @@ class PhysicalSlide implements ITransition {
     if (isOffscreen) {
       const xTranslation = -totalWidth * distanceFromCenterSign;
       const translatedDistanceFromCenter =
-        (window.innerHeight * distanceFromCenterSign) +
+        (SCROLL_ELEMENT.clientHeight * distanceFromCenterSign) +
         distanceFromCenter + xTranslation;
 
       if (
@@ -237,8 +238,8 @@ class PhysicalSlide implements ITransition {
     let distanceOnLeftToCover = Math.max(slideLeftEdgeDistanceFromLeftEdge, 0);
     let distanceOnRightToCover =
       Math.min(
-        window.innerWidth,
-        window.innerWidth - slideRightEdgeDistanceFromWindowLeftEdge);
+        SCROLL_ELEMENT.clientWidth,
+        SCROLL_ELEMENT.clientWidth - slideRightEdgeDistanceFromWindowLeftEdge);
     let leftIndex = targetSlideIndex;
     let rightIndex = targetSlideIndex;
 

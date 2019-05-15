@@ -1,5 +1,6 @@
 import {getVisibleArea} from './get-visible-area';
 import {isDisplayed} from "../style/is-displayed";
+import {SCROLL_ELEMENT} from "./scroll-element";
 
 function isFillingVisibleArea(
   target: HTMLElement,
@@ -9,7 +10,7 @@ function isFillingVisibleArea(
   const visibleArea = getVisibleArea(target, container, factorInOpacity);
   return isDisplayed(target) &&
     visibleArea > 0 &&
-    visibleArea === window.innerWidth * window.innerHeight;
+    visibleArea === SCROLL_ELEMENT.clientWidth * SCROLL_ELEMENT.clientHeight;
 }
 
 export {isFillingVisibleArea};

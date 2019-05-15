@@ -12,11 +12,12 @@ class RenderStep {
   public static readonly MUTATE = Symbol('Mutate');
   public static readonly PRE_MEASURE = Symbol('Pre-measure');
   public static readonly SCROLL_PRE_MEASURE = Symbol('Scroll-measure');
-  public static readonly ANY_PRE_MEASURE = Symbol('Any-measure');
   public static readonly SCROLL_MEASURE = Symbol('Scroll-measure');
   public static readonly SCROLL_MUTATE = Symbol('Scroll-mutate');
-  public static readonly ANY_MUTATE = Symbol('Any-mutate');
   public static readonly SCROLL_CLEANUP = Symbol('Scroll-cleanup');
+  public static readonly ANY_PRE_MEASURE = Symbol('Any-pre-measure');
+  public static readonly ANY_MEASURE = Symbol('Any-measure');
+  public static readonly ANY_MUTATE = Symbol('Any-mutate');
   public static readonly ANY_CLEANUP = Symbol('Any-cleanup');
 }
 
@@ -31,6 +32,7 @@ const ALL_STEP_ORDER: Array<symbol> = [
   RenderStep.ANY_PRE_MEASURE,
   RenderStep.MEASURE,
   RenderStep.SCROLL_MEASURE,
+  RenderStep.ANY_MEASURE,
   RenderStep.PHYSICS,
   RenderStep.MUTATE,
   RenderStep.SCROLL_MUTATE,
@@ -45,6 +47,7 @@ const ANIMATION_FRAME_STEP_ORDER: Array<symbol> = [
   RenderStep.PRE_MEASURE,
   RenderStep.ANY_PRE_MEASURE,
   RenderStep.MEASURE,
+  RenderStep.ANY_MEASURE,
   RenderStep.PHYSICS,
   RenderStep.MUTATE,
   RenderStep.ANY_MUTATE,
@@ -56,6 +59,7 @@ const SCROLL_STEP_ORDER: Array<symbol> = [
   RenderStep.SCROLL_PRE_MEASURE,
   RenderStep.ANY_PRE_MEASURE,
   RenderStep.SCROLL_MEASURE,
+  RenderStep.ANY_MEASURE,
   RenderStep.SCROLL_MUTATE,
   RenderStep.ANY_MUTATE,
   RenderStep.SCROLL_CLEANUP,
@@ -171,6 +175,10 @@ class RenderLoop {
 
   public anyPremeasure(fn: RenderFunction): RenderFunctionID {
     return this.addFnToStep_(fn, RenderStep.ANY_PRE_MEASURE);
+  }
+
+  public anyMeasure(fn: RenderFunction): RenderFunctionID {
+    return this.addFnToStep_(fn, RenderStep.ANY_MEASURE);
   }
 
   public anyMutate(fn: RenderFunction): RenderFunctionID {

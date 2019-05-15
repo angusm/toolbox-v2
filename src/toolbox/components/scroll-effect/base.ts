@@ -10,6 +10,7 @@ import {TScrollEffectCallbackMap} from "./types/t-scroll-effect-callback-map";
 import {TScrollEffectCallback} from "./types/t-scroll-effect-callback";
 import {TScrollEffectDistanceValue} from "./types/t-scroll-effect-distance-value";
 import {forEach} from "../../utils/iterable-iterator/for-each";
+import {SCROLL_ELEMENT} from "../../utils/dom/position/scroll-element";
 
 /**
  * These are the default option values provided to ScrollEffect unless otherwise
@@ -40,8 +41,8 @@ class ScrollEffectRunValue {
   public readonly distance: number;
   public readonly distanceAsPercent: number;
   public readonly lastRunValue: ScrollEffectRunValue;
-  public readonly windowInnerHeight: number;
-  public readonly windowInnerWidth: number;
+  public readonly clientHeight: number;
+  public readonly clientWidth: number;
 
   constructor(
     distance: number,
@@ -50,16 +51,16 @@ class ScrollEffectRunValue {
   ) {
     this.distance = distance;
     this.distanceAsPercent = distanceAsPercent;
-    this.windowInnerHeight = window.innerHeight;
-    this.windowInnerWidth = window.innerWidth;
+    this.clientHeight = SCROLL_ELEMENT.clientHeight;
+    this.clientWidth = SCROLL_ELEMENT.clientWidth;
     this.lastRunValue = lastRunValue;
   }
 
   public shouldTriggerRun(): boolean {
     return this.lastRunValue === null ||
       this.distance !== this.lastRunValue.distance ||
-      this.windowInnerHeight !== this.lastRunValue.windowInnerHeight ||
-      this.windowInnerWidth !== this.lastRunValue.windowInnerWidth;
+      this.clientHeight !== this.lastRunValue.clientHeight ||
+      this.clientWidth !== this.lastRunValue.clientWidth;
   }
 
   public getRunRangeAsPercent(): NumericRange {
