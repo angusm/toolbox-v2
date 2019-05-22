@@ -14,12 +14,12 @@ class ClassModifier {
 }
 
 class AccordionItem {
-  private contentSelector_: string;
-  private itemSelector_: string;
-  private toggleSelector_: string;
-  private content_: Element;
-  private item_: Element;
-  private toggle_: Element;
+  private readonly contentSelector_: string;
+  private readonly itemSelector_: string;
+  private readonly toggleSelector_: string;
+  private readonly content_: Element;
+  private readonly item_: Element;
+  private readonly toggle_: Element;
 
   constructor(
     item: Element,
