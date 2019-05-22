@@ -1,5 +1,5 @@
 import {renderLoop} from '../../utils/render-loop';
-import {zip} from '../../utils/iterable/zip';
+import {zip} from '../../utils/array/zip';
 
 class Class {
   public static CONTAINER: string = 'accordion';
