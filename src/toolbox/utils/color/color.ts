@@ -99,7 +99,7 @@ class Color implements ICssStyleValueInstance, IMeasurableInstance {
     return this.fromString(getStyle(el, 'background-color'));
   }
 
-  public static isHexValue_(value: string) {
+  private static isHexValue_(value: string) {
     if (value[0] === '#') {
       value = value.slice(1);
     }
