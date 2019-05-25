@@ -1,5 +1,4 @@
 import {isFullyVisible} from './is-fully-visible';
-import {getAsList} from "../../object/get-as-list";
 
 function filterToFullyVisible(
   elements: NodeList, container: HTMLElement = null
