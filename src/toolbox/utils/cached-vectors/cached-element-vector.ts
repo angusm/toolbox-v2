@@ -2,8 +2,6 @@ import {DynamicDefaultMap} from '../map/dynamic-default';
 import {MultiValueDynamicDefaultMap} from '../map/multi-value-dynamic-default';
 import {Vector} from '../math/geometry/vector';
 import {renderLoop} from '../render-loop';
-import {RenderFunction} from "../t-render-function";
-import {RenderFunctionID} from "../render-function-id";
 
 const VALUE_LIMIT: number = 2;
 
