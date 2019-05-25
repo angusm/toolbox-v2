@@ -1,10 +1,10 @@
-function replace<V, K=V>(values: Array<K|V>, replacementMap: Map<K, V>): V[] {
+function replace<V>(values: Array<V>, replacementMap: Map<V, V>): V[] {
   return values
     .map((value) => {
-      if (replacementMap.has(<K>value)) {
-        return replacementMap.get(<K>value);
+      if (replacementMap.has(value)) {
+        return replacementMap.get(value);
       } else {
-        return <V>value;
+        return value;
       }
     });
 }
