@@ -5,11 +5,14 @@ import { Firefox } from '../browser/firefox';
 import { Chrome } from '../browser/chrome';
 import { Opera } from '../browser/opera';
 
-const webmSupportedBrowsers: Map<typeof Browser, NumericRange> = new Map([
-  [<typeof Browser>Edge, new NumericRange(75, Number.POSITIVE_INFINITY)],
-  [<typeof Browser>Firefox, new NumericRange(28, Number.POSITIVE_INFINITY)],
-  [<typeof Browser>Chrome, new NumericRange(25, Number.POSITIVE_INFINITY)],
-  [<typeof Browser>Opera, new NumericRange(16, Number.POSITIVE_INFINITY)]
+const webmSupportedBrowsers: Map<typeof Browser, NumericRange> = new Map<
+  typeof Browser,
+  NumericRange
+>([
+  [Edge, new NumericRange(75, Number.POSITIVE_INFINITY)],
+  [Firefox, new NumericRange(28, Number.POSITIVE_INFINITY)],
+  [Chrome, new NumericRange(25, Number.POSITIVE_INFINITY)],
+  [Opera, new NumericRange(16, Number.POSITIVE_INFINITY)]
 ]);
 
 export { webmSupportedBrowsers };
