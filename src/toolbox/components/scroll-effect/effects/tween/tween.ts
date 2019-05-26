@@ -1,10 +1,10 @@
-import {IEffect} from "../i-effect";
-import {renderLoop} from "../../../../utils/render-loop";
-import {setStyle} from "../../../../utils/dom/style/set-style";
-import {Animation} from "./animation";
-import {KeyframeStyle} from "./keyframe-style";
-import {TKeyframesConfig} from "./types/t-keyframes-config";
-import {ITweenOptions} from "./interfaces/tween-options";
+import { IEffect } from '../i-effect';
+import { renderLoop } from '../../../../utils/render-loop';
+import { setStyle } from '../../../../utils/dom/style/set-style';
+import { Animation } from './animation';
+import { KeyframeStyle } from './keyframe-style';
+import { TKeyframesConfig } from './types/t-keyframes-config';
+import { ITweenOptions } from './interfaces/tween-options';
 
 /**
  * Default values provided to Tween for optional parameters.
@@ -13,7 +13,7 @@ import {ITweenOptions} from "./interfaces/tween-options";
 const defaultOptions: ITweenOptions = {
   easingFunction: (distanceAsPercent: number) => distanceAsPercent,
   keyframeStyle: KeyframeStyle.PERCENT,
-  styleTarget: null,
+  styleTarget: null
 };
 
 /**
@@ -24,9 +24,11 @@ const defaultOptions: ITweenOptions = {
  */
 class Tween implements IEffect {
   private readonly animation_: Animation;
-  private readonly styleTarget_: HTMLElement;
-  private readonly cachedGetDistanceFn_:
-    (distanceAsPx: number, distanceAsPercent: number) => number;
+  private readonly styleTarget_: ElementCSSInlineStyle;
+  private readonly cachedGetDistanceFn_: (
+    distanceAsPx: number,
+    distanceAsPercent: number
+  ) => number;
 
   /**
    * Creates a new instance of the tween effect.
@@ -75,17 +77,17 @@ class Tween implements IEffect {
     {
       easingFunction = defaultOptions.easingFunction,
       keyframeStyle = defaultOptions.keyframeStyle,
-      styleTarget = defaultOptions.styleTarget,
+      styleTarget = defaultOptions.styleTarget
     }: ITweenOptions = defaultOptions
   ) {
     this.animation_ = Animation.fromKeyframesConfig(keyframes);
     this.styleTarget_ = styleTarget;
     this.cachedGetDistanceFn_ =
-      keyframeStyle === KeyframeStyle.PERCENT ?
-        (distanceAsPx: number, distanceAsPercent: number) => {
-          return easingFunction(distanceAsPercent);
-        } :
-        (distanceAsPx: number, distanceAsPercent: number) => distanceAsPx;
+      keyframeStyle === KeyframeStyle.PERCENT
+        ? (distanceAsPx: number, distanceAsPercent: number) => {
+            return easingFunction(distanceAsPercent);
+          }
+        : (distanceAsPx: number, distanceAsPercent: number) => distanceAsPx;
   }
 
   /**
@@ -107,15 +109,15 @@ class Tween implements IEffect {
     distanceAsPercent: number
   ): void {
     const distance = this.cachedGetDistanceFn_(rawDistance, distanceAsPercent);
-    const propertyValueMap =
-      this.animation_.getPropertyValueMapFromPosition(distance);
+    const propertyValueMap = this.animation_.getPropertyValueMapFromPosition(
+      distance
+    );
     const styleTarget = this.styleTarget_ === null ? target : this.styleTarget_;
 
     renderLoop.anyMutate(() => {
-      propertyValueMap.forEach(
-        (value, property) => {
-          setStyle(styleTarget, property, value.toStyleString())
-        });
+      propertyValueMap.forEach((value, property) => {
+        setStyle(styleTarget, property, value.toStyleString());
+      });
     });
   }
 
@@ -125,4 +127,4 @@ class Tween implements IEffect {
   public destroy(): void {}
 }
 
-export {Tween};
+export { Tween };
