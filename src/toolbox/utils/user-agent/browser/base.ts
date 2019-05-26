@@ -1,6 +1,8 @@
 import { contains } from '../../string/contains';
 import { USER_AGENT_STRING } from '../string';
 import { webpSupportedBrowsers } from '../feature-support-maps/webp-supported-browsers';
+import { NumericRange } from '../../math/numeric-range';
+import { webmSupportedBrowsers } from '../feature-support-maps/webm-supported-browsers';
 
 type Offset = [string, number];
 
@@ -53,10 +55,20 @@ abstract class Browser {
     return Math.floor(this.getVersion());
   }
 
-  public static isWebpSupported(): boolean {
+  private static isSupported_(
+    featureSupportMap: Map<typeof Browser, NumericRange>
+  ): boolean {
     const version = this.getVersion();
-    const range = webpSupportedBrowsers.get(this);
+    const range = featureSupportMap.get(this);
     return range.contains(version);
+  }
+
+  public static isWebpSupported(): boolean {
+    return Browser.isSupported_(webpSupportedBrowsers);
+  }
+
+  public static isWebmSupported(): boolean {
+    return Browser.isSupported_(webmSupportedBrowsers);
   }
 }
 
