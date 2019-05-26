@@ -1,7 +1,6 @@
 import { ILazyLoadedImageOptions } from './i-lazy-loaded-image-options';
 import { addClassIfMissing } from '../../utils/dom/class/add-class-if-missing';
 import { renderLoop } from '../../utils/render-loop';
-import { getVisibleArea } from '../../utils/dom/position/get-visible-area';
 import { getVisibleDistanceFromRoot } from '../../utils/dom/position/vertical/get-visible-distance-from-root';
 import { loadImage } from '../../utils/loading/load-image';
 
@@ -69,7 +68,13 @@ class LazyLoadedImage {
             callback(this.element_, this.url_);
           });
         });
+      } else {
+        renderLoop.scrollCleanup(() => {
+          this.renderLoop_();
+        });
       }
     });
   }
 }
+
+export { LazyLoadedImage };
