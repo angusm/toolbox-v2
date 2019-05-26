@@ -5,7 +5,7 @@ import { getVisibleDistanceFromRoot } from '../../utils/dom/position/vertical/ge
 import { loadImage } from '../../utils/loading/load-image';
 
 const defaultOptions: ILazyLoadedImageOptions = {
-  getLoadedCssClass: () => 'loaded',
+  getLoadedCssClass: null,
   getLoadDistance: () => window.innerHeight,
   callbacks: []
 };
@@ -33,12 +33,15 @@ class LazyLoadedImage {
   ) {
     this.element_ = imageElement;
     this.url_ = imageUrl;
-    this.callbacks_ = [
-      ...callbacks,
-      (element, url) => {
-        addClassIfMissing(element, getLoadedCssClass(element, url));
-      }
-    ];
+    this.callbacks_ =
+      getLoadedCssClass === null
+        ? callbacks
+        : [
+            ...callbacks,
+            (element, url) => {
+              addClassIfMissing(element, getLoadedCssClass(element, url));
+            }
+          ];
     this.getLoadDistance_ = getLoadDistance;
   }
 
