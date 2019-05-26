@@ -4,6 +4,7 @@ import { Edge } from '../browser/edge';
 import { Firefox } from '../browser/firefox';
 import { Chrome } from '../browser/chrome';
 import { Opera } from '../browser/opera';
+import { isFeatureSupported } from './is-feature-supported';
 
 const webpSupportedBrowsers: Map<typeof Browser, NumericRange> = new Map<
   typeof Browser,
@@ -15,4 +16,8 @@ const webpSupportedBrowsers: Map<typeof Browser, NumericRange> = new Map<
   [Opera, new NumericRange(19, Number.POSITIVE_INFINITY)]
 ]);
 
-export { webpSupportedBrowsers };
+function isWebpSupported(browser: typeof Browser): boolean {
+  return isFeatureSupported(browser, webpSupportedBrowsers);
+}
+
+export { isWebpSupported };

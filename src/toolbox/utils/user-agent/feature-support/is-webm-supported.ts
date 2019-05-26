@@ -4,6 +4,7 @@ import { Edge } from '../browser/edge';
 import { Firefox } from '../browser/firefox';
 import { Chrome } from '../browser/chrome';
 import { Opera } from '../browser/opera';
+import { isFeatureSupported } from './is-feature-supported';
 
 const webmSupportedBrowsers: Map<typeof Browser, NumericRange> = new Map<
   typeof Browser,
@@ -15,4 +16,8 @@ const webmSupportedBrowsers: Map<typeof Browser, NumericRange> = new Map<
   [Opera, new NumericRange(16, Number.POSITIVE_INFINITY)]
 ]);
 
-export { webmSupportedBrowsers };
+function isWebmSupported(browser: typeof Browser): boolean {
+  return isFeatureSupported(browser, webmSupportedBrowsers);
+}
+
+export { isWebmSupported };
