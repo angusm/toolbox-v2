@@ -30,16 +30,14 @@ abstract class Browser {
       ([uaid, x]: [string, Offset[]]) => contains(USER_AGENT_STRING, uaid)
     );
 
-    const offset: Offset = offsets.find((offset: Offset) =>
-      contains(USER_AGENT_STRING, <string>offset[0])
-    );
+    const [browserName, offsetToVersionNumber]: Offset =
+      offsets.find(
+        (offset: Offset) => contains(USER_AGENT_STRING, <string>offset[0]));
 
-    const range: [number, number] = [
-      USER_AGENT_STRING.indexOf(<string>offset[0]),
-      <number>offset[1]
-    ];
+    const startIndex: number =
+      USER_AGENT_STRING.indexOf(<string>browserName) + offsetToVersionNumber;
 
-    const rawVersion = USER_AGENT_STRING.substring(range[0], range[1]);
+    const rawVersion = USER_AGENT_STRING.substring(startIndex);
 
     const trimmedVersion: string = rawVersion
       .split(';')[0]
