@@ -2,7 +2,7 @@ import { LazyLoaded } from './lazy-loaded';
 import { loadImage } from '../../utils/loading/load-image';
 import { setStyle } from '../../utils/dom/style/set-style';
 
-class LazyLoadedImage extends LazyLoaded {
+class LazyLoadedBackgroundImage extends LazyLoaded {
   public loadImage(
     url: string,
     element: HTMLElement,
@@ -17,4 +17,4 @@ class LazyLoadedImage extends LazyLoaded {
   }
 }
 
-export { LazyLoadedImage };
+export { LazyLoadedBackgroundImage };
