@@ -49,6 +49,10 @@ class Formula {
         currentString += value;
       } else {
         if (currentString) {
+          if (insertIndex === 1 && withOperationsAndVariables[0] === Subtract) {
+            insertIndex = 0;
+            currentString = `-${currentString}`;
+          }
           withOperationsAndVariables[insertIndex] =
             Variable.fromString(currentString);
           withOperationsAndVariables[insertIndex + 1] = value;
