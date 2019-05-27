@@ -1,4 +1,4 @@
-const algebraRegex = /^((([0-9]*\.?[0-9]+)([a-zA-Z\%]*))|([a-zA-Z\%]+))$/;
+const algebraRegex = /^\-?((([0-9]*\.?[0-9]+)([a-zA-Z\%]*))|([a-zA-Z\%]+))$/;
 
 type VariableSymbol = string|null;
 
@@ -24,9 +24,10 @@ class Variable {
     if (matches === null) {
       throw new Error(`Invalid variable value in "${s}"`);
     }
+    const sign = s[0] === '-' ? -1 : 1;
     const numericValue = matches[3] ? parseFloat(matches[3]) : 1;
     const symbol = matches[4] || matches[5] || null;
-    return new Variable(numericValue, symbol);
+    return new Variable(sign * numericValue, symbol);
   }
 
   public toString(): string {
