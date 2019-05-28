@@ -1,5 +1,4 @@
 import {getOpacity} from '../style/get-opacity';
-import {isDisplayed} from "../style/is-displayed";
 import {getVisibleDimensions} from "./get-visible-dimensions";
 import {isVisible} from "../style/is-visible";
 
@@ -8,7 +7,7 @@ function getVisibleArea(
   container: HTMLElement = null,
   factorInOpacity: boolean = false
 ): number {
-  if (!isDisplayed(target) || !isVisible(target)) {
+  if (!isVisible(target)) {
     return 0;
   }
 

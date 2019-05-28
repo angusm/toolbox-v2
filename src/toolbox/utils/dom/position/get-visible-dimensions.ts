@@ -1,6 +1,6 @@
 import {Dimensions2d} from '../../math/geometry/dimensions-2d';
-import {getVisibleHeight} from './get-visible-height';
-import {getVisibleWidth} from './get-visible-width';
+import {getVisibleHeight} from './vertical/get-visible-height';
+import {getVisibleWidth} from './horizontal/get-visible-width';
 
 function getVisibleDimensions(
   target: HTMLElement, container: HTMLElement = null

@@ -24,6 +24,26 @@ class SmoothScrollTransition {
   }
 }
 
+const INTERRUPTING_EVENTS = [
+  'mousewheel',
+  'wheel',
+  'interact',
+  'touchstart',
+  'touchmove',
+  'touchend',
+  'resize'
+];
+
+const INTERRUPTING_KEYCODES = new Set([
+  32, // Space
+  38, // Up
+  40, // Down
+  33, // Page Up
+  34, // Page Down
+  36, // Home
+  35, // End
+]);
+
 class SmoothScrollService {
   private static singleton_: SmoothScrollService;
 
@@ -52,18 +72,16 @@ class SmoothScrollService {
   }
 
   private init_(): void {
-    [
-      'mousewheel',
-      'wheel',
-      'interact',
-      'touchstart',
-      'touchmove',
-      'touchend',
-      'keydown',
-      'resize'
-    ].forEach(
+    INTERRUPTING_EVENTS.forEach(
       (eventName) => {
         window.addEventListener(eventName, () => this.cancelTransition());
+      });
+    window.addEventListener(
+      'keydown',
+      (keyDownEvent) => {
+        if (INTERRUPTING_KEYCODES.has(keyDownEvent.keyCode)) {
+          this.cancelTransition()
+        }
       });
     this.renderLoop_();
   }
