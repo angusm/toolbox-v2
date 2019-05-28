@@ -1,13 +1,16 @@
 interface ILazyLoadedImageOptions {
   getLoadedCssClass?: (
-    imageElement: HTMLImageElement,
+    imageElement: HTMLImageElement | HTMLElement,
     imageUrl: string
   ) => string;
   getLoadDistance?: (
-    imageElement: HTMLImageElement,
+    imageElement: HTMLImageElement | HTMLElement,
     imageUrl: string
   ) => number;
-  callbacks?: ((imageElement: HTMLImageElement, imageUrl: string) => void)[];
+  callbacks?: ((
+    imageElement: HTMLImageElement | HTMLElement,
+    imageUrl: string
+  ) => void)[];
 }
 
 export { ILazyLoadedImageOptions };
