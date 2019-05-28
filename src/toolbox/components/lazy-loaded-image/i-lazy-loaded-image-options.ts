@@ -1,8 +1,5 @@
 interface ILazyLoadedImageOptions {
-  getLoadedCssClass?: (
-    imageElement: HTMLImageElement | HTMLElement,
-    imageUrl: string
-  ) => string;
+  getLoadedCssClass?: (imageElement: HTMLImageElement | HTMLElement) => string;
   getLoadDistance?: (
     imageElement: HTMLImageElement | HTMLElement,
     imageUrl: string

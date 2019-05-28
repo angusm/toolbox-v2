@@ -38,7 +38,7 @@ class LazyLoaded {
         : [
             ...callbacks,
             (element, url) => {
-              addClassIfMissing(element, getLoadedCssClass(element, url));
+              addClassIfMissing(element, getLoadedCssClass(element));
             }
           ];
     this.getLoadDistance_ = getLoadDistance;
