@@ -6,7 +6,7 @@
 
 function submitGoogleForm(form: HTMLFormElement, callback?: () => {}): void {
   form.addEventListener('submit', e => {
-    let mappedInput: string[] = [];
+    const mappedInput: string[] = [];
     Array.from(form).map((input: HTMLInputElement) => {
       if (input.name && input.value !== undefined) {
         mappedInput.push(`${input.name}=${input.value}`);
