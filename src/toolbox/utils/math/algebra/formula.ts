@@ -1,16 +1,12 @@
 import {
-  CloseParenthesis,
-  OpenParenthesis,
-  IOperation, Subtract, ALL_OPERATIONS
+  CloseParenthesis, OpenParenthesis, IOperation, Subtract
 } from "./operation";
 import {Variable} from "./variable";
-import {contains as stringContains} from "../../string/contains";
 import {contains as arrayContains} from "../../array/contains";
 import {stringToOperation} from "./string-to-operation";
 import {zip} from "../../array/zip";
 import {operationToString} from "./operation-to-string";
 import {operationsInOrder} from "./operations-in-order";
-import {replace} from "../../array/replace";
 import {replaceInPlace} from "../../array/replace-in-place";
 
 type FormulaPiece = IOperation | Variable | Formula;
@@ -156,38 +152,32 @@ class Formula {
     return new Formula(
       operationsInOrder.reduce(
         (lastPass, operation) => {
-          let reducedFormula: Array<FormulaPiece> = [];
+          let reducedFormula: Array<FormulaPiece> = [lastPass[0]];
 
-          if (lastPass.length === 2 && lastPass[0] === Subtract) {
-            const value = <Variable>lastPass[1];
-            return Subtract.execute(new Variable(0, value.symbol), value);
-          }
-
-          for (let i = 0; i < lastPass.length; i++) {
-            const lastVariable = reducedFormula.slice(-2, -1)[0];
-            const operationToRun = reducedFormula.slice(-1)[0];
+          for (let i: number = 2; i < lastPass.length; i += 2) {
+            const lastVariable = reducedFormula.slice(-1)[0];
+            const operationToRun = lastPass[i - 1];
             const currentVariable = lastPass[i];
 
-            if (reducedFormula.length < 2) {
-              reducedFormula.push(currentVariable);
-            } else if (currentVariable instanceof Formula) {
-              throw new Error('Support for subformulas not yet fully implemented');
+            if (currentVariable instanceof Formula) {
+              throw new Error(
+                'Support for subformulas not yet fully implemented');
             } else if (currentVariable instanceof Variable) {
-              if (
-                !arrayContains(operationsInOrder, operationToRun) ||
-                arrayContains(operationsInOrder, lastVariable)
-              ) {
-                throw new Error('Invalid formula');
+              if (arrayContains(operationsInOrder, lastVariable)) {
+                throw new Error('Operation found where variable was expected');
               }
               if (!(lastVariable instanceof Variable)) {
-                throw new Error('Support for subformulas not yet fully implemented');
+                throw new Error(
+                  'Support for subformulas not yet fully implemented');
               }
+              // Operation is not the one we're running at the oment
               if (operationToRun !== operation) {
-                reducedFormula.push(currentVariable);
+                reducedFormula =
+                  [...reducedFormula, operationToRun, currentVariable];
               } else {
                 reducedFormula =
                   [
-                    ...reducedFormula.slice(0, -2),
+                    ...reducedFormula.slice(0, -1),
                     ...(<IOperation>operationToRun)
                       .execute(lastVariable, currentVariable)];
               }
