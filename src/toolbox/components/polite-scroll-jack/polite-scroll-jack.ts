@@ -261,18 +261,17 @@ class PoliteScrollJack {
 
     let position;
 
-    if (activeElement === currentActiveSlide) {
+    // Check if the container is offscreen
+    const containerVisibleHeight =
+      getVisibleHeightIfUnstuck(this.container_, this.scrollContainer_);
+
+    if (containerVisibleHeight < window.innerHeight) {
+      position = TargetPosition.NONE
+    } else if (activeElement === currentActiveSlide) {
       if (isFillingVisibleHeightIfUnstuck(activeElement)) {
         position = TargetPosition.NONE;
       } else {
-        const totalVisibleHeight =
-          this.carousel_.getSlides().reduce(
-            (result, slide) => result + getVisibleHeightIfUnstuck(slide), 0);
-        if (totalVisibleHeight >= window.innerHeight) {
-          position = TargetPosition.TOP;
-        } else {
-          position = TargetPosition.NONE;
-        }
+        position = TargetPosition.TOP;
       }
     } else if (isFullyVisible(activeElement, this.scrollContainer_)) {
       position = TargetPosition.CENTER;
