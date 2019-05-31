@@ -98,6 +98,7 @@ class PoliteScrollJack {
   private scrollJackTimeout_: number;
   private lastActiveSlide_: ActiveSlide;
   private lastScrollDelta_: number;
+  private scrollJackDisabled_: boolean;
 
   constructor(
     container: HTMLElement,
@@ -116,6 +117,8 @@ class PoliteScrollJack {
     this.scrollJackCallback_ = () => this.scrollJack_();
     this.lastActiveSlide_ = null;
     this.lastScrollDelta_ = 0;
+
+    this.scrollJackDisabled_ = false;
 
     const elementToScroll =
       scrollContainer === null ? SCROLL_ELEMENT : scrollContainer;
@@ -144,7 +147,7 @@ class PoliteScrollJack {
   private scrollJack_(): void {
     renderLoop.measure(() => {
       const amount = this.getScrollAmount_();
-      if (amount !== 0) {
+      if (amount !== 0 && !this.scrollJackDisabled_) {
         this.smoothScrollService_.scrollYByAmount(amount);
       }
     });
@@ -314,6 +317,18 @@ class PoliteScrollJack {
 
   public getCarousel(): Carousel {
     return this.carousel_;
+  }
+
+  public isScrollJackEnabled(): boolean {
+    return this.scrollJackDisabled_;
+  }
+
+  public disableScrollJack(): void {
+    this.scrollJackDisabled_ = true;
+  }
+
+  public enableScrollJack(): void {
+    this.scrollJackDisabled_ = false;
   }
 }
 
