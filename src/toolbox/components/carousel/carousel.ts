@@ -38,6 +38,7 @@ class Carousel implements ICarousel {
   private interactions_: symbol[];
   private lastActiveSlide_: HTMLElement;
   private destroyed_: boolean;
+  private disabled_: boolean;
 
   /**
    * @param container Parent element of slides.
@@ -85,6 +86,7 @@ class Carousel implements ICarousel {
     this.transitionTarget_ = null;
     this.interactions_ = [];
     this.destroyed_ = false;
+    this.disabled_ = false;
     this.slideCssClasses_ =
       DynamicDefaultMap.usingFunction<HTMLElement, Set<string>>(
         () => new Set<string>());
@@ -152,6 +154,11 @@ class Carousel implements ICarousel {
 
     renderLoop.measure(() => {
       renderLoop.cleanup(() => this.render_());
+
+      // Do nothing if disabled
+      if (this.disabled_) {
+        return;
+      }
 
       this.transition_.renderLoop(this); // Run the transition's render loop
       this.handleTransition_();
@@ -321,6 +328,14 @@ class Carousel implements ICarousel {
 
   public getSlideByIndex(index: number): HTMLElement {
     return this.slides_[index];
+  }
+
+  public enable(): void {
+    this.disabled_ = false;
+  }
+
+  public disable(): void {
+    this.disabled_ = true;
   }
 
   destroy() {
