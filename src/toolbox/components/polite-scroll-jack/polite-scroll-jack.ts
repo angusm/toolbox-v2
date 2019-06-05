@@ -18,6 +18,7 @@ import {isFillingVisibleHeightIfUnstuck} from "../../utils/dom/position/vertical
 import {isFullyVisibleIfUnstuck} from "../../utils/dom/position/vertical/is-fully-visible-if-unstuck";
 import {getVisibleHeightIfUnstuck} from "../../utils/dom/position/vertical/get-visible-height-if-unstuck";
 import {isVisibleIfUnstuck} from "../../utils/dom/position/vertical/is-visible-if-unstuck";
+import {ICarousel, ICarouselOptions} from "../carousel/interfaces";
 
 const scroll = Scroll.getSingleton();
 
@@ -84,6 +85,7 @@ interface IPoliteScrollJackOptions {
   delay?: number,
   scrollContainer?: HTMLElement,
   smoothScrollConfig?: ISmoothScrollServiceOptions,
+  carouselConfig?: ICarouselOptions,
 }
 
 class PoliteScrollJack {
@@ -108,10 +110,11 @@ class PoliteScrollJack {
       delay = 200,
       scrollContainer = null,
       smoothScrollConfig = {},
+      carouselConfig =  {allowLooping: false},
     }: IPoliteScrollJackOptions = {}
   ) {
     this.scrollContainer_ = scrollContainer;
-    this.carousel_ = new Carousel(container, slides, {allowLooping: false});
+    this.carousel_ = new Carousel(container, slides, carouselConfig);
     this.container_ = container;
     this.scrollJackTimeout_ = null;
     this.delay_ = delay;

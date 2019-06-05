@@ -1,4 +1,4 @@
-import {ICarousel, ITransition} from './interfaces';
+import {ICarousel, ICarouselOptions, ITransition} from './interfaces';
 import {isVisible} from '../../utils/dom/position/is-visible';
 import {removeFirstInstance} from '../../utils/array/remove-first-instance';
 import {renderLoop} from '../../utils/render-loop';
@@ -65,14 +65,7 @@ class Carousel implements ICarousel {
       afterCssClass = CssClass.AFTER_SLIDE,
       allowLooping = true,
       transition = defaultTransition,
-    }: {
-      onTransitionCallbacks?: ((carousel: ICarousel) => void)[],
-      activeCssClass?: string,
-      beforeCssClass?: string,
-      afterCssClass?: string,
-      allowLooping?: boolean,
-      transition?: ITransition,
-    } = {}
+    }: ICarouselOptions = {}
   ) {
     this.activeCssClass_ = activeCssClass;
     this.beforeCssClass_ = beforeCssClass;

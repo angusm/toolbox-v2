@@ -29,7 +29,17 @@ interface ICarousel {
   transitionToIndex(index: number, skipSync: boolean): void;
 }
 
+interface ICarouselOptions {
+  onTransitionCallbacks?: ((carousel: ICarousel) => void)[],
+  activeCssClass?: string,
+  beforeCssClass?: string,
+  afterCssClass?: string,
+  allowLooping?: boolean,
+  transition?: ITransition,
+}
+
 export {
   ICarousel,
+  ICarouselOptions,
   ITransition,
 };
