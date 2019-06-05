@@ -13,6 +13,7 @@ interface ICarousel {
   isBeingInteractedWith(interaction?: symbol): boolean;
   isIdle(): boolean;
   getActiveSlide(): HTMLElement;
+  getLastActiveSlide(): HTMLElement;
   getActiveSlideIndex(): number;
   getSlideIndex(slide: HTMLElement): number;
   getSlidesBetween(a: HTMLElement, b: HTMLElement): HTMLElement[];

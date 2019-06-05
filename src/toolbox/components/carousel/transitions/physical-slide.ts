@@ -22,6 +22,7 @@ import {sumOffsetWidthsFromArray} from "../../../utils/dom/position/sum-offset-w
 import {getVisibleDistanceFromRoot} from '../../../utils/dom/position/horizontal/get-visible-distance-from-root';
 import {wrapIndex} from "../../../utils/array/wrap-index";
 import {SCROLL_ELEMENT} from "../../../utils/dom/position/scroll-element";
+import {min} from "../../../utils/array/min";
 
 const MAX_DRAG_VELOCITY = 10000;
 const SLIDE_INTERACTION = Symbol('Physical Slide Interaction');
@@ -382,8 +383,16 @@ class PhysicalSlide implements ITransition {
   }
 
   public getActiveSlide(carousel: ICarousel): HTMLElement {
-    return <HTMLElement>getClosestToCenter(
-      carousel.getSlides(), carousel.getContainer());
+    const lastActiveSlide = carousel.getLastActiveSlide()
+    return min(
+      carousel.getSlides(),
+      (el) => {
+        return Math.abs(
+          getVisibleDistanceBetweenElementCenters(
+            <HTMLElement>el, carousel.getContainer()));
+      },
+      (el) => el === lastActiveSlide ? 0 : 1,
+    );
   }
 
   public hasTransitionedTo(slide: HTMLElement, carousel: ICarousel): boolean {
