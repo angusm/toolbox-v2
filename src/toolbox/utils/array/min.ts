@@ -9,7 +9,7 @@ function min<T>(values: T[], ...scoreFns: ((v: T) => number)[]): T {
     if (minScore > score) {
       minValue = value;
       minScore = score;
-    } else if (minScore === score) {
+    } else if (minScore === score && scoreFns.length > 1) {
       let i = 1;
       let tieBreaker = scoreFns[i];
       while (
