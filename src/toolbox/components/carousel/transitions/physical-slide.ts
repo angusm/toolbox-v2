@@ -23,6 +23,7 @@ import {getVisibleDistanceFromRoot} from '../../../utils/dom/position/horizontal
 import {wrapIndex} from "../../../utils/array/wrap-index";
 import {SCROLL_ELEMENT} from "../../../utils/dom/position/scroll-element";
 import {min} from "../../../utils/array/min";
+import {ROOT_ELEMENT} from "../../../utils/dom/position/root-element";
 
 const MAX_DRAG_VELOCITY = 10000;
 const SLIDE_INTERACTION = Symbol('Physical Slide Interaction');
@@ -199,7 +200,7 @@ class PhysicalSlide implements ITransition {
     if (isOffscreen) {
       const xTranslation = -totalWidth * distanceFromCenterSign;
       const translatedDistanceFromCenter =
-        (SCROLL_ELEMENT.clientHeight * distanceFromCenterSign) +
+        (ROOT_ELEMENT.clientWidth * distanceFromCenterSign) +
         distanceFromCenter + xTranslation;
 
       if (

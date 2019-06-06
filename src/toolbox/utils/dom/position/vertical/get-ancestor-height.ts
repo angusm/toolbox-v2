@@ -1,7 +1,7 @@
-import {SCROLL_ELEMENT} from "../scroll-element";
+import {ROOT_ELEMENT} from "../root-element";
 
 function getAncestorHeight(ancestor: HTMLElement = null): number {
-  return ancestor ? ancestor.offsetHeight : SCROLL_ELEMENT.clientHeight;
+  return ancestor ? ancestor.offsetHeight : ROOT_ELEMENT.clientHeight;
 }
 
 export {getAncestorHeight};

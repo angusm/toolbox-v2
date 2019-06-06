@@ -9,6 +9,7 @@ import {max} from "../../array/max";
 import {getDistanceUntilVisible} from "../position/get-distance-until-visible";
 import {getVisibleDistanceBetweenElementCenters} from "../position/vertical/get-visible-distance-between-element-centers";
 import {SCROLL_ELEMENT} from "../position/scroll-element";
+import {ROOT_ELEMENT} from "../position/root-element";
 
 // TODO: Make functional with horizontal scrolling as well.
 
@@ -33,7 +34,7 @@ function getCurrentAnchorByVisibleOrSeen(
       .filter((anchor) => isStyledVisible(anchor) && isDisplayed(anchor))
       .filter((anchor) => {
         return getVisibleDistanceBetweenElementCenters(anchor, null) <=
-          SCROLL_ELEMENT.clientHeight / 2;
+          ROOT_ELEMENT.clientHeight / 2;
       });
 
   //noinspection JSSuspiciousNameCombination

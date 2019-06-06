@@ -1,6 +1,7 @@
 import {Vector} from './vector';
 import {areArrayValuesEqual} from "../../array/are-array-values-equal";
 import {SCROLL_ELEMENT} from "../../dom/position/scroll-element";
+import {ROOT_ELEMENT} from "../../dom/position/root-element";
 
 class Dimensions2d extends Vector {
   constructor(width: number = 0, height: number = 0, ...args: number[]) {
@@ -42,6 +43,10 @@ class Dimensions2d extends Vector {
     }
   }
 
+  public static fromRootElement<T extends Dimensions2d>() {
+    return <T>new this(ROOT_ELEMENT.clientWidth, ROOT_ELEMENT.clientHeight);
+  }
+
   public static fromScrollElementClient<T extends Dimensions2d>() {
     return <T>new this(SCROLL_ELEMENT.clientWidth, SCROLL_ELEMENT.clientHeight);
   }
@@ -50,7 +55,7 @@ class Dimensions2d extends Vector {
       return <T>new this(window.innerWidth, window.innerHeight);
   }
 
-  public getArea(): number{
+  public getArea(): number {
     return this.width * this.height;
   }
 

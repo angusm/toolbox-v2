@@ -11,6 +11,7 @@ import {TScrollEffectCallback} from "./types/t-scroll-effect-callback";
 import {TScrollEffectDistanceValue} from "./types/t-scroll-effect-distance-value";
 import {forEach} from "../../utils/iterable-iterator/for-each";
 import {SCROLL_ELEMENT} from "../../utils/dom/position/scroll-element";
+import {ROOT_ELEMENT} from "../../utils/dom/position/root-element";
 
 /**
  * These are the default option values provided to ScrollEffect unless otherwise
@@ -51,8 +52,8 @@ class ScrollEffectRunValue {
   ) {
     this.distance = distance;
     this.distanceAsPercent = distanceAsPercent;
-    this.clientHeight = SCROLL_ELEMENT.clientHeight;
-    this.clientWidth = SCROLL_ELEMENT.clientWidth;
+    this.clientHeight = ROOT_ELEMENT.clientHeight;
+    this.clientWidth = ROOT_ELEMENT.clientWidth;
     this.lastRunValue = lastRunValue;
   }
 
