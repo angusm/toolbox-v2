@@ -1,10 +1,10 @@
-import {Browser, Offset} from "./base";
+import {Browser, TOffset} from "./base";
 import {contains} from "../../string/contains";
 import {USER_AGENT_STRING} from "../string";
 
 class Firefox extends Browser {
   protected static name_: string = 'Firefox';
-  protected static uaidsWithOffsets_: [string, Offset[]][] =
+  protected static uaidsWithOffsets_: [string, TOffset[]][] =
     [
       ['Firefox', [['Firefox', 8]]]
     ];

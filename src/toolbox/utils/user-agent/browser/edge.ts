@@ -1,8 +1,8 @@
-import {Browser, Offset} from "./base";
+import {Browser, TOffset} from "./base";
 
 class Edge extends Browser {
   protected static name_: string = 'Edge';
-  protected static uaidsWithOffsets_: [string, Offset[]][] =
+  protected static uaidsWithOffsets_: [string, TOffset[]][] =
     [
       ['Edge', [['Edge', 5]]]
     ];
