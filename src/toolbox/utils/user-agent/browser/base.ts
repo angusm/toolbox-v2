@@ -10,9 +10,11 @@ type TOffset = [string, number];
 abstract class Browser {
   protected static name_: string;
   protected static uaidsWithOffsets_: [string, TOffset[]][];
-  protected static genericStylePropertyToSupported_: Map<string, string>;
+  protected static genericStylePropertyToSupported_: Map<string, string> =
+    new Map();
   protected static supportedStylePropertyToGeneric_: Map<string, string>;
-  protected static genericStyleValueToSupported_: MultiValueMap<string, string>;
+  protected static genericStyleValueToSupported_
+    : MultiValueMap<string, string> = new MultiValueMap();
   protected static supportedStyleValueToGeneric_: MultiValueMap<string, string>;
 
   public static getAsCSSModifier() {
