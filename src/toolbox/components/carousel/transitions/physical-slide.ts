@@ -237,11 +237,16 @@ class PhysicalSlide implements ITransition {
     const slidesToAdjust = new Set(nonTargetSlides);
     const slideCount = slides.length;
 
-    let distanceOnLeftToCover = Math.max(slideLeftEdgeDistanceFromLeftEdge, 0);
+    let distanceOnLeftToCover =
+      carousel.allowsLooping() ?
+        Math.max(slideLeftEdgeDistanceFromLeftEdge, 0) :
+        targetSlideIndex;
     let distanceOnRightToCover =
-      Math.min(
-        SCROLL_ELEMENT.clientWidth,
-        SCROLL_ELEMENT.clientWidth - slideRightEdgeDistanceFromWindowLeftEdge);
+      carousel.allowsLooping() ?
+        Math.min(
+          SCROLL_ELEMENT.clientWidth,
+          SCROLL_ELEMENT.clientWidth - slideRightEdgeDistanceFromWindowLeftEdge) :
+        slides.length - targetSlideIndex - 1;
     let leftIndex = targetSlideIndex;
     let rightIndex = targetSlideIndex;
 
@@ -319,15 +324,30 @@ class PhysicalSlide implements ITransition {
       return 0;
     }
     const inBetweenSlides =
-      loopSlice(
-        carousel.getSlides(),
-        carousel.getSlideIndex(slide) - direction,
-        carousel.getSlideIndex(targetSlide),
-        -direction);
+      this.getInBetweenSlides_(carousel, targetSlide, slide, direction);
     const inBetweenWidth = sumOffsetWidthsFromArray(inBetweenSlides);
     const halfSlideWidth = slide.offsetWidth / 2;
     const halfTargetSlideWidth = targetSlide.offsetWidth / 2;
     return (halfSlideWidth + inBetweenWidth + halfTargetSlideWidth) * direction;
+  }
+
+  private getInBetweenSlides_(
+    carousel: ICarousel,
+    targetSlide: HTMLElement,
+    slide: HTMLElement,
+    direction: number
+  ): HTMLElement[] {
+    const targetIndex = carousel.getSlideIndex(targetSlide);
+    const endIndex = carousel.getSlideIndex(slide) - direction;
+    if (carousel.allowsLooping()) {
+      return loopSlice(carousel.getSlides(), endIndex, targetIndex, -direction);
+    } else if (targetIndex === endIndex) {
+      return [];
+    } else {
+      return carousel.getSlides().slice(
+        Math.min(targetIndex + 1, endIndex),
+        Math.max(targetIndex, endIndex + direction));
+    }
   }
 
   private startInteraction_(event: DragStart, carousel: ICarousel): void {
