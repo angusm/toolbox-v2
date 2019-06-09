@@ -144,9 +144,7 @@ class PoliteScrollJack {
   }
 
   public init(): void {
-    renderLoop.anyMeasure(() => {
-      renderLoop.anyCleanup(() => this.renderLoop_());
-    });
+    this.renderLoop_();
   }
 
   private scrollJack_(): void {
