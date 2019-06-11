@@ -18,7 +18,7 @@ import {isFillingVisibleHeightIfUnstuck} from "../../utils/dom/position/vertical
 import {isFullyVisibleIfUnstuck} from "../../utils/dom/position/vertical/is-fully-visible-if-unstuck";
 import {getVisibleHeightIfUnstuck} from "../../utils/dom/position/vertical/get-visible-height-if-unstuck";
 import {isVisibleIfUnstuck} from "../../utils/dom/position/vertical/is-visible-if-unstuck";
-import {ICarousel, ICarouselOptions} from "../carousel/interfaces";
+import {ICarouselOptions} from "../carousel/interfaces";
 
 const scroll = Scroll.getSingleton();
 
@@ -96,6 +96,7 @@ class PoliteScrollJack {
   private readonly scrollJackCallback_: () => void;
   private readonly scrollContainer_: HTMLElement;
 
+  private firstRun_: boolean;
   private destroyed_: boolean;
   private disabled_: boolean;
   private scrollJackTimeout_: number;
@@ -121,6 +122,7 @@ class PoliteScrollJack {
     this.scrollJackCallback_ = () => this.scrollJack_();
     this.lastActiveSlide_ = null;
     this.lastScrollDelta_ = 0;
+    this.firstRun_ = true;
 
     this.disabled_ = false;
     this.scrollJackDisabled_ = false;
@@ -212,7 +214,7 @@ class PoliteScrollJack {
       return currentActiveSlide;
     }
 
-    if (scrollDeltaSign === 0) {
+    if (scrollDeltaSign === 0 && !this.firstRun_) {
       return currentActiveSlide;
     }
 
@@ -227,7 +229,10 @@ class PoliteScrollJack {
 
     // Get elements in the last scrolled direction
     let elementsInTheRightDirection: HTMLElement[];
-    if (isScrollingDown) {
+    if (this.firstRun_) {
+      this.firstRun_ = false;
+      elementsInTheRightDirection = this.carousel_.getSlides();
+    } else if (isScrollingDown) {
       elementsInTheRightDirection =
         this.carousel_.getSlidesAfter(currentActiveSlide);
       if (includeCurrentActiveSlide) {
