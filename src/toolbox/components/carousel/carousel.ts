@@ -153,8 +153,8 @@ class Carousel implements ICarousel {
         return;
       }
 
-      this.transition_.renderLoop(this); // Run the transition's render loop
       this.handleTransition_();
+      this.transition_.renderLoop(this); // Run the transition's render loop
 
       const activeSlide = this.getActiveSlide();
 
@@ -302,7 +302,7 @@ class Carousel implements ICarousel {
     }
 
     const clampedIndex = this.getClampedIndex_(index);
-    this.transitionToSlide(this.getSlides()[clampedIndex]);
+    this.transitionToSlide(this.getSlideByIndex(clampedIndex));
   }
 
   private getClampedIndex_(index: number): number {
@@ -316,7 +316,9 @@ class Carousel implements ICarousel {
   }
 
   public transitionToSlideByIndex(index: number): void {
-    this.transitionToSlide(this.getSlideByIndex(index));
+    console.warn(
+      'transitionToSlideByIndex is deprecated, please use transitionToIndex');
+    this.transitionToIndex(index);
   }
 
   public getSlideByIndex(index: number): HTMLElement {

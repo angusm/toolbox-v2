@@ -8,7 +8,6 @@ import {getVisibleDistanceBetweenElementCenters}  from '../../../utils/dom/posit
 import {renderLoop}  from '../../../utils/render-loop';
 import {translate2d}  from '../../../utils/dom/position/translate-2d';
 import {ICarousel, ITransition} from "../interfaces";
-import {getClosestToCenter} from "../../../utils/dom/position/horizontal/get-closest-to-center";
 import {PhysicallyDraggable} from "../../draggable/physically-draggable";
 import {DraggableFixedYConstraint} from "../../draggable/constraints/fixed-y";
 import {DynamicDefaultMap} from "../../../utils/map/dynamic-default";
@@ -109,9 +108,7 @@ class PhysicalSlide implements ITransition {
           eventHandler.addListener(
             draggable,
             Drag,
-            (event: Drag) => {
-              this.adjustSplit_(carousel, event.getElement(), event.getDelta());
-            });
+            (event: Drag) => this.adjustSplit_(carousel, event.getElement()));
           eventHandler.addListener(
             draggable,
             DragEnd,
@@ -122,7 +119,7 @@ class PhysicalSlide implements ITransition {
   public renderLoop(carousel: ICarousel): void {
     renderLoop.measure(() => {
       if (!carousel.isBeingInteractedWith()) {
-        if(this.transitionTargets_.has(carousel)) {
+        if (this.transitionTargets_.has(carousel)) {
           this.transitionToTarget_(carousel);
         } else {
           this.adjustSplit_(carousel);
@@ -215,8 +212,7 @@ class PhysicalSlide implements ITransition {
 
   private adjustSplit_(
     carousel: ICarousel,
-    target: HTMLElement = null,
-    dragAdjustment: Vector2d = ZERO_VECTOR_2D
+    target: HTMLElement = null
   ): void {
     // No matter what we need to loop adjust the target if we have one
     if (target !== null) {
@@ -241,13 +237,13 @@ class PhysicalSlide implements ITransition {
       carousel.allowsLooping() ?
         Math.max(slideLeftEdgeDistanceFromLeftEdge, 0) :
         targetSlideIndex;
+    const clientWidth = SCROLL_ELEMENT.clientWidth;
+    let leftIndex = targetSlideIndex;
     let distanceOnRightToCover =
       carousel.allowsLooping() ?
         Math.min(
-          SCROLL_ELEMENT.clientWidth,
-          SCROLL_ELEMENT.clientWidth - slideRightEdgeDistanceFromWindowLeftEdge) :
-        slides.length - targetSlideIndex - 1;
-    let leftIndex = targetSlideIndex;
+          clientWidth, clientWidth - slideRightEdgeDistanceFromWindowLeftEdge) :
+        slides.length - 1 - targetSlideIndex;
     let rightIndex = targetSlideIndex;
 
     while (slidesToAdjust.size > 0) {
@@ -262,7 +258,7 @@ class PhysicalSlide implements ITransition {
         }
         this.adjustSlideForSplit_(
           carousel, targetSlide, slideToAdjust, distancesFromTarget, -1);
-        distanceOnLeftToCover -= slideToAdjust.offsetWidth;
+        distanceOnLeftToCover--;
         slidesToAdjust.delete(slideToAdjust);
       } else {
         rightIndex = wrapIndex(rightIndex + 1, slideCount);
@@ -275,7 +271,7 @@ class PhysicalSlide implements ITransition {
         }
         this.adjustSlideForSplit_(
           carousel, targetSlide, slideToAdjust, distancesFromTarget, 1);
-        distanceOnRightToCover -= slideToAdjust.offsetWidth;
+        distanceOnRightToCover--;
         slidesToAdjust.delete(slideToAdjust);
       }
     }
@@ -404,7 +400,7 @@ class PhysicalSlide implements ITransition {
   }
 
   public getActiveSlide(carousel: ICarousel): HTMLElement {
-    const lastActiveSlide = carousel.getLastActiveSlide()
+    const lastActiveSlide = carousel.getLastActiveSlide();
     return min(
       carousel.getSlides(),
       (el) => {
