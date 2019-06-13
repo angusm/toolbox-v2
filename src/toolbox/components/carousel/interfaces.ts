@@ -28,6 +28,8 @@ interface ICarousel {
   endInteraction(interaction: symbol): void;
   transitionSlidesBy(value: number): void;
   transitionToIndex(index: number, skipSync: boolean): void;
+  getFirstSlide(): HTMLElement;
+  getLastSlide(): HTMLElement;
 }
 
 interface ICarouselOptions {

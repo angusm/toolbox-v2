@@ -1,8 +1,8 @@
-import {Physical2d} from "../../physical/physical-2d";
+import {TEasingFunction} from "../../../shared-types/t-easing-function";
 
 interface IPhysicalSlideConfig {
-  physical2d?: Physical2d;
   transitionTime?: number;
+  easingFunction?: TEasingFunction;
 }
 
 export {IPhysicalSlideConfig};

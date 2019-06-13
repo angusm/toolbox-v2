@@ -7,8 +7,8 @@ import {addDomEventListener} from '../../utils/dom/event/add-dom-event-listener'
 import {cursor} from '../../utils/cached-vectors/cursor';
 import {eventHandler} from '../../utils/event/event-handler';
 import {renderLoop} from '../../utils/render-loop';
-import {translate2d} from '../../utils/dom/position/translate-2d';
 import {Vector2d} from "../../utils/math/geometry/vector-2d";
+import {DraggableSyncManager} from "./draggable-sync-manager";
 
 class Draggable implements IDraggable {
   private readonly element_: HTMLElement;
@@ -33,24 +33,18 @@ class Draggable implements IDraggable {
   private initInteraction_(): void {
     addDomEventListener(
       this.element_, EventType.CURSOR_DOWN, () => this.startInteraction_());
-    const endInteractionEventTypes = [
-      EventType.CONTEXTMENU,
-      EventType.DRAGSTART,
-      EventType.CURSOR_UP,
-    ];
-    endInteractionEventTypes
-      .forEach(
-        (eventType) => {
-          addDomEventListener(window, eventType, () => this.endInteraction_());
-        });
+    const endEventTypes =
+      [EventType.CONTEXTMENU,  EventType.DRAGSTART,  EventType.CURSOR_UP];
+    const endInteraction =  () => this.endInteraction_();
+    endEventTypes.forEach(
+      (eventType) => addDomEventListener(window, eventType, endInteraction));
     addDomEventListener(
       this.element_,
       EventType.MOUSEOUT,
       (event) => {
-        if (event.target !== this.element_) {
-          return;
+        if (event.target === this.element_) {
+          this.endInteraction_();
         }
-        this.endInteraction_()
       });
   }
 
@@ -70,10 +64,9 @@ class Draggable implements IDraggable {
 
     this.interacting_ = false;
     renderLoop.measure(() => {
-      eventHandler
-        .dispatchEvent(
-          new DragEnd(
-            this, this.getDelta_(), cursor.getClient().getLastFrameVelocity()));
+      eventHandler.dispatchEvent(
+        new DragEnd(
+          this, this.getDelta_(), cursor.getClient().getLastFrameVelocity()));
     });
   }
 
@@ -96,7 +89,7 @@ class Draggable implements IDraggable {
     if (!delta.getLength()) {
       return;
     }
-    translate2d(this.element_, delta);
+    DraggableSyncManager.getSingleton().renderDrag(this, delta);
     eventHandler.dispatchEvent(new Drag(this, this.element_, delta));
   }
 
