@@ -1,4 +1,13 @@
 function getContentInFirstSetOfParentheses(s: string): string {
+  if (s.indexOf('(') === -1 && s.indexOf(')') === -1) {
+    return '';
+  }
+  if (s.indexOf('(') === -1 && s.indexOf(')') !== -1) {
+    throw new Error(
+      "Value passed to getContentInFirstSetOfParentheses() has no " +
+      "opening parenthesis");
+  }
+
   const startIndex = s.indexOf('(') + 1;
   let openParenthesesCount = 1;
   let currentIndex = startIndex;

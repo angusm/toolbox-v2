@@ -1,29 +1,30 @@
-import {
-  CloseParenthesis, OpenParenthesis, IOperation, Subtract
-} from "./operation";
+import {IOperation, Subtract} from "./operation";
 import {Variable} from "./variable";
-import {contains as arrayContains} from "../../array/contains";
 import {stringToOperation} from "./string-to-operation";
-import {zip} from "../../array/zip";
 import {operationToString} from "./operation-to-string";
 import {operationsInOrder} from "./operations-in-order";
 import {replaceInPlace} from "../../array/replace-in-place";
+import {isDefined} from "../../is-defined";
+import {contains} from "../../array/contains";
 
-type FormulaPiece = IOperation | Variable | Formula;
-type InterstitialFormulaPiece = IOperation | Symbol | string
-type InterstitialFormula = Array<InterstitialFormulaPiece>
+type FormulaPiece = IOperation | Variable;
+type InterstitialFormulaPiece = IOperation | string;
+type InterstitialFormula = InterstitialFormulaPiece[];
+
+const formulaRegex = new RegExp(/^[A-Za-z0-9\.\-\s\+\*\/\%]*$/);
 
 class Formula {
   private readonly pieces_: FormulaPiece[];
 
   constructor(pieces: FormulaPiece[]) {
-    if (Formula.hasImplicitMultiplication_(pieces)) {
-      throw new Error('Formula does not support implicit multiplication.')
-    }
-    this.pieces_ = pieces;
+    this.pieces_ = Formula.reduce_(pieces);
   }
 
   public static fromString(formula: string): Formula {
+    if (!formulaRegex.test(formula)) {
+      throw new Error(`Invalid formula "${formula}", does not match regex`);
+    }
+
     const stripped: string = formula.replace(/ /g, '');
 
     // Insert operations
@@ -31,81 +32,26 @@ class Formula {
       replaceInPlace<InterstitialFormulaPiece>(
         stripped.split(''), stringToOperation);
 
-    let hasSubformula = false;
-
     // Group variable strings
-    // NOTE: Intentionally verbose for sake of performance
-    let withOperationsAndVariables: Array<FormulaPiece|Symbol> = [];
-    let currentString = '';
+    let withOperationsAndVariables: FormulaPiece[] = [];
     let insertIndex = 0;
-    for (let i = 0; i < withOperations.length; i++) {
-      const value = withOperations[i];
-      hasSubformula = value === OpenParenthesis || hasSubformula;
-      if (typeof value === 'string') {
-        currentString += value;
-      } else {
-        if (currentString) {
-          if (insertIndex === 1 && withOperationsAndVariables[0] === Subtract) {
-            insertIndex = 0;
-            currentString = `-${currentString}`;
-          }
-          withOperationsAndVariables[insertIndex] =
-            Variable.fromString(currentString);
-          withOperationsAndVariables[insertIndex + 1] = value;
-          currentString = '';
-          insertIndex += 2
-        } else {
-          withOperationsAndVariables[insertIndex] = value;
-          insertIndex++;
+
+    let i = 0;
+    while (i < withOperations.length) {
+      let value = '';
+      if (typeof withOperations[i] === 'string') {
+        while (typeof withOperations[i] === 'string') {
+          value += withOperations[i];
+          i++;
         }
-      }
-    }
-    if (currentString) {
-      withOperationsAndVariables[insertIndex] =
-        Variable.fromString(currentString);
-    }
-
-    if (hasSubformula) {
-      return new Formula(
-        Formula.extractSubFormulas_(withOperationsAndVariables));
-    } else {
-      return new Formula(<FormulaPiece[]>withOperationsAndVariables);
-    }
-  }
-
-  private static extractSubFormulas_(
-    values: Array<FormulaPiece|Symbol>
-  ): FormulaPiece[] {
-    const result: FormulaPiece[] = [];
-
-    for (let i = 0; i < values.length; i++) {
-      const value = values[i];
-      if (value === OpenParenthesis) {
-        const startIndex: number = i;
-        let openParenthesesCount = 1;
-
-        for (i = i + 1; i < values.length; i++) {
-          const candidateValue = values[i];
-          if (candidateValue === OpenParenthesis) {
-            openParenthesesCount++;
-          } else if (candidateValue === CloseParenthesis) {
-            openParenthesesCount--;
-          }
-
-          if (openParenthesesCount === 0) {
-            break;
-          }
-        }
-
-        const subFormula: Formula =
-          new Formula(Formula.extractSubFormulas_(values.slice(startIndex, i)));
-        result.push(subFormula);
+        withOperationsAndVariables[insertIndex] = Variable.fromString(value);
       } else {
-        result.push(<FormulaPiece>value);
+        withOperationsAndVariables[insertIndex] = <IOperation>withOperations[i];
+        i++;
       }
+      insertIndex++;
     }
-
-    return result;
+    return new Formula(withOperationsAndVariables);
   }
 
   public getPieces() {
@@ -113,7 +59,7 @@ class Formula {
   }
 
   public toString(): string {
-    return this.reduce().getPieces()
+    return this.getPieces()
       .map((value) => {
         if (operationToString.has(<IOperation>value)) {
           return operationToString.get(<IOperation>value);
@@ -124,69 +70,165 @@ class Formula {
       .join(' ');
   }
 
-  private static isVariableOrFormula_(formulaPiece: FormulaPiece): boolean {
-    return formulaPiece instanceof Variable || formulaPiece instanceof Formula;
+  private static reduce_(pieces: FormulaPiece[]): FormulaPiece[] {
+    return Formula.reduceWithExecution_(
+      Formula.reduceWithNegation_(Formula.reduceFirstNegation_(pieces)));
   }
 
-  private static hasImplicitMultiplication_(pieces: FormulaPiece[]): boolean {
-    const zippedPairs: FormulaPiece[][] =
-      zip(pieces.slice(0, -1), pieces.slice(1));
+  private static reduceFirstNegation_(pieces: FormulaPiece[]): FormulaPiece[] {
+    if (pieces.length > 1 && pieces[0] === Subtract) {
+      const firstValue = pieces[1];
+      if (!(firstValue instanceof Variable)) {
+        throw new Error('Formulas should start with a Variable');
+      }
+      const result = pieces.slice(1);
+      result[0] = firstValue.invert();
+      return result;
+    } else {
+      return pieces;
+    }
+  }
 
-    return zippedPairs
-      .some(([a, b]) => {
-        return Formula.isVariableOrFormula_(a) &&
-          Formula.isVariableOrFormula_(b);
-      });
+  private static reduceWithNegation_(pieces: FormulaPiece[]): FormulaPiece[] {
+    const length = pieces.length;
+    if (length === 0) {
+      return pieces;
+    }
+
+    const firstValue = pieces[0];
+    if (!(firstValue instanceof Variable)) {
+      throw new Error('Formulas should start with a Variable');
+    }
+
+    if (length === 1) {
+      return pieces;
+    }
+
+    let result: FormulaPiece[] = [firstValue];
+    let insertIndex = 1;
+
+    const insert = (current: FormulaPiece) => {
+      result[insertIndex] = current;
+      insertIndex++;
+    };
+
+    for (let i = 1; i < length; i++) {
+      const last = result[insertIndex - 1];
+      const secondLast = result[insertIndex - 2];
+      const current = pieces[i];
+
+      if (current instanceof Variable) {
+        // Implicit multiplication
+        if (last instanceof Variable) {
+          throw new Error('Formula does not support implicit multiplication.');
+        } else if (last === Subtract && !(secondLast instanceof Variable)) {
+          result[insertIndex - 1] = current.invert();
+        } else if (!(secondLast instanceof Variable)) {
+          throw new Error('Formulas must have a value between operators.');
+        } else {
+          insert(current);
+        }
+      } else {
+        if (!(last instanceof Variable)) {
+          if (!(current === Subtract)) {
+            throw new Error('Formulas must have a value between operators.');
+          } else if (
+            !(secondLast instanceof Variable) && isDefined(secondLast)
+          ) {
+            throw new Error('Formulas must have a value between operators.');
+          } else {
+            insert(current);
+          }
+        } else {
+          insert(current);
+        }
+      }
+    }
+
+    return result;
+  }
+
+  private static reduceWithOperations_(
+    pieces: FormulaPiece[], operations: IOperation[]
+  ): FormulaPiece[] {
+
+    const matchingOperationsList =
+      operations.filter((operation) => contains(pieces, operation));
+    if (matchingOperationsList.length === 0) {
+      return pieces;
+    }
+    const matchingOperationsSet = new Set(matchingOperationsList);
+
+    if (pieces.length === 1) {
+      return pieces;
+    } else if (pieces.length % 2 === 0) {
+      throw new Error(
+        'Cannot reduce with operation on an even number of pieces');
+    }
+
+    let result: FormulaPiece[] = [pieces[0], pieces[1]];
+    let insertIndex = 2;
+
+    for (let i = 2; i < pieces.length; i+= 2) {
+      const lastVariable: FormulaPiece = result[insertIndex - 2];
+      const operation: FormulaPiece = result[insertIndex - 1];
+      const current: FormulaPiece = pieces[i];
+
+      // Check for errors
+      if (!(lastVariable instanceof Variable)) {
+        throw new Error('Found IOperation where a Variable was expected');
+      }
+      if (!(current instanceof Variable)) {
+        throw new Error('Found IOperation where a Variable was expected');
+      }
+      if (operation instanceof Variable) {
+        throw new Error('Found Variable where a IOperation was expected');
+      }
+      if (matchingOperationsSet.has(<IOperation>operation)) {
+        const value = (<IOperation>operation).execute(lastVariable, current);
+        if (value.length === 1) {
+          result.pop(); // Remove the last two values
+          result.pop();
+          result[insertIndex - 2] = value[0];
+          insertIndex--;
+        } else {
+          result[insertIndex - 2] = value[0];
+          result[insertIndex - 1] = value[1];
+          result[insertIndex] = value[2];
+          insertIndex++;
+        }
+      } else {
+        result[insertIndex] = current;
+        insertIndex++;
+      }
+      if (i + 1 < pieces.length) {
+        result[insertIndex] = pieces[i + 1];
+        insertIndex++;
+      }
+    }
+
+    return result;
+  }
+
+  private static reduceWithExecution_(pieces: FormulaPiece[]): FormulaPiece[] {
+    if (pieces.length === 1) {
+      return pieces;
+    }
+    if (pieces.length % 2 === 0) {
+      throw new Error(
+        'Cannot reduce with execution on an even number of pieces');
+    }
+
+    return operationsInOrder.reduce(
+      (result, operations) => Formula.reduceWithOperations_(result, operations),
+      pieces);
   }
 
   public reduce(): Formula {
-    const reducedSubFormulas: FormulaPiece[] =
-      this.pieces_.map((piece: FormulaPiece) => {
-        if (piece instanceof Formula) {
-          return piece.reduce();
-        } else {
-          return piece;
-        }
-      });
-
-    return new Formula(
-      operationsInOrder.reduce(
-        (lastPass, operation) => {
-          let reducedFormula: Array<FormulaPiece> = [lastPass[0]];
-
-          for (let i: number = 2; i < lastPass.length; i += 2) {
-            const lastVariable = reducedFormula.slice(-1)[0];
-            const operationToRun = lastPass[i - 1];
-            const currentVariable = lastPass[i];
-
-            if (currentVariable instanceof Formula) {
-              throw new Error(
-                'Support for subformulas not yet fully implemented');
-            } else if (currentVariable instanceof Variable) {
-              if (arrayContains(operationsInOrder, lastVariable)) {
-                throw new Error('Operation found where variable was expected');
-              }
-              if (!(lastVariable instanceof Variable)) {
-                throw new Error(
-                  'Support for subformulas not yet fully implemented');
-              }
-              // Operation is not the one we're running at the oment
-              if (operationToRun !== operation) {
-                reducedFormula =
-                  [...reducedFormula, operationToRun, currentVariable];
-              } else {
-                reducedFormula =
-                  [
-                    ...reducedFormula.slice(0, -1),
-                    ...(<IOperation>operationToRun)
-                      .execute(lastVariable, currentVariable)];
-              }
-            }
-          }
-          return reducedFormula;
-        },
-        reducedSubFormulas)
-    );
+    console.warn(
+      'Formula.reduce is deprecated. ' +
+      'All formulas are now reduced at construction.');
+    return this;
   }
 }
 

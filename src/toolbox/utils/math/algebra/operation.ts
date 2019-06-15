@@ -52,32 +52,16 @@ class Subtract implements IOperationInstance {
     if (a.symbol === b.symbol) {
       return [new Variable(a.numericValue - b.numericValue, a.symbol)];
     } else {
-      return [a, Add, b.invert()];
+      return [a, Subtract, b];
     }
   }
 }
 
-const OpenParenthesis = Symbol('(');
-const CloseParenthesis = Symbol(')');
-
-const ALL_OPERATIONS: Set<IOperation|symbol> =
-  new Set([
-    Divide,
-    Multiply,
-    Add,
-    Subtract,
-    OpenParenthesis,
-    CloseParenthesis
-  ]);
-
 export {
-  ALL_OPERATIONS,
   IOperation,
   OperationResult,
   Divide,
   Multiply,
   Add,
-  Subtract,
-  OpenParenthesis,
-  CloseParenthesis
+  Subtract
 };

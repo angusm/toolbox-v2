@@ -1,20 +1,17 @@
 import {
   IOperation,
   Add,
-  CloseParenthesis,
   Divide,
-  Multiply, OpenParenthesis,
+  Multiply,
   Subtract
 } from "./operation";
 
 const stringToOperation =
-  new Map<string, IOperation|symbol>([
+  new Map<string, IOperation>([
     ['*', Multiply],
     ['/', Divide],
     ['+', Add],
     ['-', Subtract],
-    ['(', OpenParenthesis],
-    [')', CloseParenthesis],
   ]);
 
 export {stringToOperation};

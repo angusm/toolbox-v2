@@ -1,6 +1,4 @@
 import {TransformValueBase} from "./transform-value-base";
-import {IMeasurableInstance} from "../../../../math/interfaces/measurable";
-import {ICssStyleValueInstance} from "../../interfaces/css-style-value";
 import {
   CSS_CALC_FORMULA_ALLOWED_UNITS,
   CssCalcFormula

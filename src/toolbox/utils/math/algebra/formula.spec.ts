@@ -6,6 +6,19 @@ describe('Formula', () => {
   describe('fromString', () => {
     const tests: any[] = [
       ['-3x', '-3x'],
+      ['-2a + 4y', '-2a + 4y'],
+      ['-2a+4y', '-2a + 4y'],
+      ['-8d+ 2e', '-8d + 2e'],
+      ['-5z +9y', '-5z + 9y'],
+      ['3x', '3x'],
+      ['2a - 4y', '2a - 4y'],
+      ['2a-4y', '2a - 4y'],
+      ['8d- 2e', '8d - 2e'],
+      ['5z -9y', '5z - 9y'],
+      ['a', '1a'],
+      ['a + a', '2a'],
+      ['a + a + a', '3a'],
+      ['a + a - a + a', '2a'],
     ];
     tests.forEach(([testInput, expectedResult]) => {
       it(`should return ${JSON.stringify(expectedResult)} for ${JSON.stringify(testInput)}`, () => {

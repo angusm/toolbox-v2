@@ -47,7 +47,7 @@ class CssRotationCalcFormula implements IMeasurableInstance, ICssStyleValueInsta
       styleString.slice(0, 4) === 'calc' ?
         styleString.slice(5, -1) :
         styleString;
-    const formulaPieces = Formula.fromString(formula).reduce().getPieces();
+    const formulaPieces = Formula.fromString(formula).getPieces();
     const variables: FormulaPiece[] =
       formulaPieces
         .filter(
