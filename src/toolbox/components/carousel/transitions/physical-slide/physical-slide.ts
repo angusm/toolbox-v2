@@ -25,6 +25,7 @@ import {NumericRange} from "../../../../utils/math/numeric-range";
 import {getInvertedDistanceToCenter} from "./get-inverted-distance-to-center";
 import {adjustSlideForSplit} from './adjust-slide-for-split';
 import {adjustSlideForLoop} from "./adjust-slide-for-loop";
+import {sum} from '../../../../utils/math/sum';
 
 const SLIDE_INTERACTION = Symbol('Physical Slide Interaction');
 
@@ -131,6 +132,7 @@ class PhysicalSlide implements ITransition {
     const targetSlide = target ? target : carousel.getActiveSlide();
     const distancesFromTarget =
       this.getDistancesFromTarget_(carousel, targetSlide);
+
     const slideLeftEdgeDistanceFromLeftEdge =
       getVisibleDistanceFromRoot(targetSlide);
     const slideRightEdgeDistanceFromWindowLeftEdge =
@@ -145,14 +147,15 @@ class PhysicalSlide implements ITransition {
     let distanceOnLeftToCover =
       carousel.allowsLooping() ?
         Math.max(slideLeftEdgeDistanceFromLeftEdge, 0) :
-        targetSlideIndex;
+        sum(...slides.slice(0, targetSlideIndex).map((slide) => slide.offsetWidth));
     const clientWidth = SCROLL_ELEMENT.clientWidth;
+
     let leftIndex = targetSlideIndex;
     let distanceOnRightToCover =
       carousel.allowsLooping() ?
         Math.min(
           clientWidth, clientWidth - slideRightEdgeDistanceFromWindowLeftEdge) :
-        slides.length - 1 - targetSlideIndex;
+        sum(...slides.slice(targetSlideIndex + 1).map((slide) => slide.offsetWidth));
     let rightIndex = targetSlideIndex;
 
     while (slidesToAdjust.size > 0) {
@@ -167,7 +170,7 @@ class PhysicalSlide implements ITransition {
         }
         adjustSlideForSplit(
           carousel, targetSlide, slideToAdjust, distancesFromTarget, -1);
-        distanceOnLeftToCover--;
+        distanceOnLeftToCover -= slideToAdjust.offsetWidth;
         slidesToAdjust.delete(slideToAdjust);
       } else {
         rightIndex = wrapIndex(rightIndex + 1, slideCount);
@@ -180,7 +183,7 @@ class PhysicalSlide implements ITransition {
         }
         adjustSlideForSplit(
           carousel, targetSlide, slideToAdjust, distancesFromTarget, 1);
-        distanceOnRightToCover--;
+        distanceOnRightToCover -= slideToAdjust.offsetWidth;
         slidesToAdjust.delete(slideToAdjust);
       }
     }
@@ -193,9 +196,9 @@ class PhysicalSlide implements ITransition {
     carousel.getSlides().forEach(
       (slide) => {
         const distance =
-          getVisibleDistanceBetweenElementCenters(slide, targetSlide) -
-          matrixService.getAlteredXTranslation(targetSlide) +
-          matrixService.getAlteredXTranslation(slide);
+          getVisibleDistanceBetweenElementCenters(slide, targetSlide) +
+          matrixService.getAlteredXTranslation(slide) -
+          matrixService.getAlteredXTranslation(targetSlide);
         distancesFromTarget.set(slide, distance);
       });
     return distancesFromTarget;
