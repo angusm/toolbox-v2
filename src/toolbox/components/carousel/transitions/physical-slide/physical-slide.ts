@@ -39,7 +39,7 @@ class PhysicalSlide implements ITransition {
   private readonly transitionTargets_: Map<ICarousel, TransitionTarget>;
   private readonly transitionTime_: number;
   private interactionStartTime_: number;
-  private interactionStartX_: number;
+  private interactionStartPosition_: Vector2d;
 
   constructor(
     {
@@ -51,7 +51,7 @@ class PhysicalSlide implements ITransition {
       DynamicDefaultMap.usingFunction(
         (carousel: ICarousel) => new SlideToDraggableMap(carousel));
     this.easingFunction_ = easingFunction;
-    this.interactionStartX_ = null;
+    this.interactionStartPosition_ = null;
     this.transitionTime_ = transitionTime;
     this.transitionTargets_ = new Map<ICarousel, TransitionTarget>();
   }
@@ -207,8 +207,8 @@ class PhysicalSlide implements ITransition {
   private startInteraction_(event: DragStart, carousel: ICarousel): void {
     this.transitionTargets_.delete(carousel);
     this.interactionStartTime_ = performance.now();
-    this.interactionStartX_ =
-      Vector2d.fromElementTransform(event.getTarget().getElement()).getX();
+    this.interactionStartPosition_ =
+      Vector2d.fromElementTransform(event.getTarget().getElement());
     carousel.startInteraction(SLIDE_INTERACTION);
   }
 
@@ -219,14 +219,19 @@ class PhysicalSlide implements ITransition {
     const activeSlide = this.getActiveSlide(carousel);
     const distance = getInvertedDistanceToCenter(activeSlide, carousel);
 
+    const interactionDelta =
+      Vector2d.fromElementTransform(event.getTarget().getElement())
+        .subtract(this.interactionStartPosition_);
+    const wasHorizontalDrag =
+      Math.abs(interactionDelta.getX()) > Math.abs(interactionDelta.getY());
+
     const velocity =
-      interactionDuration > 700 ?
+      interactionDuration > 700 && wasHorizontalDrag ?
         0 :
-        Vector2d.fromElementTransform(event.getTarget().getElement()).getX() -
-        this.interactionStartX_;
+        interactionDelta.getX();
 
     this.interactionStartTime_ = null;
-    this.interactionStartX_ = null;
+    this.interactionStartPosition_ = null;
 
     const velocitySign = getSign(velocity);
     const distanceSign = getSign(distance);
