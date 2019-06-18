@@ -19,6 +19,8 @@ describe('Formula', () => {
       ['a + a', '2a'],
       ['a + a + a', '3a'],
       ['a + a - a + a', '2a'],
+      ['-4.999999999999999% - 96px', '-4.999999999999999% - 96px'],
+      ['-4.999999999999999% - 60px', '-4.999999999999999% - 60px'],
     ];
     tests.forEach(([testInput, expectedResult]) => {
       it(`should return ${JSON.stringify(expectedResult)} for ${JSON.stringify(testInput)}`, () => {

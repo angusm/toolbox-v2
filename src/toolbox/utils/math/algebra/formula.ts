@@ -54,7 +54,7 @@ class Formula {
     return new Formula(withOperationsAndVariables);
   }
 
-  public getPieces() {
+  public getPieces(): FormulaPiece[] {
     return this.pieces_;
   }
 

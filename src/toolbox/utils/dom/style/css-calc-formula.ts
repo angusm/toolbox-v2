@@ -5,6 +5,7 @@ import {DynamicDefaultMap} from "../../map/dynamic-default";
 import {zip} from "../../array/zip";
 import {Formula, FormulaPiece} from "../../math/algebra/formula";
 import {contains} from "../../array/contains";
+import {Add, Subtract} from "../../math/algebra/operation";
 
 const CSS_CALC_FORMULA_ALLOWED_UNITS = [
   'px',
@@ -51,8 +52,22 @@ class CssCalcFormula implements IMeasurableInstance, ICssStyleValueInstance {
         styleString.slice(5, -1) :
         styleString;
     const formulaPieces = Formula.fromString(formula).getPieces();
+    const addOnlyFormula: Array<Variable|typeof Add> = [];
+
+    for (let i = formulaPieces.length - 1; i >= 0; i--) {
+      const value = formulaPieces[i];
+      if (value === Subtract) {
+        addOnlyFormula[i] = Add;
+        addOnlyFormula[i+1] = (<Variable>addOnlyFormula[i+1]).invert();
+      } else if (!(value instanceof Variable) && value !== Add) {
+        throw new Error('CssCalcFormula currently only supports Add/Subtract');
+      } else {
+        addOnlyFormula[i] = value;
+      }
+    }
+
     const variables: FormulaPiece[] =
-      formulaPieces
+      addOnlyFormula
         .filter(
           (value) => {
             return contains(
