@@ -1,5 +1,6 @@
 import {getStyle} from "../../style/get-style";
 import {getVisibleDistanceFromRoot} from "./get-visible-distance-from-root";
+import {NumericRange} from "../../../math/numeric-range";
 
 const ignoredPositions = new Set(['fixed', 'absolute']);
 
@@ -18,10 +19,18 @@ function getStuckDistance(element: HTMLElement): number {
       previousSibling = <HTMLElement>previousSibling.previousElementSibling;
     }
 
-    let parentElementOffsetTop: number =
-      getVisibleDistanceFromRoot(element.parentElement);
+    const stickyContainer = element.parentElement;
+    const parentElementOffsetTop: number =
+      getVisibleDistanceFromRoot(stickyContainer);
 
-    return Math.max(-1 * (previousSiblingHeight + parentElementOffsetTop), 0);
+    const maxStickyDistance =
+      stickyContainer.offsetHeight - previousSiblingHeight -
+      element.offsetHeight;
+
+    const stickyRange = new NumericRange(0, maxStickyDistance);
+    const estimatedStickyDistance =
+      -1 * (previousSiblingHeight + parentElementOffsetTop);
+    return stickyRange.clamp(estimatedStickyDistance);
   }
 }
 

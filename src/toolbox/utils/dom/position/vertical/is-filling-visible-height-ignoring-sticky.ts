@@ -1,14 +1,14 @@
 import {isDisplayed} from '../../style/is-displayed';
-import {getVisibleHeightIfUnstuck} from "./get-visible-height-if-unstuck";
+import {getVisibleHeightIgnoringSticky} from "./get-visible-height-ignoring-sticky";
 import {ROOT_ELEMENT} from "../root-element";
 
-function isFillingVisibleHeightIfUnstuck(
+function isFillingVisibleHeightIgnoringSticky(
   target: HTMLElement,
   container: HTMLElement = null
 ): boolean {
   return isDisplayed(target) && (
-    getVisibleHeightIfUnstuck(target, container) ===
+    getVisibleHeightIgnoringSticky(target, container) ===
     ROOT_ELEMENT.clientHeight);
 }
 
-export {isFillingVisibleHeightIfUnstuck};
+export {isFillingVisibleHeightIgnoringSticky};

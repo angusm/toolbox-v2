@@ -1,7 +1,11 @@
 {
   "extends": "../../config/base",
   "compilerOptions": {
+    "baseUrl": "../../",
+    "paths": {
+      "lottie-web/*": ["node_modules/lottie-web/*"]
+    },
     "module": "commonjs",
-    "outDir": "toolbox",
+    "outDir": "toolbox"
   }
 }

@@ -73,6 +73,10 @@ class NumericRange implements IRange<number>{
       new NumericRange(0, 1).clamp(percent);
   }
 
+  public getPercentAsInt(percent: number): number {
+    return Math.round(this.getPercentAsValue(percent));
+  }
+
   public getOverlap(overlap: NumericRange): NumericRange {
     if (!this.hasOverlap(overlap)) {
       return null;

@@ -12,12 +12,12 @@ import {getVisibleDistanceBetweenElementBottoms} from "../../utils/dom/position/
 import {getVisibleDistanceBetweenElements} from "../../utils/dom/position/vertical/get-visible-distance-between-elements";
 import {getStuckDistance} from "../../utils/dom/position/vertical/get-stuck-distance";
 import {intersect} from "../../utils/array/intersection";
-import {getVisibleDistanceFromRootIfUnstuck} from "../../utils/dom/position/vertical/get-visible-distance-from-root-if-unstuck";
+import {getVisibleDistanceFromRootIgnoringSticky} from "../../utils/dom/position/vertical/get-visible-distance-from-root-ignoring-sticky";
 import {min} from "../../utils/array/min";
-import {isFillingVisibleHeightIfUnstuck} from "../../utils/dom/position/vertical/is-filling-visible-height-if-unstuck";
-import {isFullyVisibleIfUnstuck} from "../../utils/dom/position/vertical/is-fully-visible-if-unstuck";
-import {getVisibleHeightIfUnstuck} from "../../utils/dom/position/vertical/get-visible-height-if-unstuck";
-import {isVisibleIfUnstuck} from "../../utils/dom/position/vertical/is-visible-if-unstuck";
+import {isFillingVisibleHeightIgnoringSticky} from "../../utils/dom/position/vertical/is-filling-visible-height-ignoring-sticky";
+import {isFullyVisibleIgnoringSticky} from "../../utils/dom/position/vertical/is-fully-visible-ignoring-sticky";
+import {getVisibleHeightIgnoringSticky} from "../../utils/dom/position/vertical/get-visible-height-ignoring-sticky";
+import {isVisibleIgnoringSticky} from "../../utils/dom/position/vertical/is-visible-ignoring-sticky";
 import {ICarouselOptions} from "../carousel/interfaces";
 
 const scroll = Scroll.getSingleton();
@@ -186,11 +186,11 @@ class PoliteScrollJack {
     return min(
       candidateElements,
       (candidateElement) => {
-        if (isFullyVisibleIfUnstuck(candidateElement)) {
+        if (isFullyVisibleIgnoringSticky(candidateElement)) {
           return 0;
         } else {
           return window.innerHeight -
-            getVisibleHeightIfUnstuck(candidateElement);
+            getVisibleHeightIgnoringSticky(candidateElement);
         }
       },
       (candidateElement) => {
@@ -208,8 +208,8 @@ class PoliteScrollJack {
     const isScrollingDown = scrollDeltaSign === -1;
 
     if (
-      isFillingVisibleHeightIfUnstuck(currentActiveSlide) &&
-      getVisibleDistanceFromRootIfUnstuck(currentActiveSlide) !== 0
+      isFillingVisibleHeightIgnoringSticky(currentActiveSlide) &&
+      getVisibleDistanceFromRootIgnoringSticky(currentActiveSlide) !== 0
     ) {
       return currentActiveSlide;
     }
@@ -220,7 +220,7 @@ class PoliteScrollJack {
 
     const visibleSlides =
       this.carousel_.getSlides()
-        .filter((slide) => isVisibleIfUnstuck(slide, this.scrollContainer_));
+        .filter((slide) => isVisibleIgnoringSticky(slide, this.scrollContainer_));
 
     // If no slides are visible, return the active slide
     if (visibleSlides.length === 0) {
@@ -271,12 +271,12 @@ class PoliteScrollJack {
 
     // Check if the container is offscreen
     const containerVisibleHeight =
-      getVisibleHeightIfUnstuck(this.container_, this.scrollContainer_);
+      getVisibleHeightIgnoringSticky(this.container_, this.scrollContainer_);
 
     if (containerVisibleHeight < window.innerHeight) {
       position = TargetPosition.NONE
     } else if (activeElement === currentActiveSlide) {
-      if (isFillingVisibleHeightIfUnstuck(activeElement)) {
+      if (isFillingVisibleHeightIgnoringSticky(activeElement)) {
         position = TargetPosition.NONE;
       } else {
         position = TargetPosition.TOP;

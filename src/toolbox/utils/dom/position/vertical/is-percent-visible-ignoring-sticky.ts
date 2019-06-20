@@ -1,15 +1,15 @@
 import {isDisplayed} from "../../style/is-displayed";
-import {getVisibleHeightIfUnstuck} from "./get-visible-height-if-unstuck";
+import {getVisibleHeightIgnoringSticky} from "./get-visible-height-ignoring-sticky";
 
-function isPercentVisibleIfUnstuck(
+function isPercentVisibleIgnoringSticky(
   target: HTMLElement,
   percent: number,
   container: HTMLElement = null
 ): boolean {
-  const visibleHeight = getVisibleHeightIfUnstuck(target, container);
+  const visibleHeight = getVisibleHeightIgnoringSticky(target, container);
   return isDisplayed(target) &&
     visibleHeight > 0 &&
     visibleHeight >= target.offsetHeight * percent;
 }
 
-export {isPercentVisibleIfUnstuck};
+export {isPercentVisibleIgnoringSticky};

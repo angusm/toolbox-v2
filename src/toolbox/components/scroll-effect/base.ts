@@ -10,7 +10,6 @@ import {TScrollEffectCallbackMap} from "./types/t-scroll-effect-callback-map";
 import {TScrollEffectCallback} from "./types/t-scroll-effect-callback";
 import {TScrollEffectDistanceValue} from "./types/t-scroll-effect-distance-value";
 import {forEach} from "../../utils/iterable-iterator/for-each";
-import {SCROLL_ELEMENT} from "../../utils/dom/position/scroll-element";
 import {ROOT_ELEMENT} from "../../utils/dom/position/root-element";
 
 /**

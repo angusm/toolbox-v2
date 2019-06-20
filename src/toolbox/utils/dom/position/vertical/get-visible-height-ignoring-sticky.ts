@@ -1,13 +1,13 @@
 import {NumericRange} from '../../../math/numeric-range';
 import {getAncestorHeight} from "./get-ancestor-height";
-import {getVisibleDistanceBetweenElementsIfUnstuck} from "./get-visible-distance-between-elements-if-unstuck";
+import {getVisibleDistanceBetweenElementsIgnoringSticky} from "./get-visible-distance-between-elements-ignoring-sticky";
 
-function getVisibleHeightIfUnstuck(
+function getVisibleHeightIgnoringSticky(
   target: HTMLElement,
   container: HTMLElement = null
 ): number {
   const distance: number =
-    getVisibleDistanceBetweenElementsIfUnstuck(target, container);
+    getVisibleDistanceBetweenElementsIgnoringSticky(target, container);
   const containerHeight: number = getAncestorHeight(container);
   const visibleYRange: NumericRange = new NumericRange(0, containerHeight);
   const startY: number = visibleYRange.clamp(distance);
@@ -15,4 +15,4 @@ function getVisibleHeightIfUnstuck(
   return endY - startY;
 }
 
-export {getVisibleHeightIfUnstuck};
+export {getVisibleHeightIgnoringSticky};
