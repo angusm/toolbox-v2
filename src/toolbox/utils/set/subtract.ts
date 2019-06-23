@@ -1,5 +1,5 @@
 function subtract<T>(minuend: Set<T>, subtrahend: Set<T>): Set<T> {
-  const result = new Set();
+  const result = new Set<T>();
   minuend.forEach((value) => {
     if (!subtrahend.has(value)) {
       result.add(value);

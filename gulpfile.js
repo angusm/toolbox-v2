@@ -22,7 +22,7 @@ targets.forEach(
           () => {
             return gulp
                 .src(`./lib/${target}`, {allowEmpty: true})
-                .pipe(exec(`tsc -p <%= file.path %>`));
+                .pipe(exec(`npx tsc -p <%= file.path %>`));
           });
     });
 
