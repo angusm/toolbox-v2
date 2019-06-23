@@ -2,23 +2,33 @@ import {DynamicDefaultMap} from "../../../map/dynamic-default";
 import {renderLoop} from "../../../render-loop";
 import {Scroll} from '../../../cached-vectors/scroll';
 import {Vector2d} from '../../../math/geometry/vector-2d';
-import {getStyle} from "../../style/get-style";
 import {getStuckDistance} from "./get-stuck-distance";
+import {isFixed} from "../is-fixed";
 
 const scroll: Scroll = Scroll.getSingleton();
 
-function getVisibleDistanceFromRoot_(element: HTMLElement): number {
+function getIgnoreStickyOffset_(candidateElement: HTMLElement): number {
+  return getBasicOffset_(candidateElement) - getStuckDistance(candidateElement);
+}
+
+function getBasicOffset_(candidateElement: HTMLElement): number {
+  return candidateElement.offsetTop +
+    Vector2d.fromElementTransform(candidateElement).y;
+}
+
+function getVisibleDistanceFromRoot_(
+  element: HTMLElement,
+  getOffsetFn: (e: HTMLElement) => number,
+): number {
   let candidateElement = element;
   let y = 0;
 
   while (candidateElement && candidateElement !== document.body) {
     // Special case for fixed elements
-    if (getStyle(candidateElement, 'position') === 'fixed') {
+    if (isFixed(candidateElement)) {
       return y + candidateElement.offsetTop;
     } else {
-      y +=
-        candidateElement.offsetTop +
-        Vector2d.fromElementTransform(element).y -
+      y += getOffsetFn(candidateElement) -
         candidateElement.scrollTop;
     }
 
@@ -29,47 +39,15 @@ function getVisibleDistanceFromRoot_(element: HTMLElement): number {
   return y + invertedScroll.y;
 }
 
-function getVisibleDistanceFromRoot(element: HTMLElement): number {
-  if (getStyle(element, 'position') === 'fixed') {
-    return element.offsetTop;
-  }
-  return element.offsetTop +
-    Vector2d.fromElementTransform(element).y +
-    getVisibleDistanceFromRoot_(<HTMLElement>element.offsetParent);
-}
-
-function getVisibleDistanceFromRootIgnoringSticky_(element: HTMLElement): number {
-  let candidateElement = element;
-  let y = 0;
-
-  while (candidateElement && candidateElement !== document.body) {
-    // Special case for fixed elements
-    if (getStyle(candidateElement, 'position') === 'fixed') {
-      return y + candidateElement.offsetTop;
-    } else {
-      y +=
-        candidateElement.offsetTop +
-        Vector2d.fromElementTransform(element).y -
-        candidateElement.scrollTop -
-        getStuckDistance(element);
-    }
-
-    candidateElement = <HTMLElement>candidateElement.offsetParent;
-  }
-
-  const invertedScroll = scroll.getPosition().invert();
-  return y + invertedScroll.y;
-}
-
-function getVisibleDistanceFromRootIgnoringSticky(
-  element: HTMLElement
+function getVisibleDistanceFromRoot(
+  element: HTMLElement,
+  getOffsetFn: (e: HTMLElement) => number,
 ): number {
-  if (getStyle(element, 'position') === 'fixed') {
+  if (isFixed(element)) {
     return element.offsetTop;
   }
-  return element.offsetTop +
-    Vector2d.fromElementTransform(element).y +
-    getVisibleDistanceFromRootIgnoringSticky_(<HTMLElement>element.offsetParent);
+  return getOffsetFn(element) +
+    getVisibleDistanceFromRoot_(<HTMLElement>element.offsetParent, getOffsetFn);
 }
 
 class VisibleDistanceFromRootService {
@@ -80,11 +58,13 @@ class VisibleDistanceFromRootService {
   constructor() {
     this.cache_ =
       DynamicDefaultMap.usingFunction(
-        (element: HTMLElement) => getVisibleDistanceFromRoot(element));
+        (element: HTMLElement) => {
+          return getVisibleDistanceFromRoot(element, getBasicOffset_);
+        });
     this.cacheIgnoringSticky_ =
       DynamicDefaultMap.usingFunction(
         (element: HTMLElement) => {
-          return getVisibleDistanceFromRootIgnoringSticky(element);
+          return getVisibleDistanceFromRoot(element, getIgnoreStickyOffset_);
         });
     this.init_();
   }
@@ -104,10 +84,15 @@ class VisibleDistanceFromRootService {
   private renderLoop_() {
     renderLoop.anyMutate(() => {
       renderLoop.anyCleanup(() => {
-        this.cache_.clear();
+        this.clearCaches_();
         this.renderLoop_();
       });
     });
+  }
+
+  private clearCaches_() {
+    this.cache_.clear();
+    this.cacheIgnoringSticky_.clear();
   }
 
   public static getSingleton(): VisibleDistanceFromRootService {
