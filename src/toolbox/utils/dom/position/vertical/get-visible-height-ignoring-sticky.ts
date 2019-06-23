@@ -9,9 +9,9 @@ function getVisibleHeightIgnoringSticky(
   const distance: number =
     getVisibleDistanceBetweenElementsIgnoringSticky(target, container);
   const containerHeight: number = getAncestorHeight(container);
-  const visibleYRange: NumericRange = new NumericRange(0, containerHeight);
-  const startY: number = visibleYRange.clamp(distance);
-  const endY: number = visibleYRange.clamp(distance + target.offsetHeight);
+  const startY: number = NumericRange.clamp(distance, 0, containerHeight);
+  const endY: number =
+    NumericRange.clamp(distance + target.offsetHeight, 0, containerHeight);
   return endY - startY;
 }
 

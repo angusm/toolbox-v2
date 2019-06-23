@@ -13,6 +13,10 @@ class NumericRange implements IRange<number>{
     return new NumericRange(Math.min(a, b), Math.max(a, b));
   }
 
+  public static clamp(value: number, min: number, max: number) {
+    return Math.min(max, Math.max(min, value));
+  }
+
   public clamp(value: number): number {
     return Math.min(this.max_, Math.max(this.min_, value));
   }
