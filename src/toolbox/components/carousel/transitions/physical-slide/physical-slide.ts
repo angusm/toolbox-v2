@@ -213,6 +213,10 @@ class PhysicalSlide implements ITransition {
   }
 
   private endInteraction_(event: DragEnd, carousel: ICarousel): void {
+    if (this.interactionStartPosition_ === null) {
+      return;
+    }
+
     carousel.endInteraction(SLIDE_INTERACTION);
 
     const interactionDuration = performance.now() - this.interactionStartTime_;
