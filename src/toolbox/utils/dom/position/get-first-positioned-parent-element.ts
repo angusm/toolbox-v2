@@ -1,14 +1,8 @@
 import {isPositioned} from "./is-positioned";
+import {getMatchingParentElement} from "../ancestry/get-matching-parent-element";
 
 function getFirstPositionedParentElement(element: HTMLElement): HTMLElement {
-  let candidate = element.parentElement;
-  while (candidate) {
-    if (isPositioned(candidate)) {
-      return candidate;
-    }
-    candidate = candidate.parentElement;
-  }
-  return null;
+  return getMatchingParentElement(element, isPositioned);
 }
 
 export {getFirstPositionedParentElement};
