@@ -11,8 +11,15 @@ function getOffsetTopIgnoringSticky(element: HTMLElement) {
     let previousSibling: HTMLElement =
       <HTMLElement>element.previousElementSibling;
     while (previousSibling) {
-      if (!ignoredPositions.has(getStyle(previousSibling, 'position'))){
-        previousSiblingHeight += previousSibling.offsetHeight;
+      const previousSiblingPosition = getStyle(previousSibling, 'position');
+      if (!ignoredPositions.has(previousSiblingPosition)){
+        if (previousSiblingPosition === 'sticky') {
+          previousSiblingHeight += previousSibling.offsetHeight;
+        } else {
+          previousSiblingHeight +=
+            previousSibling.offsetTop + previousSibling.offsetHeight;
+          break;
+        }
       }
       previousSibling = <HTMLElement>previousSibling.previousElementSibling;
     }
