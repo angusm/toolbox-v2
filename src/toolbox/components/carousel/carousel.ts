@@ -20,6 +20,24 @@ const CssClass = Object.freeze({
   AFTER_SLIDE: 'after',
 });
 
+class TransitionTarget {
+  private readonly element_: HTMLElement;
+  private readonly drivenBySync_: boolean;
+
+  constructor(element: HTMLElement, drivenBySync: boolean = false) {
+    this.element_ = element;
+    this.drivenBySync_ = drivenBySync;
+  }
+
+  public getElement(): HTMLElement {
+    return this.element_;
+  }
+
+  public isDrivenBySync(): boolean {
+    return this.drivenBySync_;
+  }
+}
+
 class Carousel implements ICarousel {
   private readonly activeCssClass_: string;
   private readonly activeCssClassSet_: Set<string>;
@@ -34,7 +52,7 @@ class Carousel implements ICarousel {
   private readonly onTransitionCallbacks_: ((carousel: ICarousel) => void)[];
   private readonly slideCssClasses_:
     DynamicDefaultMap<HTMLElement, Set<string>>;
-  private transitionTarget_: HTMLElement;
+  private transitionTarget_: TransitionTarget;
   private interactions_: symbol[];
   private lastActiveSlide_: HTMLElement;
   private destroyed_: boolean;
@@ -115,11 +133,14 @@ class Carousel implements ICarousel {
     this.transitionTarget_ = null;
   }
 
-  public transitionToSlide(targetSlide: HTMLElement): void {
+  public transitionToSlide(
+    targetSlide: HTMLElement,
+    drivenBySync: boolean = false,
+  ): void {
     if (this.isBeingInteractedWith()) {
       return;
     }
-    this.transitionTarget_ = targetSlide;
+    this.transitionTarget_ = new TransitionTarget(targetSlide, drivenBySync);
   }
 
   private init_(): void {
@@ -153,7 +174,7 @@ class Carousel implements ICarousel {
         return;
       }
 
-      this.handleTransition_();
+      const shouldSync: boolean = this.handleTransition_();
       this.transition_.renderLoop(this); // Run the transition's render loop
 
       const activeSlide = this.getActiveSlide();
@@ -167,8 +188,10 @@ class Carousel implements ICarousel {
         }
 
         // Sync other carousels.
-        CarouselSyncManager.getSingleton()
-          .transitionToIndex(this, this.getSlideIndex(activeSlide));
+        if (shouldSync) {
+          CarouselSyncManager.getSingleton()
+            .transitionToIndex(this, this.getSlideIndex(activeSlide));
+        }
       }
     });
   }
@@ -199,13 +222,21 @@ class Carousel implements ICarousel {
       });
   }
 
-  private handleTransition_() {
+  private handleTransition_(): boolean {
     if (this.isTransitioning()) {
-      if (this.transition_.hasTransitionedTo(this.transitionTarget_, this)) {
+      const hasTransitionedToTarget =
+        this.transition_.hasTransitionedTo(
+          this.transitionTarget_.getElement(), this);
+
+      const shouldSync = !this.transitionTarget_.isDrivenBySync();
+      if (hasTransitionedToTarget) {
         this.transitionTarget_ = null;
       } else {
-        this.transition_.transition(this.transitionTarget_, this);
+        this.transition_.transition(this.transitionTarget_.getElement(), this);
       }
+      return shouldSync;
+    } else {
+      return true;
     }
   }
 
@@ -286,7 +317,7 @@ class Carousel implements ICarousel {
 
   private getCurrentTransitionTarget_(): HTMLElement {
     return this.isTransitioning() ?
-      this.transitionTarget_ :
+      this.transitionTarget_.getElement() :
       this.getActiveSlide();
   }
 
@@ -296,13 +327,13 @@ class Carousel implements ICarousel {
     this.transitionToIndex(nextIndex);
   }
 
-  public transitionToIndex(index: number, skipSync: boolean = false): void {
-    if (!skipSync) {
+  public transitionToIndex(index: number, drivenBySync: boolean = false): void {
+    if (!drivenBySync) {
       CarouselSyncManager.getSingleton().transitionToIndex(this, index);
     }
 
     const clampedIndex = this.getClampedIndex_(index);
-    this.transitionToSlide(this.getSlideByIndex(clampedIndex));
+    this.transitionToSlide(this.getSlideByIndex(clampedIndex), drivenBySync);
   }
 
   private getClampedIndex_(index: number): number {

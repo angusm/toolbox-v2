@@ -27,7 +27,7 @@ interface ICarousel {
   startInteraction(interaction: symbol): void;
   endInteraction(interaction: symbol): void;
   transitionSlidesBy(value: number): void;
-  transitionToIndex(index: number, skipSync: boolean): void;
+  transitionToIndex(index: number, drivenBySync: boolean): void;
   getFirstSlide(): HTMLElement;
   getLastSlide(): HTMLElement;
 }
