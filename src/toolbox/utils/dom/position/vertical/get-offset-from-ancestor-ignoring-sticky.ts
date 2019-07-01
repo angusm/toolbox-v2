@@ -10,7 +10,7 @@ function getOffsetFromAncestorIgnoringSticky(
   } else {
     return getOffsetTopIgnoringSticky(element) +
       getOffsetFromAncestorIgnoringSticky(
-        <HTMLElement>element.offsetParent, ancestor);
+        <HTMLElement>element.parentElement, ancestor);
   }
 }
 
