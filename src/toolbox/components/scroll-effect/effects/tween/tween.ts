@@ -5,6 +5,7 @@ import { Animation } from './animation';
 import { KeyframeStyle } from './keyframe-style';
 import { TKeyframesConfig } from './types/t-keyframes-config';
 import { ITweenOptions } from './interfaces/tween-options';
+import {isDisplayed} from '../../../../utils/dom/style/is-displayed';
 
 
 /**
@@ -25,7 +26,7 @@ const defaultOptions: ITweenOptions = {
  */
 class Tween implements IEffect {
   private readonly animation_: Animation;
-  private readonly styleTarget_: ElementCSSInlineStyle;
+  private readonly styleTarget_: Element & ElementCSSInlineStyle;
   private readonly cachedGetDistanceFn_:
     (distanceAsPx: number, distanceAsPercent: number) => number;
 
@@ -107,11 +108,20 @@ class Tween implements IEffect {
     rawDistance: number,
     distanceAsPercent: number
   ): void {
+    // @ts-ignore
+    const styleTarget: Element & ElementCSSInlineStyle =
+      this.styleTarget_ === null ? target : this.styleTarget_;
+
+    // Don't bother updating hidden elements.
+    if (!isDisplayed(styleTarget)) {
+      return;
+    }
+
+
     const distance = this.cachedGetDistanceFn_(rawDistance, distanceAsPercent);
     const propertyValueMap = this.animation_.getPropertyValueMapFromPosition(
       distance
     );
-    const styleTarget = this.styleTarget_ === null ? target : this.styleTarget_;
 
     renderLoop.anyMutate(() => {
       propertyValueMap.forEach((value, property) => {

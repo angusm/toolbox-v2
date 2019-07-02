@@ -1,6 +1,6 @@
 import {getStyle} from "./get-style";
 
-function isDisplayed(element: HTMLElement): boolean {
+function isDisplayed(element: Element): boolean {
   return getStyle(element, 'display') !== 'none';
 }
 
