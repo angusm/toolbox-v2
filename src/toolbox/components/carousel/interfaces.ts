@@ -39,6 +39,7 @@ interface ICarouselOptions {
   afterCssClass?: string,
   allowLooping?: boolean,
   transition?: ITransition,
+  condition?: () => boolean,
 }
 
 export {

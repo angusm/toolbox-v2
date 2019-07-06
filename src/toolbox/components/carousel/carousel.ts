@@ -45,6 +45,7 @@ class Carousel implements ICarousel {
   private readonly beforeCssClassMap_: DynamicDefaultMap<number, Set<string>>;
   private readonly afterCssClass_: string;
   private readonly afterCssClassMap_: DynamicDefaultMap<number, Set<string>>;
+  private readonly condition_: () => boolean;
   private readonly container_: HTMLElement;
   private readonly slides_: HTMLElement[];
   private readonly transition_: ITransition;
@@ -65,6 +66,7 @@ class Carousel implements ICarousel {
    *
    * @param slides HTMLElements containing slide content.
    *
+   * @param condition Under what conditions the carousel should run
    * @param onTransitionCallbacks Functions run when the active slide changes.
    * @param activeCssClass Class to apply to active slide.
    * @param beforeCssClass Class to apply to slides before active slide.
@@ -77,6 +79,7 @@ class Carousel implements ICarousel {
     container: HTMLElement,
     slides: HTMLElement[],
     {
+      condition = () => true,
       onTransitionCallbacks = [],
       activeCssClass = CssClass.ACTIVE_SLIDE,
       beforeCssClass = CssClass.BEFORE_SLIDE,
@@ -89,6 +92,7 @@ class Carousel implements ICarousel {
     this.beforeCssClass_ = beforeCssClass;
     this.afterCssClass_ = afterCssClass;
     this.allowLooping_ = allowLooping;
+    this.condition_ = condition;
     this.container_ = container;
     this.lastActiveSlide_ = null;
     this.onTransitionCallbacks_ = onTransitionCallbacks;
@@ -170,7 +174,7 @@ class Carousel implements ICarousel {
       renderLoop.cleanup(() => this.render_());
 
       // Do nothing if disabled
-      if (this.disabled_) {
+      if (this.disabled_ || !this.condition_()) {
         return;
       }
 
