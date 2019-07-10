@@ -4,6 +4,8 @@ import {TEasingFunction} from "../../shared-types/t-easing-function";
 import {NumericRange} from "../../utils/math/numeric-range";
 import {SCROLL_ELEMENT} from "../../utils/dom/position/scroll-element";
 import {ISmoothScrollServiceOptions} from "./i-smooth-scroll-service-options";
+import {getOffsetFromAncestorIgnoringSticky} from "../../utils/dom/position/vertical/get-offset-from-ancestor-ignoring-sticky";
+import {getOffsetFromAncestor} from "../../utils/dom/position/get-offset-from-ancestor";
 
 
 class SmoothScrollTransition {
@@ -181,6 +183,14 @@ class SmoothScrollService {
       new SmoothScrollTransition(
         new NumericRange(this.element_.scrollLeft, x),
         this.generateTimeline_());
+  }
+
+  public scrollToElement(element: HTMLElement): void {
+    const container =
+      this.element_ instanceof HTMLElement ? this.element_ : null;
+    const targetX = getOffsetFromAncestor(element, container).x;
+    const targetY = getOffsetFromAncestorIgnoringSticky(element, container);
+    this.scrollTo(new Vector2d(targetX, targetY));
   }
 
   public scrollToY(y: number): void {
