@@ -205,6 +205,10 @@ class PhysicalSlide implements ITransition {
   }
 
   private startInteraction_(event: DragStart, carousel: ICarousel): void {
+    if (this.interactionStartPosition_ !== null) {
+      return;
+    }
+
     this.transitionTargets_.delete(carousel);
     this.interactionStartTime_ = performance.now();
     this.interactionStartPosition_ =
