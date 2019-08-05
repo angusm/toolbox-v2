@@ -91,32 +91,39 @@ class SmoothScrollService {
       return;
     }
 
-    renderLoop.mutate(() => {
-      const now = performance.now();
-      this.transitionX_(now);
-      this.transitionY_(now);
+    renderLoop.anyPremeasure(() => {
+      renderLoop.anyCleanup(() => this.renderLoop_());
 
-      renderLoop.cleanup(() => this.renderLoop_());
+      const now = performance.now();
+      this.applyScrollTransition_(now);
+      this.cancelFinishedTransitions_(now);
     });
   }
 
-  private transitionX_(now: number): void {
-    if (this.xTransition_ === null) {
-      return;
+  private applyScrollTransition_(now: number): void {
+    if (this.xTransition_ !== null) {
+      this.element_.scrollLeft =
+        this.getTransitionValue_(this.xTransition_, now);
     }
-    this.element_.scrollLeft = this.getTransitionValue_(this.xTransition_, now);
-    if (now > this.xTransition_.getTimeline().getMax()) {
-      this.cancelXTransition();
+    if (this.yTransition_ !== null) {
+      this.element_.scrollTop =
+        this.getTransitionValue_(this.yTransition_, now);
     }
   }
 
-  private transitionY_(now: number): void {
-    if (this.yTransition_ === null) {
-      return;
-    }
-    this.element_.scrollTop = this.getTransitionValue_(this.yTransition_, now);
-    if (now > this.yTransition_.getTimeline().getMax()) {
+  private cancelFinishedTransitions_(now: number): void {
+    if (
+      this.yTransition_ !== null &&
+      now > this.yTransition_.getTimeline().getMax()
+    ) {
       this.cancelYTransition();
+    }
+
+    if (
+      this.xTransition_ !== null &&
+      now > this.xTransition_.getTimeline().getMax()
+    ) {
+      this.cancelXTransition();
     }
   }
 
@@ -137,6 +144,10 @@ class SmoothScrollService {
     transition: SmoothScrollTransition,
     now: number
   ): number {
+    if (transition === null) {
+      return 0;
+    }
+
     const percent =
       this.easingFunction_(transition.getTimeline().getValueAsPercent(now));
     return transition.getDistance().getPercentAsValue(percent);
@@ -146,6 +157,10 @@ class SmoothScrollService {
     const startTime = performance.now();
     const endTime = startTime + this.duration_;
     return new NumericRange(startTime, endTime);
+  }
+
+  public getDuration(): number {
+    return this.duration_;
   }
 
   public scrollTo(target: Vector2d): void {

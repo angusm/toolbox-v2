@@ -19,6 +19,9 @@ import {isFullyVisibleIgnoringSticky} from "../../utils/dom/position/vertical/is
 import {getVisibleHeightIgnoringSticky} from "../../utils/dom/position/vertical/get-visible-height-ignoring-sticky";
 import {isVisibleIgnoringSticky} from "../../utils/dom/position/vertical/is-visible-ignoring-sticky";
 import {ICarouselOptions} from "../carousel/interfaces";
+import {getParentElements} from "../../utils/dom/position/get-parent-elements";
+import {contains} from "../../utils/array/contains";
+import {DynamicDefaultMap} from "../../utils/map/dynamic-default";
 
 const scroll = Scroll.getSingleton();
 
@@ -33,35 +36,118 @@ enum TargetPosition {
 class PoliteScrollJackCoordinator {
   private static singleton_: PoliteScrollJackCoordinator;
 
-  private scrollJackCount_: number;
+  private readonly containerToInstance_: Map<HTMLElement, PoliteScrollJack>;
+  private readonly ancestorsCache_: DynamicDefaultMap<HTMLElement, HTMLElement[]>;
+
+  private sortedInstancesCache_: Array<PoliteScrollJack>;
+  private lastScrollDelta_: number;
+  private scrollJackTimeout_: number;
+  private lastScrollJackTime_: number;
 
   constructor() {
-    this.scrollJackCount_ = 0;
+    this.containerToInstance_ = new Map();
+    this.ancestorsCache_ =
+      DynamicDefaultMap.usingFunction(
+        (element: HTMLElement) => getParentElements(element));
+    this.lastScrollDelta_ = 0;
+    this.scrollJackTimeout_ = null;
+    this.lastScrollJackTime_ = 0;
+    this.runLoop_();
+  }
+
+  private clearCaches_(): void {
+    this.ancestorsCache_.clear();
+    this.sortedInstancesCache_ = [];
+  }
+
+  private getInstances_(): IterableIterator<PoliteScrollJack> {
+    return this.containerToInstance_.values();
+  }
+
+  /**
+   * Sorting instances ensures that nested carousel items have a chance to be
+   * snapped to before large snaps are made.
+   *
+   * @private
+   */
+  private setupCaches_(): void {
+    this.lastScrollDelta_ = scroll.getDelta().getY();
+    this.sortedInstancesCache_ =
+      Array.from(this.getInstances_()).sort(
+        (a: PoliteScrollJack, b: PoliteScrollJack) => {
+          const aContainer = a.getContainer();
+          const bContainer = b.getContainer();
+          const aAncestors = this.ancestorsCache_.get(aContainer);
+          const bAncestors = this.ancestorsCache_.get(bContainer);
+
+          if (contains(aAncestors, bContainer)) {
+            return -1;
+          } else if (contains(bAncestors, aContainer)) {
+            return 1;
+          } else {
+            return 0;
+          }
+        });
+  }
+
+  public getScrollDeltaSign(): number {
+    return getSign(this.lastScrollDelta_);
+  }
+
+  public register(instance: PoliteScrollJack): void {
+    this.containerToInstance_.set(instance.getContainer(), instance);
+  }
+
+  public deregister(instance: PoliteScrollJack): void {
+    this.containerToInstance_.delete(instance.getContainer());
+  }
+
+  private runLoop_(): void {
+    renderLoop.scrollMeasure(() => {
+      renderLoop.scrollCleanup(() => {
+        this.clearCaches_();
+        this.runLoop_();
+      });
+
+      this.setupCaches_();
+
+      const isScrollJacking =
+        this.sortedInstancesCache_
+          .some((instance) => instance.isScrollJacking());
+      if (isScrollJacking) {
+        return; // Do nothing if we're already scroll jacking.
+      }
+
+      this.clearScrollJackTimeout_();
+      const instanceToScrollAmount: Map<PoliteScrollJack, number> =
+        this.sortedInstancesCache_.reduce(
+          (map, instance) => {
+            map.set(instance, instance.getScrollAmount());
+            return map;
+          },
+          new Map());
+      const instance =
+        this.sortedInstancesCache_
+          .find((instance) => instanceToScrollAmount.get(instance) !== 0);
+
+      if (instance) {
+        this.scrollJackTimeout_ =
+          instance.scrollJack(instanceToScrollAmount.get(instance));
+      }
+    });
+  }
+
+  private clearScrollJackTimeout_(): void {
+    window.clearTimeout(this.scrollJackTimeout_);
+    this.scrollJackTimeout_ = null;
   }
 
   public static getSingleton(): PoliteScrollJackCoordinator {
     return this.singleton_ = this.singleton_ || new this();
   }
-
-  public scrollJack() {
-    this.scrollJackCount_++;
-  }
-
-  public stopScrollJack() {
-    if (this.scrollJackCount_ === 0) {
-      throw new Error(
-        'Attempting to stop scroll jacking more time than it has been started');
-    } else {
-      this.scrollJackCount_--;
-    }
-  }
-
-  public isScrollJacking() {
-    return this.scrollJackCount_ > 0;
-  }
 }
 
-const politeScrollJackCoordinator = PoliteScrollJackCoordinator
+const politeScrollJackCoordinator = PoliteScrollJackCoordinator.getSingleton();
 
 class ActiveSlide {
   private readonly slide_: HTMLElement;
@@ -93,15 +179,12 @@ class PoliteScrollJack {
   private readonly container_: HTMLElement;
   private readonly smoothScrollService_: SmoothScrollService;
   private readonly delay_: number;
-  private readonly scrollJackCallback_: () => void;
   private readonly scrollContainer_: HTMLElement;
 
+  private scrollJackEndTime_: number;
   private firstRun_: boolean;
-  private destroyed_: boolean;
   private disabled_: boolean;
-  private scrollJackTimeout_: number;
   private lastActiveSlide_: ActiveSlide;
-  private lastScrollDelta_: number;
   private scrollJackDisabled_: boolean;
 
   constructor(
@@ -117,13 +200,10 @@ class PoliteScrollJack {
     this.scrollContainer_ = scrollContainer;
     this.carousel_ = new Carousel(container, slides, carouselConfig);
     this.container_ = container;
-    this.scrollJackTimeout_ = null;
     this.delay_ = delay;
-    this.scrollJackCallback_ = () => this.scrollJack_();
     this.lastActiveSlide_ = null;
-    this.lastScrollDelta_ = 0;
     this.firstRun_ = true;
-
+    this.scrollJackEndTime_ = 0;
     this.disabled_ = false;
     this.scrollJackDisabled_ = false;
 
@@ -133,6 +213,10 @@ class PoliteScrollJack {
       elementToScroll === SCROLL_ELEMENT ?
         SmoothScrollService.getSingleton() :
         new SmoothScrollService(elementToScroll, smoothScrollConfig);
+  }
+
+  public getContainer(): HTMLElement {
+    return this.container_;
   }
 
   public static fireAndForget(
@@ -146,19 +230,30 @@ class PoliteScrollJack {
   }
 
   public init(): void {
-    this.renderLoop_();
+    politeScrollJackCoordinator.register(this);
+    this.transitionLoop();
   }
 
-  private scrollJack_(): void {
-    renderLoop.measure(() => {
-      const amount = this.getScrollAmount_();
-      if (amount !== 0 && !this.scrollJackDisabled_) {
+  public scrollJack(amount: number): number {
+    return window.setTimeout(
+      () => {
         this.smoothScrollService_.scrollYByAmount(amount);
-      }
-    });
+        this.scrollJackEndTime_ =
+          performance.now() + this.smoothScrollService_.getDuration() + 200;
+      }, this.delay_);
   }
 
-  private getScrollAmount_(): number {
+  public isScrollJacking(): boolean {
+    return this.smoothScrollService_.isScrolling() ||
+      performance.now() <= this.scrollJackEndTime_;
+  }
+
+  public getScrollAmount(): number {
+    // Don't do any scrolling if we're disabled.
+    if (this.disabled_ || this.scrollJackDisabled_) {
+      return 0;
+    }
+
     const mostActiveSlide = this.getNextActiveSlide_();
     const targetPosition = mostActiveSlide.getPosition();
     const activeSlide = mostActiveSlide.getSlide();
@@ -204,7 +299,7 @@ class PoliteScrollJack {
     includeCurrentActiveSlide = false
   ): HTMLElement {
     const currentActiveSlide = this.carousel_.getActiveSlide();
-    const scrollDeltaSign = getSign(this.lastScrollDelta_);
+    const scrollDeltaSign = politeScrollJackCoordinator.getScrollDeltaSign();
     const isScrollingDown = scrollDeltaSign === -1;
 
     if (
@@ -264,7 +359,7 @@ class PoliteScrollJack {
     const currentActiveSlide = this.carousel_.getActiveSlide();
     const activeElement = this.getActiveSlideBasedOnScroll_(false);
 
-    const scrollDeltaSign = getSign(this.lastScrollDelta_);
+    const scrollDeltaSign = politeScrollJackCoordinator.getScrollDeltaSign();
     const isScrollingDown = scrollDeltaSign === -1;
 
     let position;
@@ -296,35 +391,15 @@ class PoliteScrollJack {
     return new ActiveSlide(activeElement, position);
   }
 
-  private renderLoop_(): void {
-    // Since we're using any, we need to be careful about clashing between
-    // scroll and animation.
-    if (this.destroyed_) {
-      return;
-    }
-
+  public transitionLoop(): void {
     renderLoop.scrollMeasure(() => {
-      renderLoop.scrollCleanup(() => this.renderLoop_());
-
-      // Do nothing if disabled
-      if (this.disabled_) {
-        return;
-      }
-
-      this.lastScrollDelta_ = scroll.getDelta().y;
-      window.clearTimeout(this.scrollJackTimeout_);
-
-      if (!this.smoothScrollService_.isScrolling()) {
-        this.scrollJackTimeout_ =
-          window.setTimeout(this.scrollJackCallback_, this.delay_);
-      }
-
+      renderLoop.scrollCleanup(() => this.transitionLoop());
       this.carousel_.transitionToSlide(this.getActiveSlideBasedOnScroll_(true));
     });
   }
 
   public destroy() {
-    this.destroyed_ = true;
+    politeScrollJackCoordinator.deregister(this);
   }
 
   public getCarousel(): Carousel {
