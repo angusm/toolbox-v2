@@ -88,6 +88,10 @@ class Carousel implements ICarousel {
       transition = defaultTransition,
     }: ICarouselOptions = {}
   ) {
+    if (slides.length < 1) {
+      throw new Error('Cannot start carousel without slides');
+    }
+
     this.activeCssClass_ = activeCssClass;
     this.beforeCssClass_ = beforeCssClass;
     this.afterCssClass_ = afterCssClass;
