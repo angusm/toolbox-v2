@@ -56,6 +56,7 @@ class Carousel implements ICarousel {
   private readonly onDestroyCallbacks_: ((carousel: ICarousel) => void)[];
   private readonly slideCssClasses_:
     DynamicDefaultMap<HTMLElement, Set<string>>;
+  private readonly track_: HTMLElement;
   private transitionTarget_: TransitionTarget;
   private interactions_: symbol[];
   private lastActiveSlide_: HTMLElement;
@@ -84,6 +85,7 @@ class Carousel implements ICarousel {
     container: HTMLElement,
     slides: HTMLElement[],
     {
+      track = null,
       condition = () => true,
       onTransitionCallbacks = [],
       onDestroyCallbacks = [],
@@ -108,6 +110,7 @@ class Carousel implements ICarousel {
     this.onTransitionCallbacks_ = onTransitionCallbacks;
     this.onDestroyCallbacks_ = onDestroyCallbacks;
     this.slides_ = slides;
+    this.track_ = track;
     this.transition_ = transition;
     this.transitionTarget_ = null;
     this.interactions_ = [];
@@ -136,6 +139,14 @@ class Carousel implements ICarousel {
 
 
     this.init_();
+  }
+
+  public hasTrack(): boolean {
+    return this.track_ !== null;
+  }
+
+  public getTrack(): HTMLElement {
+    return this.track_;
   }
 
   public allowsLooping() {

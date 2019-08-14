@@ -30,6 +30,7 @@ import {isVisible} from "../../../../utils/dom/position/horizontal/is-visible";
 import {setStyle} from "../../../../utils/dom/style/set-style";
 import {forEach} from "../../../../utils/iterable-iterator/for-each";
 import {ErrorService} from "../../../../utils/error/service";
+import {getSubarraysOfLength} from 'src/toolbox/utils/array/get-subarrays-of-length';
 
 const SLIDE_INTERACTION = Symbol('Physical Slide Interaction');
 
@@ -48,9 +49,8 @@ class PhysicalSlide implements ITransition {
 
   constructor(
     {
-      transitionTime = 500,
       easingFunction = EasingFunction.EASES_IN_OUT_SINE,
-      lockScroll = false,
+      transitionTime = 500,
     }: IPhysicalSlideConfig = {}
   ) {
     this.matrixService_ = MatrixService.getSingleton();

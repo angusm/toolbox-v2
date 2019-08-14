@@ -9,6 +9,7 @@ import {eventHandler} from '../../utils/event/event-handler';
 import {renderLoop} from '../../utils/render-loop';
 import {Vector2d} from "../../utils/math/geometry/vector-2d";
 import {DraggableSyncManager} from "./draggable-sync-manager";
+import {setStyle} from "../../utils/dom/style/set-style";
 
 class Draggable implements IDraggable {
   private readonly element_: HTMLElement;
@@ -51,6 +52,7 @@ class Draggable implements IDraggable {
 
   protected startInteraction_(): void {
     this.interacting_ = true;
+    setStyle(this.element_, 'pointer-events', 'none');
     eventHandler.dispatchEvent(new DragStart(this));
   }
 
@@ -69,6 +71,7 @@ class Draggable implements IDraggable {
         new DragEnd(
           this, this.getDelta_(), cursor.getClient().getLastFrameVelocity()));
     });
+    renderLoop.mutate(() => setStyle(this.element_, 'pointer-events', ''));
   }
 
   protected isInteracting_(): boolean {

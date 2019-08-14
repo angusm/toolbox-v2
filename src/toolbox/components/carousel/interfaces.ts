@@ -22,6 +22,8 @@ interface ICarousel {
   getVisibleSlides(): HTMLElement[];
   getSlidesBefore(slide: HTMLElement): HTMLElement[];
   getSlidesAfter(slide: HTMLElement): HTMLElement[];
+  hasTrack(): boolean;
+  getTrack(): HTMLElement;
   next(): void;
   previous(): void;
   startInteraction(interaction: symbol): void;
@@ -38,11 +40,12 @@ interface ICarouselOptions {
   onTransitionCallbacks?: ((carousel: ICarousel) => void)[],
   onDestroyCallbacks?: ((carousel: ICarousel) => void)[],
   activeCssClass?: string,
-  beforeCssClass?: string,
   afterCssClass?: string,
   allowLooping?: boolean,
-  transition?: ITransition,
+  beforeCssClass?: string,
   condition?: () => boolean,
+  track?: HTMLElement,
+  transition?: ITransition,
 }
 
 export {

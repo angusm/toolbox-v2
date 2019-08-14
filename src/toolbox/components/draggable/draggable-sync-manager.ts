@@ -40,10 +40,11 @@ class DraggableSyncManager {
     const syncedDraggables = this.getSetForDraggable_(draggable);
     if (!syncedDraggables) {
       translate2d(draggable.getElement(), delta);
+    } else {
+      syncedDraggables.forEach((syncedDraggable) => {
+        translate2d(syncedDraggable.getElement(), delta);
+      });
     }
-    syncedDraggables.forEach((syncedDraggable) => {
-      translate2d(syncedDraggable.getElement(), delta);
-    });
   }
 
   public destroyDraggable(draggable: IDraggable) {
