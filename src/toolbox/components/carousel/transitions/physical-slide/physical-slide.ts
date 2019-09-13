@@ -26,6 +26,8 @@ import {getInvertedDistanceToCenter} from "./get-inverted-distance-to-center";
 import {adjustSlideForSplit} from './adjust-slide-for-split';
 import {adjustSlideForLoop} from "./adjust-slide-for-loop";
 import {sum} from '../../../../utils/math/sum';
+import {isVisible} from "../../../../utils/dom/position/horizontal/is-visible";
+import {setStyle} from "../../../../utils/dom/style/set-style";
 
 const SLIDE_INTERACTION = Symbol('Physical Slide Interaction');
 
@@ -99,6 +101,13 @@ class PhysicalSlide implements ITransition {
           this.adjustSplit_(carousel);
         }
       }
+      carousel.getSlides().forEach((slide) => {
+        if (!isVisible(slide, carousel.getContainer())) {
+          setStyle(slide, 'visibility', 'hidden');
+        } else {
+          setStyle(slide, 'visibility', '');
+        }
+      })
     });
   }
 
