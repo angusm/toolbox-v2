@@ -4,8 +4,6 @@ import {Scroll} from "../../utils/cached-vectors/scroll";
 import {negateNumericFunction} from "../../utils/functions/negate-numeric-function";
 import {getVisibleDistanceFromRoot} from "../../utils/dom/position/vertical/get-visible-distance-from-root";
 
-const scroll = Scroll.getSingleton();
-
 /**
  * Collection of static functions that can be used to determine scrolled
  * distances for Scroll Effects.
@@ -46,7 +44,7 @@ class DistanceFunction {
    * Scroll values is retrieved from the Scroll cached vector which pulls values
    * once a frame during the renderLoop.premeasure step.
    */
-  public static DOCUMENT_SCROLL = () => scroll.getPosition().y;
+  public static DOCUMENT_SCROLL = () => Scroll.getSingleton().getPosition().y;
 }
 
 export {DistanceFunction}

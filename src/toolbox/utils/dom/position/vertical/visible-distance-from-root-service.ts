@@ -5,8 +5,6 @@ import {Vector2d} from '../../../math/geometry/vector-2d';
 import {getStuckDistance} from "./get-stuck-distance";
 import {isFixed} from "../is-fixed";
 
-const scroll: Scroll = Scroll.getSingleton();
-
 function getIgnoreStickyOffset_(candidateElement: HTMLElement): number {
   return getBasicOffset_(candidateElement) - getStuckDistance(candidateElement);
 }
@@ -35,7 +33,7 @@ function getVisibleDistanceFromRoot_(
     candidateElement = <HTMLElement>candidateElement.offsetParent;
   }
 
-  const invertedScroll = scroll.getPosition().invert();
+  const invertedScroll = Scroll.getSingleton().getPosition().invert();
   return y + invertedScroll.y;
 }
 

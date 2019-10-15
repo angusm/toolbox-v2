@@ -2,11 +2,10 @@ import {Scroll} from '../../utils/cached-vectors/scroll';
 import {renderLoop} from '../../utils/render-loop';
 import {getAnchorsWithCommonSelector} from "../../utils/dom/anchor/get-anchors-with-common-selector";
 
-const windowScroll: Scroll = Scroll.getSingleton();
-
 class DeepLinkByScroll {
   private getCurrentAnchor_: (getAnchorsFn: () => HTMLElement[]) => HTMLElement;
   private getAnchorsFn_: () => HTMLElement[];
+  private readonly windowScroll_: Scroll;
 
   constructor(
     getCurrentAnchorFn: (getAnchorsFn: () => HTMLElement[]) => HTMLElement,
@@ -14,6 +13,7 @@ class DeepLinkByScroll {
   ) {
     this.getCurrentAnchor_ = getCurrentAnchorFn;
     this.getAnchorsFn_ = getAnchorsFn;
+    this.windowScroll_ = Scroll.getSingleton();
     this.init_();
   }
 
@@ -26,7 +26,7 @@ class DeepLinkByScroll {
       renderLoop.cleanup(() => this.render_());
 
       // Do nothing if there's been no scrolling
-      if (windowScroll.getDelta().getLength() === 0) {
+      if (this.windowScroll_.getDelta().getLength() === 0) {
         return;
       }
 

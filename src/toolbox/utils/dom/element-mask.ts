@@ -11,8 +11,6 @@ import {VisibleDimensions} from '../cached-vectors/visible-dimensions';
 import {VisibleDistance} from '../cached-vectors/visible-distance';
 import {renderLoop} from '../render-loop';
 
-const windowDimensions: Dimensions = Dimensions.getSingleton();
-const windowScroll: Scroll = Scroll.getSingleton();
 
 class ElementMask{
   private fixedEl_: HTMLElement;
@@ -21,6 +19,8 @@ class ElementMask{
   private maskPosition_: VisibleDistance;
   private stopped_: boolean;
   private buffer_: number;
+  private readonly windowDimensions_: Dimensions;
+  private readonly windowScroll_: Scroll;
 
   constructor(
     fixedElement: HTMLElement, maskElement: HTMLElement, buffer: number = 0
@@ -31,6 +31,8 @@ class ElementMask{
     this.maskPosition_ = VisibleDistance.getForElement(maskElement);
     this.stopped_ = false;
     this.buffer_ = buffer;
+    this.windowDimensions_ = Dimensions.getSingleton();
+    this.windowScroll_ = Scroll.getSingleton();
     this.init_();
   }
 
@@ -64,7 +66,7 @@ class ElementMask{
   }
 
   private getWindowDimensionRanges_(): NumericRange[] {
-    return windowDimensions.getDimensions()
+    return this.windowDimensions_.getDimensions()
       .asRanges()
       .map((range) => range.expand(this.buffer_));
   }
@@ -75,7 +77,7 @@ class ElementMask{
     const clippedPosition =
       this.maskPosition_.getDistance()
         .clamp(widthRange, heightRange)
-        .add(windowScroll.getPosition());
+        .add(this.windowScroll_.getPosition());
 
     let bufferedDimensions = new Dimensions2d();
     if (this.maskVisibleDimensions_.getDimensions().getLength() != 0) {

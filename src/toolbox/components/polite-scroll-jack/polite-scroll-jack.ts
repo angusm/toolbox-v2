@@ -23,8 +23,6 @@ import {getParentElements} from "../../utils/dom/position/get-parent-elements";
 import {contains} from "../../utils/array/contains";
 import {DynamicDefaultMap} from "../../utils/map/dynamic-default";
 
-const scroll = Scroll.getSingleton();
-
 enum TargetPosition {
   BOTTOM,
   CENTER,
@@ -38,6 +36,7 @@ class PoliteScrollJackCoordinator {
 
   private readonly containerToInstance_: Map<HTMLElement, PoliteScrollJack>;
   private readonly ancestorsCache_: DynamicDefaultMap<HTMLElement, HTMLElement[]>;
+  private readonly scroll_: Scroll;
 
   private sortedInstancesCache_: Array<PoliteScrollJack>;
   private lastScrollDelta_: number;
@@ -52,6 +51,7 @@ class PoliteScrollJackCoordinator {
     this.lastScrollDelta_ = 0;
     this.scrollJackTimeout_ = null;
     this.lastScrollJackTime_ = 0;
+    this.scroll_ = Scroll.getSingleton();
     this.runLoop_();
   }
 
@@ -71,7 +71,7 @@ class PoliteScrollJackCoordinator {
    * @private
    */
   private setupCaches_(): void {
-    this.lastScrollDelta_ = scroll.getDelta().getY();
+    this.lastScrollDelta_ = this.scroll_.getDelta().getY();
     this.sortedInstancesCache_ =
       Array.from(this.getInstances_()).sort(
         (a: PoliteScrollJack, b: PoliteScrollJack) => {

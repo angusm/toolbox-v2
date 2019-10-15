@@ -5,7 +5,6 @@ import {Scroll} from "../../cached-vectors/scroll";
 import {setScroll} from "./set-scroll";
 
 let scrollToApply = ZERO_VECTOR_2D;
-let currentScroll = Scroll.getSingleton();
 let setToRun = false;
 
 function applyScrollToScrollElement(
@@ -24,7 +23,7 @@ function applyScrollToScrollElement(
   setToRun = true;
 
   const apply = () => {
-    setScroll(currentScroll.getPosition().add(scrollToApply));
+    setScroll(Scroll.getSingleton().getPosition().add(scrollToApply));
     scrollToApply = ZERO_VECTOR_2D;
     setToRun = false;
   };

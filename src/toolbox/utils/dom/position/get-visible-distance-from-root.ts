@@ -2,8 +2,6 @@ import {Scroll} from '../../cached-vectors/scroll';
 import {Vector2d} from '../../math/geometry/vector-2d';
 import {getStyle} from '../style/get-style';
 
-const scroll: Scroll = Scroll.getSingleton();
-
 function getVisibleDistanceFromRoot_(element: HTMLElement): Vector2d {
   let candidateElement: HTMLElement = element;
   let x = 0;
@@ -32,7 +30,7 @@ function getVisibleDistanceFromRoot_(element: HTMLElement): Vector2d {
     candidateElement = <HTMLElement>candidateElement.offsetParent;
   }
 
-  const invertedScroll = scroll.getPosition().invert();
+  const invertedScroll = Scroll.getSingleton().getPosition().invert();
   return new Vector2d(x + invertedScroll.x, y + invertedScroll.y);
 }
 
