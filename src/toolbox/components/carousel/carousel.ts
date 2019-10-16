@@ -360,6 +360,10 @@ class Carousel implements ICarousel {
     this.transitionToIndex(index);
   }
 
+  public onTransition(callback: (carousel: ICarousel) => void) {
+    this.onTransitionCallbacks_.push(callback);
+  }
+
   public getSlideByIndex(index: number): HTMLElement {
     return this.slides_[index];
   }
