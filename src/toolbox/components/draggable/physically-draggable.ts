@@ -15,6 +15,7 @@ import {IConstraint2d} from "../../utils/math/geometry/2d-constraints/interface"
 interface IPhysicallyDraggableConfig {
   draggableConstraints?: IDraggableConstraint[],
   physical2d?: Physical2d,
+  DraggableClass?: typeof Draggable,
 }
 
 const defaultPhysicallyDraggableConfig: IPhysicallyDraggableConfig =
@@ -30,6 +31,7 @@ class PhysicallyDraggable implements IDraggable {
   constructor(
     target: HTMLElement,
     {
+      DraggableClass = Draggable,
       draggableConstraints =
         defaultPhysicallyDraggableConfig.draggableConstraints,
       physical2d = defaultPhysicallyDraggableConfig.physical2d,
@@ -39,7 +41,7 @@ class PhysicallyDraggable implements IDraggable {
     this.positioned2d_ =
       new PhysicallyPositionedElement2d(target, finalPhysical2d);
     this.draggable_ =
-      new Draggable(target, {constraints: draggableConstraints});
+      new DraggableClass(target, {constraints: draggableConstraints});
     this.init_();
   }
 

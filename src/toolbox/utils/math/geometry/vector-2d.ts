@@ -2,6 +2,7 @@ import {Matrix} from '../../dom/position/matrix';
 import {Vector} from './vector';
 import {browserHasChrome64TableDisplayOffsetIssues} from '../../dom/style/browser-has-chrome64-table-display-offset-issues';
 import {isTableDisplayed} from '../../dom/style/is-table-displayed';
+import {absMax} from "../abs-max";
 
 class Vector2d extends Vector {
   constructor(x: number = 0, y: number = 0, ...args: number[]) {
@@ -71,8 +72,16 @@ class Vector2d extends Vector {
     element.style.transform = `translate(${this.x}px, ${this.y}px)`;
   }
 
+  trendsHorizontal() {
+    return absMax(this.getX(), this.getY()) === Math.abs(this.getX());
+  }
+
+  trendsVertical() {
+    return absMax(this.getX(), this.getY()) === Math.abs(this.getY());
+  }
+
   public toString(): string {
-    return `X: ${this.x}, Y: ${this.y}`;
+    return `X: ${this.getX()}, Y: ${this.getY()}`;
   }
 }
 

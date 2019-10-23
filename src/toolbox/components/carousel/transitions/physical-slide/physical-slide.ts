@@ -28,7 +28,6 @@ import {adjustSlideForLoop} from "./adjust-slide-for-loop";
 import {sum} from '../../../../utils/math/sum';
 import {isVisible} from "../../../../utils/dom/position/horizontal/is-visible";
 import {setStyle} from "../../../../utils/dom/style/set-style";
-import {ScrollLockService} from "../../../scroll-lock-service/scroll-lock-service";
 
 const SLIDE_INTERACTION = Symbol('Physical Slide Interaction');
 
@@ -37,7 +36,6 @@ class PhysicalSlide implements ITransition {
     DynamicDefaultMap<ICarousel, SlideToDraggableMap>;
   private readonly easingFunction_: TEasingFunction;
   private readonly matrixService_: MatrixService;
-  private readonly scrollLockService_: ScrollLockService;
   private readonly transitionTargets_: Map<ICarousel, TransitionTarget>;
   private readonly transitionTime_: number;
   private readonly carousels_: Set<ICarousel>;
@@ -47,15 +45,15 @@ class PhysicalSlide implements ITransition {
   constructor(
     {
       transitionTime = 500,
-      easingFunction = EasingFunction.EASES_IN_OUT_SINE
+      easingFunction = EasingFunction.EASES_IN_OUT_SINE,
+      lockScroll = false,
     }: IPhysicalSlideConfig = {}
   ) {
     this.matrixService_ = MatrixService.getSingleton();
-    this.scrollLockService_ = ScrollLockService.getSingleton();
     this.carousels_ = new Set();
     this.draggableBySlide_ =
       DynamicDefaultMap.usingFunction(
-        (carousel: ICarousel) => new SlideToDraggableMap(carousel));
+        (carousel: ICarousel) => new SlideToDraggableMap(carousel, lockScroll));
     this.easingFunction_ = easingFunction;
     this.interactionStartPosition_ =
       DynamicDefaultMap.usingFunction(() => null);
@@ -234,7 +232,6 @@ class PhysicalSlide implements ITransition {
       return;
     }
 
-    this.scrollLockService_.lockScroll();
     this.transitionTargets_.delete(carousel);
     this.interactionStartTime_.set(carousel, performance.now());
     this.interactionStartPosition_.set(
@@ -289,8 +286,6 @@ class PhysicalSlide implements ITransition {
         }
       }
     }
-
-    this.scrollLockService_.unlockScroll();
   }
 
   public transition(
@@ -348,9 +343,6 @@ class PhysicalSlide implements ITransition {
 
   private destroy_(carousel: ICarousel) {
     this.carousels_.delete(carousel);
-    if (this.transitionTargets_.get(carousel) !== null) {
-      this.scrollLockService_.unlockScroll();
-    }
     this.transitionTargets_.delete(carousel);
   }
 }

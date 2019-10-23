@@ -12,8 +12,9 @@ import {DraggableSyncManager} from "./draggable-sync-manager";
 
 class Draggable implements IDraggable {
   private readonly element_: HTMLElement;
-  private interacting_: boolean;
   private constraints_: IDraggableConstraint[];
+
+  protected interacting_: boolean;
 
   constructor(
     element: HTMLElement,
@@ -48,12 +49,12 @@ class Draggable implements IDraggable {
       });
   }
 
-  private startInteraction_(): void {
+  protected startInteraction_(): void {
     this.interacting_ = true;
     eventHandler.dispatchEvent(new DragStart(this));
   }
 
-  private endInteraction_(): void {
+  protected endInteraction_(): void {
     /**
      * Since global events are being listened to in order to end the interaction
      * then we must first verify we are in fact interacting.
@@ -70,7 +71,7 @@ class Draggable implements IDraggable {
     });
   }
 
-  private isInteracting_(): boolean {
+  protected isInteracting_(): boolean {
     return this.interacting_;
   }
 
@@ -81,7 +82,7 @@ class Draggable implements IDraggable {
     });
   }
 
-  private renderDrag_(): void {
+  protected renderDrag_(): void {
     if (!this.isInteracting_()) {
       return;
     }
