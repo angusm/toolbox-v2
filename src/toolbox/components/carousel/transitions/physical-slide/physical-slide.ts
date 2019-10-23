@@ -28,20 +28,21 @@ import {adjustSlideForLoop} from "./adjust-slide-for-loop";
 import {sum} from '../../../../utils/math/sum';
 import {isVisible} from "../../../../utils/dom/position/horizontal/is-visible";
 import {setStyle} from "../../../../utils/dom/style/set-style";
+import {ScrollLockService} from "../../../scroll-lock-service/scroll-lock-service";
 
 const SLIDE_INTERACTION = Symbol('Physical Slide Interaction');
-
-// Micro-optimization
-const matrixService = MatrixService.getSingleton();
 
 class PhysicalSlide implements ITransition {
   private readonly draggableBySlide_:
     DynamicDefaultMap<ICarousel, SlideToDraggableMap>;
   private readonly easingFunction_: TEasingFunction;
+  private readonly matrixService_: MatrixService;
+  private readonly scrollLockService_: ScrollLockService;
   private readonly transitionTargets_: Map<ICarousel, TransitionTarget>;
   private readonly transitionTime_: number;
-  private interactionStartTime_: number;
-  private interactionStartPosition_: Vector2d;
+  private readonly carousels_: Set<ICarousel>;
+  private interactionStartTime_: DynamicDefaultMap<ICarousel, number>;
+  private interactionStartPosition_: DynamicDefaultMap<ICarousel, Vector2d>;
 
   constructor(
     {
@@ -49,18 +50,32 @@ class PhysicalSlide implements ITransition {
       easingFunction = EasingFunction.EASES_IN_OUT_SINE
     }: IPhysicalSlideConfig = {}
   ) {
+    this.matrixService_ = MatrixService.getSingleton();
+    this.scrollLockService_ = ScrollLockService.getSingleton();
+    this.carousels_ = new Set();
     this.draggableBySlide_ =
       DynamicDefaultMap.usingFunction(
         (carousel: ICarousel) => new SlideToDraggableMap(carousel));
     this.easingFunction_ = easingFunction;
-    this.interactionStartPosition_ = null;
+    this.interactionStartPosition_ =
+      DynamicDefaultMap.usingFunction(() => null);
+    this.interactionStartTime_ = DynamicDefaultMap.usingFunction(() => null);
     this.transitionTime_ = transitionTime;
     this.transitionTargets_ = new Map<ICarousel, TransitionTarget>();
   }
 
   public init(activeSlide: HTMLElement, carousel: ICarousel): void {
+    this.carousels_.add(carousel);
+    carousel.onDestroy((destroyedCarousel) => this.destroy_(destroyedCarousel));
     this.initActiveSlide_(activeSlide, carousel);
     this.initDraggableSlides_(carousel);
+  }
+
+  private validateCarousel_(carousel: ICarousel) {
+    if (!this.carousels_.has(carousel)) {
+      throw new Error(
+        'PhysicalSlide instance not initialized for this carousel.');
+    }
   }
 
   private initActiveSlide_(target: HTMLElement, carousel: ICarousel): void {
@@ -93,6 +108,7 @@ class PhysicalSlide implements ITransition {
   }
 
   public renderLoop(carousel: ICarousel): void {
+    this.validateCarousel_(carousel);
     renderLoop.measure(() => {
       if (!carousel.isBeingInteractedWith()) {
         if (this.transitionTargets_.has(carousel)) {
@@ -206,39 +222,41 @@ class PhysicalSlide implements ITransition {
       (slide) => {
         const distance =
           getVisibleDistanceBetweenElementCenters(slide, targetSlide) +
-          matrixService.getAlteredXTranslation(slide) -
-          matrixService.getAlteredXTranslation(targetSlide);
+          this.matrixService_.getAlteredXTranslation(slide) -
+          this.matrixService_.getAlteredXTranslation(targetSlide);
         distancesFromTarget.set(slide, distance);
       });
     return distancesFromTarget;
   }
 
   private startInteraction_(event: DragStart, carousel: ICarousel): void {
-    if (this.interactionStartPosition_ !== null) {
+    if (this.interactionStartPosition_.get(carousel) !== null) {
       return;
     }
 
+    this.scrollLockService_.lockScroll();
     this.transitionTargets_.delete(carousel);
-    this.interactionStartTime_ = performance.now();
-    this.interactionStartPosition_ =
-      Vector2d.fromElementTransform(event.getTarget().getElement());
+    this.interactionStartTime_.set(carousel, performance.now());
+    this.interactionStartPosition_.set(
+      carousel, Vector2d.fromElementTransform(event.getTarget().getElement()));
     carousel.startInteraction(SLIDE_INTERACTION);
   }
 
   private endInteraction_(event: DragEnd, carousel: ICarousel): void {
-    if (this.interactionStartPosition_ === null) {
+    if (this.interactionStartPosition_.get(carousel) === null) {
       return;
     }
 
     carousel.endInteraction(SLIDE_INTERACTION);
 
-    const interactionDuration = performance.now() - this.interactionStartTime_;
+    const interactionDuration =
+      performance.now() - this.interactionStartTime_.get(carousel);
     const activeSlide = this.getActiveSlide(carousel);
     const distance = getInvertedDistanceToCenter(activeSlide, carousel);
 
     const interactionDelta =
       Vector2d.fromElementTransform(event.getTarget().getElement())
-        .subtract(this.interactionStartPosition_);
+        .subtract(this.interactionStartPosition_.get(carousel));
     const wasHorizontalDrag =
       Math.abs(interactionDelta.getX()) > Math.abs(interactionDelta.getY());
 
@@ -247,8 +265,8 @@ class PhysicalSlide implements ITransition {
         0 :
         interactionDelta.getX();
 
-    this.interactionStartTime_ = null;
-    this.interactionStartPosition_ = null;
+    this.interactionStartTime_.set(carousel, null);
+    this.interactionStartPosition_.set(carousel, null);
 
     const velocitySign = getSign(velocity);
     const distanceSign = getSign(distance);
@@ -271,6 +289,8 @@ class PhysicalSlide implements ITransition {
         }
       }
     }
+
+    this.scrollLockService_.unlockScroll();
   }
 
   public transition(
@@ -278,6 +298,8 @@ class PhysicalSlide implements ITransition {
     carousel: ICarousel,
     optTransitionTime: number = null,
   ): void {
+    this.validateCarousel_(carousel);
+
     if (
       this.transitionTargets_.has(carousel) &&
       this.transitionTargets_.get(carousel).getTarget() === targetElement
@@ -302,6 +324,8 @@ class PhysicalSlide implements ITransition {
   }
 
   public getActiveSlide(carousel: ICarousel): HTMLElement {
+    this.validateCarousel_(carousel);
+
     const lastActiveSlide = carousel.getLastActiveSlide();
     return min(
       carousel.getSlides(),
@@ -315,9 +339,19 @@ class PhysicalSlide implements ITransition {
   }
 
   public hasTransitionedTo(slide: HTMLElement, carousel: ICarousel): boolean {
+    this.validateCarousel_(carousel);
+
     const distance =
       getVisibleDistanceBetweenElementCenters(slide, carousel.getContainer());
     return distance === 0
+  }
+
+  private destroy_(carousel: ICarousel) {
+    this.carousels_.delete(carousel);
+    if (this.transitionTargets_.get(carousel) !== null) {
+      this.scrollLockService_.unlockScroll();
+    }
+    this.transitionTargets_.delete(carousel);
   }
 }
 

@@ -51,6 +51,7 @@ class Carousel implements ICarousel {
   private readonly transition_: ITransition;
   private readonly allowLooping_: boolean;
   private readonly onTransitionCallbacks_: ((carousel: ICarousel) => void)[];
+  private readonly onDestroyCallbacks_: ((carousel: ICarousel) => void)[];
   private readonly slideCssClasses_:
     DynamicDefaultMap<HTMLElement, Set<string>>;
   private transitionTarget_: TransitionTarget;
@@ -81,6 +82,7 @@ class Carousel implements ICarousel {
     {
       condition = () => true,
       onTransitionCallbacks = [],
+      onDestroyCallbacks = [],
       activeCssClass = CssClass.ACTIVE_SLIDE,
       beforeCssClass = CssClass.BEFORE_SLIDE,
       afterCssClass = CssClass.AFTER_SLIDE,
@@ -100,6 +102,7 @@ class Carousel implements ICarousel {
     this.container_ = container;
     this.lastActiveSlide_ = null;
     this.onTransitionCallbacks_ = onTransitionCallbacks;
+    this.onDestroyCallbacks_ = onDestroyCallbacks;
     this.slides_ = slides;
     this.transition_ = transition;
     this.transitionTarget_ = null;
@@ -364,6 +367,10 @@ class Carousel implements ICarousel {
     this.onTransitionCallbacks_.push(callback);
   }
 
+  public onDestroy(callback: (carousel: ICarousel) => void) {
+    this.onDestroyCallbacks_.push(callback);
+  }
+
   public getSlideByIndex(index: number): HTMLElement {
     return this.slides_[index];
   }
@@ -378,6 +385,7 @@ class Carousel implements ICarousel {
 
   destroy() {
     this.destroyed_ = true;
+    this.onDestroyCallbacks_.forEach((callback) => callback(this));
     CarouselSyncManager.getSingleton().destroyCarousel(this);
   }
 }

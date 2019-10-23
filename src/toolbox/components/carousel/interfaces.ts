@@ -30,10 +30,13 @@ interface ICarousel {
   transitionToIndex(index: number, drivenBySync: boolean): void;
   getFirstSlide(): HTMLElement;
   getLastSlide(): HTMLElement;
+  onTransition(callback: (carousel: ICarousel) => void): void;
+  onDestroy(callback: (carousel: ICarousel) => void): void;
 }
 
 interface ICarouselOptions {
   onTransitionCallbacks?: ((carousel: ICarousel) => void)[],
+  onDestroyCallbacks?: ((carousel: ICarousel) => void)[],
   activeCssClass?: string,
   beforeCssClass?: string,
   afterCssClass?: string,
