@@ -28,6 +28,7 @@ import {adjustSlideForLoop} from "./adjust-slide-for-loop";
 import {sum} from '../../../../utils/math/sum';
 import {isVisible} from "../../../../utils/dom/position/horizontal/is-visible";
 import {setStyle} from "../../../../utils/dom/style/set-style";
+import {forEach} from "../../../../utils/iterable-iterator/for-each";
 
 const SLIDE_INTERACTION = Symbol('Physical Slide Interaction');
 
@@ -39,6 +40,8 @@ class PhysicalSlide implements ITransition {
   private readonly transitionTargets_: Map<ICarousel, TransitionTarget>;
   private readonly transitionTime_: number;
   private readonly carousels_: Set<ICarousel>;
+  private readonly carouselListeners_:
+    DynamicDefaultMap<ICarousel, Set<number>>;
   private interactionStartTime_: DynamicDefaultMap<ICarousel, number>;
   private interactionStartPosition_: DynamicDefaultMap<ICarousel, Vector2d>;
 
@@ -51,6 +54,7 @@ class PhysicalSlide implements ITransition {
   ) {
     this.matrixService_ = MatrixService.getSingleton();
     this.carousels_ = new Set();
+    this.carouselListeners_ = DynamicDefaultMap.usingFunction(() => new Set());
     this.draggableBySlide_ =
       DynamicDefaultMap.usingFunction(
         (carousel: ICarousel) => new SlideToDraggableMap(carousel, lockScroll));
@@ -88,18 +92,23 @@ class PhysicalSlide implements ITransition {
             const draggable: Draggable =
               this.draggableBySlide_.get(carousel).get(slide);
 
-            eventHandler.addListener(
+            const startListener = eventHandler.addListener(
               draggable,
               DragStart,
               (event: DragStart) => this.startInteraction_(event, carousel));
-            eventHandler.addListener(
+            const dragListener = eventHandler.addListener(
               draggable,
               Drag,
               (event: Drag) => this.adjustSplit_(carousel, event.getElement()));
-            eventHandler.addListener(
+            const endListener = eventHandler.addListener(
               draggable,
               DragEnd,
               (event: DragEnd) => this.endInteraction_(event, carousel));
+
+            this.carouselListeners_.get(carousel).add(startListener);
+            this.carouselListeners_.get(carousel).add(dragListener);
+            this.carouselListeners_.get(carousel).add(endListener);
+
             return draggable;
           });
     DraggableSyncManager.getSingleton().syncDraggables(...draggables);
@@ -342,6 +351,10 @@ class PhysicalSlide implements ITransition {
   }
 
   private destroy_(carousel: ICarousel) {
+    forEach(
+      this.carouselListeners_.get(carousel).values(),
+      (uid: number) => eventHandler.removeListener(uid));
+    this.carouselListeners_.delete(carousel);
     this.carousels_.delete(carousel);
     this.transitionTargets_.delete(carousel);
   }

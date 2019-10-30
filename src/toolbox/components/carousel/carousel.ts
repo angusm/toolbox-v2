@@ -69,6 +69,7 @@ class Carousel implements ICarousel {
    *
    * @param condition Under what conditions the carousel should run
    * @param onTransitionCallbacks Functions run when the active slide changes.
+   * @param onDestroyCallbacks Functions run when the carousel is destroyed.
    * @param activeCssClass Class to apply to active slide.
    * @param beforeCssClass Class to apply to slides before active slide.
    * @param afterCssClass Class to apply to slides after active slide.
@@ -385,8 +386,8 @@ class Carousel implements ICarousel {
 
   destroy() {
     this.destroyed_ = true;
-    this.onDestroyCallbacks_.forEach((callback) => callback(this));
     CarouselSyncManager.getSingleton().destroyCarousel(this);
+    this.onDestroyCallbacks_.forEach((callback) => callback(this));
   }
 }
 
