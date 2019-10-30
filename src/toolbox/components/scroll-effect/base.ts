@@ -11,6 +11,7 @@ import {TScrollEffectCallback} from "./types/t-scroll-effect-callback";
 import {TScrollEffectDistanceValue} from "./types/t-scroll-effect-distance-value";
 import {forEach} from "../../utils/iterable-iterator/for-each";
 import {ROOT_ELEMENT} from "../../utils/dom/position/root-element";
+import {ErrorService} from "../../utils/error/service";
 
 /**
  * These are the default option values provided to ScrollEffect unless otherwise
@@ -178,7 +179,8 @@ class ScrollEffect {
     }: IScrollEffectOptions = defaultOptions,
   ) {
     if (target === null) {
-      throw new Error('ScrollEffect requires a valid HTMLElement as a target');
+      ErrorService.throw(
+        'ScrollEffect requires a valid HTMLElement as a target');
     }
 
     this.condition_ = condition;

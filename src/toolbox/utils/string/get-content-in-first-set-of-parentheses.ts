@@ -1,11 +1,14 @@
+import {ErrorService} from "../error/service";
+
 function getContentInFirstSetOfParentheses(s: string): string {
   if (s.indexOf('(') === -1 && s.indexOf(')') === -1) {
     return '';
   }
   if (s.indexOf('(') === -1 && s.indexOf(')') !== -1) {
-    throw new Error(
+    ErrorService.throw(
       "Value passed to getContentInFirstSetOfParentheses() has no " +
       "opening parenthesis");
+    return '';
   }
 
   const startIndex = s.indexOf('(') + 1;
@@ -22,9 +25,10 @@ function getContentInFirstSetOfParentheses(s: string): string {
   }
 
   if (openParenthesesCount > 0) {
-    throw new Error(
+    ErrorService.throw(
       "Value passed to getContentInFirstSetOfParentheses() has uneven " +
       "opening/closing parentheses");
+    return '';
   } else {
     const endIndex = currentIndex - 1;
     return s.slice(startIndex, endIndex);

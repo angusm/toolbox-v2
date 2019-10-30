@@ -2,6 +2,7 @@ import { SCROLL_ELEMENT } from '../../utils/dom/position/scroll-element';
 import { setStyle } from '../../utils/dom/style/set-style';
 import {UserAgent} from "../../utils/user-agent/user-agent";
 import {Safari} from "../../utils/user-agent/browser/safari";
+import {ErrorService} from "../../utils/error/service";
 
 class ScrollLockService {
   public static singleton: ScrollLockService;
@@ -35,8 +36,9 @@ class ScrollLockService {
       setStyle(<HTMLElement>SCROLL_ELEMENT, 'overflow', '');
       setStyle(<HTMLElement>SCROLL_ELEMENT, 'width', '');
     } else if (this.counter_ < 1) {
-      throw new Error(
-        'You have tried to unlock the scroll more times than you have locked the scroll.');
+      ErrorService.throw(
+        'You have tried to unlock the scroll more times than you have locked ' +
+        'the scroll.');
     }
     this.counter_--;
   }

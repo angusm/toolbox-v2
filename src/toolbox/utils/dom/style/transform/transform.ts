@@ -7,6 +7,7 @@ import {getContentInFirstSetOfParentheses} from "../../../string/get-content-in-
 import {validTransformStrings} from "./transform-value/valid-transform-strings";
 import {transformStringToClass} from "./transform-value/transform-string-to-class";
 import {trim} from "../../../string/trim";
+import {ErrorService} from "../../../error/service";
 
 class Transform implements ICssStyleValueInstance {
   ['constructor']: typeof Transform;
@@ -36,7 +37,7 @@ class Transform implements ICssStyleValueInstance {
       const transformFunction = remainingString.slice(0, valueIndex - 1);
 
       if (!validTransformStrings.has(transformFunction)) {
-        throw new Error(
+        ErrorService.throw(
           `Unsupported transform function "${transformFunction}" provided to ` +
           `Toolbox Transform.`
         );

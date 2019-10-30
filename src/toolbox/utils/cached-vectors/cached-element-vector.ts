@@ -2,6 +2,7 @@ import {DynamicDefaultMap} from '../map/dynamic-default';
 import {MultiValueDynamicDefaultMap} from '../map/multi-value-dynamic-default';
 import {Vector} from '../math/geometry/vector';
 import {renderLoop} from '../render-loop';
+import {ErrorService} from "../error/service";
 
 const VALUE_LIMIT: number = 2;
 
@@ -25,9 +26,9 @@ abstract class CachedElementVector<T extends Vector> {
 
     if (instanceByElement.has([element, ...args])) {
       if (element) {
-        throw new Error('Please use getForElement instead of new.');
+        ErrorService.throw('Please use getForElement instead of new.');
       } else {
-        throw new Error('Please use getSingleton instead of new.');
+        ErrorService.throw('Please use getSingleton instead of new.');
       }
     }
 
@@ -53,7 +54,8 @@ abstract class CachedElementVector<T extends Vector> {
   }
 
   protected getValues(): number[] {
-    throw new Error('getValues must be overridden by child class');
+    ErrorService.throw('getValues must be overridden by child class');
+    return [];
   }
 
   private getCurrentVector_(): T {

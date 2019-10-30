@@ -11,6 +11,7 @@ import {DynamicDefaultMap} from "../../utils/map/dynamic-default";
 import {subtract} from "../../utils/set/subtract";
 import {removeClassesIfPresent} from "../../utils/dom/class/remove-classes-if-present";
 import {addClassesIfMissing} from "../../utils/dom/class/add-classes-if-missing";
+import {ErrorService} from "../../utils/error/service";
 
 const defaultTransition: ITransition = new CssClassesOnly();
 const INTERACTION: symbol = Symbol('interaction');
@@ -92,7 +93,7 @@ class Carousel implements ICarousel {
     }: ICarouselOptions = {}
   ) {
     if (slides.length < 1) {
-      throw new Error('Cannot start carousel without slides');
+      ErrorService.throw('Cannot start carousel without slides');
     }
 
     this.activeCssClass_ = activeCssClass;

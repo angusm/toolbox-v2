@@ -29,6 +29,7 @@ import {sum} from '../../../../utils/math/sum';
 import {isVisible} from "../../../../utils/dom/position/horizontal/is-visible";
 import {setStyle} from "../../../../utils/dom/style/set-style";
 import {forEach} from "../../../../utils/iterable-iterator/for-each";
+import {ErrorService} from "../../../../utils/error/service";
 
 const SLIDE_INTERACTION = Symbol('Physical Slide Interaction');
 
@@ -75,7 +76,7 @@ class PhysicalSlide implements ITransition {
 
   private validateCarousel_(carousel: ICarousel) {
     if (!this.carousels_.has(carousel)) {
-      throw new Error(
+      ErrorService.throw(
         'PhysicalSlide instance not initialized for this carousel.');
     }
   }

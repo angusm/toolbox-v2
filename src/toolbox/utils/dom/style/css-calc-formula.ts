@@ -6,6 +6,7 @@ import {zip} from "../../array/zip";
 import {Formula, FormulaPiece} from "../../math/algebra/formula";
 import {contains} from "../../array/contains";
 import {Add, Subtract} from "../../math/algebra/operation";
+import {ErrorService} from "../../error/service";
 
 const CSS_CALC_FORMULA_ALLOWED_UNITS = [
   'px',
@@ -60,7 +61,8 @@ class CssCalcFormula implements IMeasurableInstance, ICssStyleValueInstance {
         addOnlyFormula[i] = Add;
         addOnlyFormula[i+1] = (<Variable>addOnlyFormula[i+1]).invert();
       } else if (!(value instanceof Variable) && value !== Add) {
-        throw new Error('CssCalcFormula currently only supports Add/Subtract');
+        ErrorService.throw(
+          'CssCalcFormula currently only supports Add/Subtract');
       } else {
         addOnlyFormula[i] = value;
       }

@@ -5,6 +5,7 @@
  * by Gaëtan Renaudeau 2014 - 2015 – MIT License
  */
 import {NumericRange} from "./numeric-range";
+import {ErrorService} from "../error/service";
 
 const clampedRange = new NumericRange(0, 1);
 
@@ -84,7 +85,7 @@ function bezier(
   mX1: number, mY1: number, mX2: number, mY2: number
 ): (percent: number) => number {
   if (!(0 <= mX1 && mX1 <= 1 && 0 <= mX2 && mX2 <= 1)) {
-    throw new Error('bezier x values must be in [0, 1] range');
+    ErrorService.throw('bezier x values must be in [0, 1] range');
   }
 
   if (mX1 === mY1 && mX2 === mY2) {

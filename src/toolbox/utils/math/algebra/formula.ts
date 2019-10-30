@@ -6,6 +6,7 @@ import {operationsInOrder} from "./operations-in-order";
 import {replaceInPlace} from "../../array/replace-in-place";
 import {isDefined} from "../../is-defined";
 import {contains} from "../../array/contains";
+import {ErrorService} from "../../error/service";
 
 type FormulaPiece = IOperation | Variable;
 type InterstitialFormulaPiece = IOperation | string;
@@ -22,7 +23,7 @@ class Formula {
 
   public static fromString(formula: string): Formula {
     if (!formulaRegex.test(formula)) {
-      throw new Error(`Invalid formula "${formula}", does not match regex`);
+      ErrorService.throw(`Invalid formula "${formula}", does not match regex`);
     }
 
     const stripped: string = formula.replace(/ /g, '');
@@ -79,7 +80,8 @@ class Formula {
     if (pieces.length > 1 && pieces[0] === Subtract) {
       const firstValue = pieces[1];
       if (!(firstValue instanceof Variable)) {
-        throw new Error('Formulas should start with a Variable');
+        ErrorService.throw('Formulas should start with a Variable');
+        return [];
       }
       const result = pieces.slice(1);
       result[0] = firstValue.invert();
@@ -97,7 +99,7 @@ class Formula {
 
     const firstValue = pieces[0];
     if (!(firstValue instanceof Variable)) {
-      throw new Error('Formulas should start with a Variable');
+      ErrorService.throw('Formulas should start with a Variable');
     }
 
     if (length === 1) {
@@ -120,22 +122,23 @@ class Formula {
       if (current instanceof Variable) {
         // Implicit multiplication
         if (last instanceof Variable) {
-          throw new Error('Formula does not support implicit multiplication.');
+          ErrorService.throw(
+            'Formula does not support implicit multiplication.');
         } else if (last === Subtract && !(secondLast instanceof Variable)) {
           result[insertIndex - 1] = current.invert();
         } else if (!(secondLast instanceof Variable)) {
-          throw new Error('Formulas must have a value between operators.');
+          ErrorService.throw('Formulas must have a value between operators.');
         } else {
           insert(current);
         }
       } else {
         if (!(last instanceof Variable)) {
           if (!(current === Subtract)) {
-            throw new Error('Formulas must have a value between operators.');
+            ErrorService.throw('Formulas must have a value between operators.');
           } else if (
             !(secondLast instanceof Variable) && isDefined(secondLast)
           ) {
-            throw new Error('Formulas must have a value between operators.');
+            ErrorService.throw('Formulas must have a value between operators.');
           } else {
             insert(current);
           }
@@ -162,7 +165,7 @@ class Formula {
     if (pieces.length === 1) {
       return pieces;
     } else if (pieces.length % 2 === 0) {
-      throw new Error(
+      ErrorService.throw(
         'Cannot reduce with operation on an even number of pieces');
     }
 
@@ -176,13 +179,16 @@ class Formula {
 
       // Check for errors
       if (!(lastVariable instanceof Variable)) {
-        throw new Error('Found IOperation where a Variable was expected');
+        ErrorService.throw('Found IOperation where a Variable was expected');
+        return [];
       }
       if (!(current instanceof Variable)) {
-        throw new Error('Found IOperation where a Variable was expected');
+        ErrorService.throw('Found IOperation where a Variable was expected');
+        return [];
       }
       if (operation instanceof Variable) {
-        throw new Error('Found Variable where a IOperation was expected');
+        ErrorService.throw('Found Variable where a IOperation was expected');
+        return [];
       }
       if (matchingOperationsSet.has(<IOperation>operation)) {
         const value = (<IOperation>operation).execute(lastVariable, current);
@@ -215,7 +221,7 @@ class Formula {
       return pieces;
     }
     if (pieces.length % 2 === 0) {
-      throw new Error(
+      ErrorService.throw(
         'Cannot reduce with execution on an even number of pieces');
     }
 

@@ -11,6 +11,7 @@ import {subtract} from "../../../utils/set/subtract";
 import {UserAgent} from "../../../utils/user-agent/user-agent";
 import {Firefox} from "../../../utils/user-agent/browser/firefox";
 import {ArrayMap} from "../../../utils/map/array";
+import {ErrorService} from "../../../utils/error/service";
 
 // Expected cap, drop it in half just to be safe
 const Z_INDEX_CAP = 2147483647 / 2;
@@ -496,7 +497,7 @@ class FrameSequenceBg implements IEffect {
    */
   public replaceFramesInPlace(frames: string[]) {
     if (frames.length !== this.imageUrlsInOrder_.length) {
-      throw new Error(
+      ErrorService.throw(
         'Can only replaceFramesInPlace if frame count is constant');
     }
 

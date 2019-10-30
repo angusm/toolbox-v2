@@ -1,3 +1,5 @@
+import {ErrorService} from "../../error/service";
+
 const algebraRegex = /^\-?((([0-9]*\.?[0-9]+)([a-zA-Z\%]*))|([a-zA-Z\%]+))$/;
 
 type VariableSymbol = string|null;
@@ -22,7 +24,8 @@ class Variable {
   public static fromString(s: string): Variable {
     const matches = algebraRegex.exec(s);
     if (matches === null) {
-      throw new Error(`Invalid variable value in "${s}"`);
+      ErrorService.throw(`Invalid variable value in "${s}"`);
+      return new Variable(0, '');
     }
     const sign = s[0] === '-' ? -1 : 1;
     const numericValue = matches[3] ? parseFloat(matches[3]) : 1;
