@@ -12,6 +12,7 @@ import {subtract} from "../../utils/set/subtract";
 import {removeClassesIfPresent} from "../../utils/dom/class/remove-classes-if-present";
 import {addClassesIfMissing} from "../../utils/dom/class/add-classes-if-missing";
 import {ErrorService} from "../../utils/error/service";
+import {RenderFunctionID} from "../../utils/render-function-id";
 
 const defaultTransition: ITransition = new CssClassesOnly();
 const INTERACTION: symbol = Symbol('interaction');
@@ -60,6 +61,7 @@ class Carousel implements ICarousel {
   private lastActiveSlide_: HTMLElement;
   private destroyed_: boolean;
   private disabled_: boolean;
+  private renderLoopCallback_: RenderFunctionID;
 
   /**
    * @param container Parent element of slides.
@@ -111,6 +113,8 @@ class Carousel implements ICarousel {
     this.interactions_ = [];
     this.destroyed_ = false;
     this.disabled_ = false;
+    this.renderLoopCallback_ = null;
+
     this.slideCssClasses_ =
       DynamicDefaultMap.usingFunction<HTMLElement, Set<string>>(
         () => new Set<string>());
@@ -179,7 +183,8 @@ class Carousel implements ICarousel {
       return;
     }
 
-    renderLoop.measure(() => {
+    this.renderLoopCallback_ = renderLoop.measure(() => {
+
       renderLoop.cleanup(() => this.render_());
 
       // Do nothing if disabled
@@ -197,7 +202,8 @@ class Carousel implements ICarousel {
         this.onTransitionCallbacks_.forEach((callback) => callback(this));
 
         if (activeSlide) {
-          renderLoop.mutate(() => this.updateClasses_(activeSlide));
+          this.renderLoopCallback_ =
+            renderLoop.mutate(() => this.updateClasses_(activeSlide));
         }
 
         // Sync other carousels.
@@ -387,6 +393,9 @@ class Carousel implements ICarousel {
 
   destroy() {
     this.destroyed_ = true;
+    if (this.renderLoopCallback_) {
+      renderLoop.clear(this.renderLoopCallback_);
+    }
     CarouselSyncManager.getSingleton().destroyCarousel(this);
     this.onDestroyCallbacks_.forEach((callback) => callback(this));
   }
