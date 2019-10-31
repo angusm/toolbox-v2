@@ -27,6 +27,7 @@ function styleStringToMap(styleString: string): Map<string, string> {
       }
     })
     .map((propertyStylePair) => propertyStylePair.split(':'))
+    .map((splitPieces) => [splitPieces[0], splitPieces.slice(1).join(':')])
     .map((pair) => pair.map((value) => trim(value, VALUES_TO_TRIM)))
     .reduce(
       (result, [property, style]) => {
