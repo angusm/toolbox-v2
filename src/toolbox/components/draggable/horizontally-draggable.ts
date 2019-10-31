@@ -6,6 +6,11 @@ import {ScrollLockService} from "../scroll-lock-service/scroll-lock-service";
 import {ZERO_VECTOR_2D} from "../../utils/math/geometry/zero-vector-2d";
 import {Vector2d} from "../../utils/math/geometry/vector-2d";
 
+
+function weightedTrendsHorizontal(delta: Vector2d) {
+  return (Math.abs(delta.getX()) * .8) > Math.abs(delta.getY());
+}
+
 class HorizontallyDraggable extends Draggable {
   private potentialInteractionStarted_: boolean;
   private dragDelta_: Vector2d;
@@ -37,7 +42,7 @@ class HorizontallyDraggable extends Draggable {
     }
 
     if (!this.isInteracting_()) {
-      if (delta.trendsHorizontal()) {
+      if (weightedTrendsHorizontal(delta)) {
         ScrollLockService.getSingleton().lockScroll();
         this.dragDelta_ = delta;
         super.startInteraction_();
@@ -46,7 +51,7 @@ class HorizontallyDraggable extends Draggable {
       }
     } else {
       this.dragDelta_ = this.dragDelta_.add(delta);
-      if (this.dragDelta_.trendsVertical()) {
+      if (!weightedTrendsHorizontal(this.dragDelta_)) {
         this.endInteraction_();
         return;
       }
