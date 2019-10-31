@@ -8,7 +8,7 @@ import {Vector2d} from "../../utils/math/geometry/vector-2d";
 
 
 function weightedTrendsHorizontal(delta: Vector2d) {
-  return (Math.abs(delta.getX()) * .8) > Math.abs(delta.getY());
+  return (Math.abs(delta.getX()) * 1.05) > Math.abs(delta.getY());
 }
 
 class HorizontallyDraggable extends Draggable {
