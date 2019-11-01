@@ -16,6 +16,14 @@ class Scroll extends CachedElementVector<Vector2d> {
     return this.getLastValue();
   }
 
+  public getX(): number {
+    return this.getPosition().getX();
+  }
+
+  public getY(): number {
+    return this.getPosition().getY();
+  }
+
   protected getValues(): number[] {
     return [this.getScrollX_(), this.getScrollY_()];
   }

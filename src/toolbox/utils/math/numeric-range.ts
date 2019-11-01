@@ -25,6 +25,10 @@ class NumericRange implements IRange<number>{
     return this.min_ <= value && value <= this.max_;
   }
 
+  public containsRange(range: NumericRange): boolean {
+    return this.contains(range.getMin()) && this.contains(range.getMax());
+  }
+
   public adjust(value: number): NumericRange {
     return new NumericRange(this.min_ + value, this.max_ + value);
   }
