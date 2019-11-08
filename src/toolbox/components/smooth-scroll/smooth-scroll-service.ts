@@ -76,7 +76,6 @@ class SmoothScrollService {
     INTERRUPTING_EVENTS.forEach(
       (eventName) => {
         window.addEventListener(eventName, () => {
-          console.log('Cancelling cause event', eventName);
           this.cancelTransition()
         });
       });
@@ -84,7 +83,6 @@ class SmoothScrollService {
       'keydown',
       (keyDownEvent) => {
         if (INTERRUPTING_KEYCODES.has(keyDownEvent.keyCode)) {
-          console.log('Cancelling cause keydown', keyDownEvent.keyCode);
           this.cancelTransition()
         }
       });

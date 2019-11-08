@@ -30,7 +30,6 @@ class PoliteScrollJackCoordinator {
   private readonly delay_: number;
 
   private lastScrollDelta_: number;
-  private lastScrollJackTime_: number;
   private smoothScrollService_: SmoothScrollService;
   private startPosition_: number;
   private timeout_: number;
@@ -39,7 +38,6 @@ class PoliteScrollJackCoordinator {
     this.scrollContainer_ = scrollContainer;
 
     this.lastScrollDelta_ = 0;
-    this.lastScrollJackTime_ = 0;
     this.scroll_ = Scroll.getSingleton();
     this.elements_ = [];
     this.rangesByStart_ = [];
@@ -146,6 +144,7 @@ class PoliteScrollJackCoordinator {
         window.clearTimeout(this.timeout_);
         this.timeout_ = null;
       }
+
       renderLoop.scrollCleanup(() => this.runLoop_());
 
       if (this.startPosition_ === null) {
@@ -162,6 +161,7 @@ class PoliteScrollJackCoordinator {
         return;
       }
 
+      this.lastScrollDelta_ = this.scroll_.getDelta().getY();
       this.calculateRanges_(); // Setup cache values
 
 
@@ -188,8 +188,6 @@ class PoliteScrollJackCoordinator {
     // }
 
     const startRange = this.getStartFocusedRange_();
-    const visibleRanges = this.getVisibleRanges_();
-
     const rangesAfterShowingTop =
       this.rangesByStart_
         .filter((range) => this.isTopVisible_(range))
@@ -199,9 +197,10 @@ class PoliteScrollJackCoordinator {
           if (bScore !== aScore) {
             return bScore - aScore;
           } else {
-            return a.getMax() - b.getMax();
+            return a.getMin() - b.getMin();
           }
         });
+
     const rangesBeforeShowingBottom =
       this.rangesByEnd_
         .filter((range) => this.isBottomVisible_(range))
@@ -211,25 +210,19 @@ class PoliteScrollJackCoordinator {
           if (bScore !== aScore) {
             return bScore - aScore;
           } else {
-            return a.getMax() - b.getMax();
+            return b.getMax() - a.getMax();
           }
         });
 
-    const isScrollingDown = (this.startPosition_ - position) < 0;
+    const scrolledDownOverall = (position - this.startPosition_) > 0;
+    const lastScrollWasDown = this.lastScrollDelta_ > 0;
 
-    if (isScrollingDown) {
+    if (lastScrollWasDown) {
       if (
         this.startedWithFocusedRangeBottomVisible_() &&
         rangesAfterShowingTop.length > 0
       ) {
         console.log('-- 1 --');
-        return rangesAfterShowingTop[0].getMin();
-      } else if (
-        // this.getRangeViewportPercent_(startRange) < .5 &&
-        this.getRangeSelfPercent_(startRange) < 1 &&
-        rangesAfterShowingTop.length > 0
-      ) {
-        console.log('-- 2 --');
         return rangesAfterShowingTop[0].getMin();
       } else {
         // Do nothing so we don't snap the bottom of the range out of view
@@ -237,23 +230,15 @@ class PoliteScrollJackCoordinator {
         return position;
       }
     } else {
-      console.log(
-        this.startedWithFocusedRangeTopVisible_(),
-        this.getRangeSelfPercent_(startRange)
-      );
       if (
         this.startedWithFocusedRangeTopVisible_() &&
         rangesBeforeShowingBottom.length > 0
       ) {
-        console.log('-- 5 --');
-        return rangesBeforeShowingBottom[0].getMax() - this.getScrollContainerHeight_();
-      } else if (
-        // this.getRangeViewportPercent_(startRange) < .5 &&
-        this.getRangeSelfPercent_(startRange) < 1 &&
-        rangesBeforeShowingBottom.length > 0
-      ) {
         console.log('-- 6 --');
-        return rangesBeforeShowingBottom[0].getMax() - this.getScrollContainerHeight_();
+        const rawTarget =
+          rangesBeforeShowingBottom[0].getMax() -
+          this.getScrollContainerHeight_();
+        return Math.max(0, rawTarget);
       } else {
         // Do nothing so we don't snap the bottom of the range out of view
         console.log('-- 7 --');
@@ -310,10 +295,19 @@ class PoliteScrollJackCoordinator {
     ranges: NumericRange[],
     position: number = null
   ): NumericRange {
+
+    // Filter to non-containing ranges
+    const nonOverlappingRanges =
+      ranges.filter((range) => {
+        return !(ranges
+          .filter((subRange) => subRange !== range)
+          .find((subRange) => range.containsRange(subRange)));
+      });
+
     const viewportRange = this.getViewportRange_(position);
     const viewportDistance = viewportRange.getDistance();
     return max<NumericRange>(
-      ranges,
+      nonOverlappingRanges,
       (range) => {
         const overlap = viewportRange.getOverlap(range);
         if (overlap === null) {
