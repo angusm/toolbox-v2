@@ -173,6 +173,9 @@ class PoliteScrollJackCoordinator {
     const startRange = this.getStartFocusedRange_();
 
     const visibleRanges = this.getVisibleRanges_();
+
+    console.log(visibleRanges.map((r) => [r, this.rangesToElements_.get(r)]));
+
     const startRangeIndex = visibleRanges.indexOf(startRange);
     const rangesAfterShowingTop =
       this.rangesByStart_.filter((range) => this.isTopVisible_(range));
