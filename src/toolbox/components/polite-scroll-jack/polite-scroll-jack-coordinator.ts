@@ -26,11 +26,11 @@ class PoliteScrollJackCoordinator {
   private readonly scrollContainer_: Element;
   private readonly elements_: HTMLElement[]; // Array to allow for duplicates
   private readonly calculatedElements_: Set<HTMLElement>;
+  private readonly delay_: number;
 
   private lastScrollDelta_: number;
   private scrollJackTimeout_: number;
   private lastScrollJackTime_: number;
-  private delay_: number;
   private smoothScrollService_: SmoothScrollService;
   private startPosition_: number;
 
@@ -144,19 +144,17 @@ class PoliteScrollJackCoordinator {
     renderLoop.scrollMeasure(() => {
       renderLoop.scrollCleanup(() => this.runLoop_());
 
-      this.calculateRanges_(); // Setup cache values
-
       // Do nothing if we're already scroll-jacking
       if (this.smoothScrollService_.isScrolling()) {
-        console.log('Doing nothing, ongoing jacking');
         return;
       }
 
       // Do nothing if we're not really scrolling
       if (this.scroll_.getDelta().getY() === 0) {
-        console.log('Doing nothing, no delta');
         return;
       }
+
+      this.calculateRanges_(); // Setup cache values
 
       if (this.startPosition_ === null) {
         this.startPosition_ =
@@ -186,7 +184,11 @@ class PoliteScrollJackCoordinator {
     const focusedRange = this.getFocusedRange_();
 
     if (!focusedRange || this.isFillingView_(focusedRange)) {
-      console.log('No focused range or is filling view', focusedRange);
+      if (!focusedRange) {
+        console.log('No focused range');
+      } else {
+        console.log('Focused range is filling view');
+      }
       return position; // Do nothing
     }
 
@@ -203,24 +205,32 @@ class PoliteScrollJackCoordinator {
     const rangesBeforeShowingBottom =
       rangesBefore.filter((range) => this.isBottomVisible_(range));
 
+    console.log(
+      visibleRanges.map(
+        (range) => [range, this.rangesToElements_.get(range).className]));
+
     if (isDownFromStart) {
       if (endedScrollingDown) {
         if (
           this.startedWithFocusedRangeBottomVisible_() &&
           rangesAfterShowingTop.length > 0
         ) {
+          console.log('-- 1 --');
           return rangesAfterShowingTop[0].getMin();
         } else if (
           // this.getRangeViewportPercent_(startRange) < .5 &&
           this.getRangeSelfPercent_(startRange) < 1 &&
           rangesAfterShowingTop.length > 0
         ) {
+          console.log('-- 2 --');
           return rangesAfterShowingTop[0].getMin();
         } else {
           // Do nothing so we don't snap the bottom of the range out of view
+          console.log('-- 3 --');
           return position;
         }
       } else {
+          console.log('-- 4 --');
         return this.getMostFocusedRange_(rangesAfter).getMin();
       }
     } else {
@@ -229,18 +239,22 @@ class PoliteScrollJackCoordinator {
           this.startedWithFocusedRangeTopVisible_() &&
           rangesBeforeShowingBottom.length > 0
         ) {
+          console.log('-- 5 --');
           return rangesBeforeShowingBottom[0].getMax() - this.getScrollContainerHeight_();
         } else if (
           // this.getRangeViewportPercent_(startRange) < .5 &&
           this.getRangeSelfPercent_(startRange) < 1 &&
           rangesBeforeShowingBottom.length > 0
         ) {
+          console.log('-- 6 --');
           return rangesBeforeShowingBottom[0].getMax() - this.getScrollContainerHeight_();
         } else {
           // Do nothing so we don't snap the bottom of the range out of view
+          console.log('-- 7 --');
           return position;
         }
       } else {
+          console.log('-- 8 --');
         return this.getMostFocusedRange_(rangesBefore).getMax() -
           this.getScrollContainerHeight_();
       }
@@ -311,10 +325,6 @@ class PoliteScrollJackCoordinator {
   }
 
   private getFocusedRange_(position: number = null): NumericRange {
-    console.log(
-      this.rangesToElements_.get(this.getMostFocusedRange_(this.getVisibleRanges_(position))),
-      this.getVisibleRanges_(position).map((r) => this.rangesToElements_.get(r))
-    );
     return this.getMostFocusedRange_(this.getVisibleRanges_(position));
   }
 
@@ -353,7 +363,7 @@ class PoliteScrollJackCoordinator {
   }
 
   public static getSingleton(
-    container: Element = SCROLL_ELEMENT
+    container: Element = null
   ): PoliteScrollJackCoordinator {
     return this.singleton_.get(container);
   }

@@ -12,9 +12,7 @@ class PoliteScrollJack {
 
   constructor(
     targets: HTMLElement[],
-    {
-      scrollContainer = SCROLL_ELEMENT,
-    }: IPoliteScrollJackOptions = {}
+    {scrollContainer = null}: IPoliteScrollJackOptions = {}
   ) {
     this.coordinator_ =
       PoliteScrollJackCoordinator.getSingleton(scrollContainer);

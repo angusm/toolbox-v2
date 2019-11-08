@@ -6,9 +6,7 @@ function getVisibleDistanceBetweenElementCenters(
   container: HTMLElement = null
 ): number {
   const containerHeight =
-    container !== null ?
-      container.offsetHeight :
-      ROOT_ELEMENT.clientHeight;
+    container !== null ? container.offsetHeight : ROOT_ELEMENT.clientHeight;
 
   return getVisibleDistanceBetweenElements(target, container) +
     (target.offsetHeight / 2) - (containerHeight / 2);

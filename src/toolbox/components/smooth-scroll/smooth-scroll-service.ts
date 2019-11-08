@@ -97,8 +97,10 @@ class SmoothScrollService {
       renderLoop.anyCleanup(() => this.renderLoop_());
 
       const now = performance.now();
-      this.applyScrollTransition_(now);
-      this.cancelFinishedTransitions_(now);
+      renderLoop.mutate(() => {
+        this.applyScrollTransition_(now);
+        this.cancelFinishedTransitions_(now);
+      });
     });
   }
 
@@ -134,12 +136,18 @@ class SmoothScrollService {
     this.cancelYTransition();
   }
 
-  private cancelYTransition(): void {
-    renderLoop.scrollCleanup(() => this.yTransition_ = null);
+  private cancelXTransition(): void {
+    if (this.xTransition_ === null) {
+      return;
+    }
+    renderLoop.scrollCleanup(() => this.xTransition_ = null);
   }
 
-  private cancelXTransition(): void {
-    renderLoop.scrollCleanup(() => this.xTransition_ = null);
+  private cancelYTransition(): void {
+    if (this.yTransition_ === null) {
+      return;
+    }
+    renderLoop.scrollCleanup(() => this.yTransition_ = null);
   }
 
   private getTransitionValue_(
@@ -166,16 +174,8 @@ class SmoothScrollService {
   }
 
   public scrollTo(target: Vector2d): void {
-    const timeline = this.generateTimeline_();
-
-    this.xTransition_ =
-      new SmoothScrollTransition(
-        new NumericRange(this.element_.scrollLeft, target.x),
-        timeline);
-    this.yTransition_ =
-      new SmoothScrollTransition(
-        new NumericRange(this.element_.scrollTop, target.y),
-        timeline);
+    this.scrollToX(target.x);
+    this.scrollToY(target.y);
   }
 
   public scrollToX(x: number): void {
@@ -194,6 +194,7 @@ class SmoothScrollService {
   }
 
   public scrollToY(y: number): void {
+    console.log('Scroll to', y);
     this.yTransition_ =
       new SmoothScrollTransition(
         new NumericRange(this.element_.scrollTop, y), this.generateTimeline_());

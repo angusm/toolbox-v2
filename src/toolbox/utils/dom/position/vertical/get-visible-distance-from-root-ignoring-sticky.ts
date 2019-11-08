@@ -1,10 +1,7 @@
 import {VisibleDistanceFromRootService} from "./visible-distance-from-root-service";
 
-const visibleDistanceFromRootService =
-  VisibleDistanceFromRootService.getSingleton();
-
 function getVisibleDistanceFromRootIgnoringSticky(element: HTMLElement): number {
-  return visibleDistanceFromRootService
+  return VisibleDistanceFromRootService.getSingleton()
     .getVisibleDistanceFromRootIgnoringSticky(element);
 }
 

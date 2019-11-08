@@ -2,7 +2,7 @@ type ShouldEatFn = (e: Event) => boolean;
 
 class EventEater {
   private target_: any;
-  private fn_: (e: Event) => void;
+  private readonly fn_: (e: Event) => void;
 
   constructor(
     event: string,
