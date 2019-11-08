@@ -152,14 +152,12 @@ class PoliteScrollJackCoordinator {
 
       this.calculateRanges_(); // Setup cache values
 
-      // this.smoothScrollService_.scrollToY(this.getScrollJackTarget_());
-      this.getScrollJackTarget_();
+      this.smoothScrollService_.scrollToY(this.getScrollJackTarget_());
     });
   }
 
   private getScrollJackTarget_(): number {
     const position = this.scroll_.getY();
-    const isDownFromStart = this.scroll_.isScrollingDown();
 
     const focusedRange = this.getFocusedRange_();
 
@@ -172,67 +170,53 @@ class PoliteScrollJackCoordinator {
       return position; // Do nothing
     }
 
-    const endedScrollingDown = this.scroll_.isScrollingDown();
-
     const startRange = this.getStartFocusedRange_();
 
     const visibleRanges = this.getVisibleRanges_();
     const startRangeIndex = visibleRanges.indexOf(startRange);
-    const rangesAfter = visibleRanges.slice(startRangeIndex + 1);
     const rangesAfterShowingTop =
       this.rangesByStart_.filter((range) => this.isTopVisible_(range));
     const rangesBefore = visibleRanges.slice(0, startRangeIndex);
     const rangesBeforeShowingBottom =
       rangesBefore.filter((range) => this.isBottomVisible_(range));
 
-    if (isDownFromStart) {
-      if (endedScrollingDown) {
-        if (
-          this.startedWithFocusedRangeBottomVisible_() &&
-          rangesAfterShowingTop.length > 0
-        ) {
-          console.log('-- 1 --');
-          return rangesAfterShowingTop[0].getMin();
-        } else if (
-          // this.getRangeViewportPercent_(startRange) < .5 &&
-          this.getRangeSelfPercent_(startRange) < 1 &&
-          rangesAfterShowingTop.length > 0
-        ) {
-          console.log('-- 2 --');
-          return rangesAfterShowingTop[0].getMin();
-        } else {
-          // Do nothing so we don't snap the bottom of the range out of view
-          console.log('-- 3 --');
-          return position;
-        }
+    if (this.scroll_.isScrollingDown()) {
+      if (
+        this.startedWithFocusedRangeBottomVisible_() &&
+        rangesAfterShowingTop.length > 0
+      ) {
+        console.log('-- 1 --');
+        return rangesAfterShowingTop[0].getMin();
+      } else if (
+        // this.getRangeViewportPercent_(startRange) < .5 &&
+        this.getRangeSelfPercent_(startRange) < 1 &&
+        rangesAfterShowingTop.length > 0
+      ) {
+        console.log('-- 2 --');
+        return rangesAfterShowingTop[0].getMin();
       } else {
-          console.log('-- 4 --');
-        return this.getMostFocusedRange_(rangesAfter).getMin();
+        // Do nothing so we don't snap the bottom of the range out of view
+        console.log('-- 3 --');
+        return position;
       }
     } else {
-      if (!endedScrollingDown) {
-        if (
-          this.startedWithFocusedRangeTopVisible_() &&
-          rangesBeforeShowingBottom.length > 0
-        ) {
-          console.log('-- 5 --');
-          return rangesBeforeShowingBottom[0].getMax() - this.getScrollContainerHeight_();
-        } else if (
-          // this.getRangeViewportPercent_(startRange) < .5 &&
-          this.getRangeSelfPercent_(startRange) < 1 &&
-          rangesBeforeShowingBottom.length > 0
-        ) {
-          console.log('-- 6 --');
-          return rangesBeforeShowingBottom[0].getMax() - this.getScrollContainerHeight_();
-        } else {
-          // Do nothing so we don't snap the bottom of the range out of view
-          console.log('-- 7 --');
-          return position;
-        }
+      if (
+        this.startedWithFocusedRangeTopVisible_() &&
+        rangesBeforeShowingBottom.length > 0
+      ) {
+        console.log('-- 5 --');
+        return rangesBeforeShowingBottom[0].getMax() - this.getScrollContainerHeight_();
+      } else if (
+        // this.getRangeViewportPercent_(startRange) < .5 &&
+        this.getRangeSelfPercent_(startRange) < 1 &&
+        rangesBeforeShowingBottom.length > 0
+      ) {
+        console.log('-- 6 --');
+        return rangesBeforeShowingBottom[0].getMax() - this.getScrollContainerHeight_();
       } else {
-          console.log('-- 8 --');
-        return this.getMostFocusedRange_(rangesBefore).getMax() -
-          this.getScrollContainerHeight_();
+        // Do nothing so we don't snap the bottom of the range out of view
+        console.log('-- 7 --');
+        return position;
       }
     }
   }
