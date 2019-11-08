@@ -76,12 +76,16 @@ class SmoothScrollService {
   private init_(): void {
     INTERRUPTING_EVENTS.forEach(
       (eventName) => {
-        window.addEventListener(eventName, () => this.cancelTransition());
+        window.addEventListener(eventName, () => {
+          console.log('Cancelling cause event', eventName);
+          this.cancelTransition()
+        });
       });
     window.addEventListener(
       'keydown',
       (keyDownEvent) => {
         if (INTERRUPTING_KEYCODES.has(keyDownEvent.keyCode)) {
+          console.log('Cancelling cause keydown', keyDownEvent.keyCode);
           this.cancelTransition()
         }
       });
@@ -185,18 +189,19 @@ class SmoothScrollService {
         this.generateTimeline_());
   }
 
+  public scrollToY(y: number): void {
+    this.yTransition_ =
+      new SmoothScrollTransition(
+        new NumericRange(this.element_.scrollTop, y),
+        this.generateTimeline_());
+  }
+
   public scrollToElement(element: HTMLElement): void {
     const container =
       this.element_ instanceof HTMLElement ? this.element_ : null;
     const targetX = getOffsetFromAncestor(element, container).x;
     const targetY = getOffsetFromAncestorIgnoringSticky(element, container);
     this.scrollTo(new Vector2d(targetX, targetY));
-  }
-
-  public scrollToY(y: number): void {
-    this.yTransition_ =
-      new SmoothScrollTransition(
-        new NumericRange(this.element_.scrollTop, y), this.generateTimeline_());
   }
 
   public scrollXByAmount(amount: number): void {

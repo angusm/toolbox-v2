@@ -78,6 +78,8 @@ class RenderLoop {
   private loaded_: boolean;
   private lastRun_: number;
   private currentRun_: number;
+  private runningScrollLoop_: boolean;
+  private runningFrameLoop_: boolean;
 
   constructor() {
     this.scheduledFns_ = new Map<symbol, RenderFunctionMap>();
@@ -92,10 +94,12 @@ class RenderLoop {
     this.loaded_ = POST_LOAD_READY_STATES.has(document.readyState);
 
     this.scrollHandler_ = () => {
+      this.runningScrollLoop_ = true;
       window.removeEventListener('load', this.scrollHandler_);
       window.removeEventListener('scroll', this.scrollHandler_);
       window.removeEventListener('resize', this.scrollHandler_);
       this.runScrollLoopAndSetupListener_();
+      this.runningScrollLoop_ = false;
     };
 
     this.init_();
@@ -209,8 +213,10 @@ class RenderLoop {
   }
 
   private runLoopAndSetupFrameCallback_(timestamp: number): void {
+    this.runningFrameLoop_ = true;
     this.runLoop(timestamp);
     this.setupRequestAnimationFrame_();
+    this.runningFrameLoop_ = false;
   }
 
   /**
@@ -260,16 +266,24 @@ class RenderLoop {
     return RenderLoop.singleton_ = RenderLoop.singleton_ || new this();
   }
 
-  public getFps() {
+  public getFps(): number {
     return 60;
   }
 
-  public getTargetFrameLength() {
+  public getTargetFrameLength(): number {
     return RenderLoop.msPerFrame_;
   }
 
-  public getMsPerFrame() {
+  public getMsPerFrame(): number {
     return RenderLoop.msPerFrame_;
+  }
+
+  public isRunningScrollLoop(): boolean {
+    return this.runningScrollLoop_;
+  }
+
+  public isRunningFrameLoop(): boolean {
+    return this.runningFrameLoop_;
   }
 
   // DEPRECATED

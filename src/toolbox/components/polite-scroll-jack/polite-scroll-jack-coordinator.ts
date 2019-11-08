@@ -9,6 +9,7 @@ import {spliceFirstInstance} from "../../utils/array/splice-first-instance";
 import {insert} from "../../utils/array/insert";
 import {max} from "../../utils/array/max";
 import {getOffsetTopFromRootIgnoringSticky} from "../..//utils/dom/position/vertical/get-offset-top-from-root-ignoring-sticky";
+import {RenderFunctionID} from "../../utils/render-function-id";
 
 
 // Handles nested scroll-jack coordinators
@@ -31,6 +32,8 @@ class PoliteScrollJackCoordinator {
   private lastScrollDelta_: number;
   private lastScrollJackTime_: number;
   private smoothScrollService_: SmoothScrollService;
+  private startPosition_: number;
+  private scrollJackRFId_: RenderFunctionID;
 
   constructor(scrollContainer: Element = null) {
     this.scrollContainer_ = scrollContainer;
@@ -46,6 +49,8 @@ class PoliteScrollJackCoordinator {
     this.calculatedElements_ = new Set();
     this.delay_ = 150;
     this.smoothScrollService_ = SmoothScrollService.getSingleton();
+    this.startPosition_ = null;
+    this.scrollJackRFId_ = null;
     this.runLoop_();
   }
 
@@ -137,7 +142,15 @@ class PoliteScrollJackCoordinator {
 
   private runLoop_(): void {
     renderLoop.scrollMeasure(() => {
+      if (this.scrollJackRFId_) {
+        renderLoop.clear(this.scrollJackRFId_);
+      }
+
       renderLoop.scrollCleanup(() => this.runLoop_());
+
+      if (this.startPosition_ === null) {
+        this.startPosition_ = this.scroll_.getLastValue().getY();
+      }
 
       // Do nothing if we're already scroll-jacking
       if (this.smoothScrollService_.isScrolling()) {
@@ -151,9 +164,12 @@ class PoliteScrollJackCoordinator {
 
       this.calculateRanges_(); // Setup cache values
 
-      const y = this.getScrollJackTarget_();
-      console.log('y', y);
-      this.smoothScrollService_.scrollToY(y);
+
+      // this.scrollJackRFId_ = renderLoop.measure(() => {
+        const y = this.getScrollJackTarget_();
+        console.log('y', y);
+        this.smoothScrollService_.scrollToY(y);
+      // });
     });
   }
 
@@ -199,7 +215,9 @@ class PoliteScrollJackCoordinator {
           }
         });
 
-    if (this.scroll_.isScrollingDown()) {
+    const isScrollingDown = (this.startPosition_ - position) < 0;
+
+    if (isScrollingDown) {
       if (
         this.startedWithFocusedRangeBottomVisible_() &&
         rangesAfterShowingTop.length > 0
@@ -312,7 +330,7 @@ class PoliteScrollJackCoordinator {
   }
 
   private getStartFocusedRange_(): NumericRange {
-    return this.getFocusedRange_(this.scroll_.getLastValue().getY());
+    return this.getFocusedRange_(this.startPosition_);
   }
 
   private isTopVisible_(range: NumericRange, position: number = null): boolean {
@@ -321,7 +339,7 @@ class PoliteScrollJackCoordinator {
 
   private startedWithFocusedRangeTopVisible_(): boolean {
     return this.isTopVisible_(
-      this.getStartFocusedRange_(), this.scroll_.getLastValue().getY());
+      this.getStartFocusedRange_(), this.startPosition_);
   }
 
   private isBottomVisible_(
@@ -333,7 +351,7 @@ class PoliteScrollJackCoordinator {
 
   private startedWithFocusedRangeBottomVisible_(): boolean {
     return this.isBottomVisible_(
-      this.getStartFocusedRange_(), this.scroll_.getLastValue().getY());
+      this.getStartFocusedRange_(), this.startPosition_);
   }
 
   isFillingView_(range: NumericRange, position: number = null): boolean {
