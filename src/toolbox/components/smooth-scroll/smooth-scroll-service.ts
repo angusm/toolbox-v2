@@ -7,7 +7,6 @@ import {ISmoothScrollServiceOptions} from "./i-smooth-scroll-service-options";
 import {getOffsetFromAncestorIgnoringSticky} from "../../utils/dom/position/vertical/get-offset-from-ancestor-ignoring-sticky";
 import {getOffsetFromAncestor} from "../../utils/dom/position/get-offset-from-ancestor";
 
-
 class SmoothScrollTransition {
   private readonly distance_: NumericRange;
   private readonly timeline_: NumericRange;

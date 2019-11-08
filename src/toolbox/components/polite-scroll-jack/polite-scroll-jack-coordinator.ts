@@ -33,7 +33,7 @@ class PoliteScrollJackCoordinator {
   private lastScrollJackTime_: number;
   private smoothScrollService_: SmoothScrollService;
   private startPosition_: number;
-  private scrollJackRFId_: RenderFunctionID;
+  private timeout_: number;
 
   constructor(scrollContainer: Element = null) {
     this.scrollContainer_ = scrollContainer;
@@ -50,7 +50,7 @@ class PoliteScrollJackCoordinator {
     this.delay_ = 150;
     this.smoothScrollService_ = SmoothScrollService.getSingleton();
     this.startPosition_ = null;
-    this.scrollJackRFId_ = null;
+    this.timeout_ = null;
     this.runLoop_();
   }
 
@@ -142,10 +142,10 @@ class PoliteScrollJackCoordinator {
 
   private runLoop_(): void {
     renderLoop.scrollMeasure(() => {
-      if (this.scrollJackRFId_) {
-        renderLoop.clear(this.scrollJackRFId_);
+      if (this.timeout_) {
+        window.clearTimeout(this.timeout_);
+        this.timeout_ = null;
       }
-
       renderLoop.scrollCleanup(() => this.runLoop_());
 
       if (this.startPosition_ === null) {
@@ -165,11 +165,11 @@ class PoliteScrollJackCoordinator {
       this.calculateRanges_(); // Setup cache values
 
 
-      // this.scrollJackRFId_ = renderLoop.measure(() => {
+      this.timeout_ = window.setTimeout(() => {
         const y = this.getScrollJackTarget_();
         console.log('y', y);
         this.smoothScrollService_.scrollToY(y);
-      // });
+      }, 250);
     });
   }
 
