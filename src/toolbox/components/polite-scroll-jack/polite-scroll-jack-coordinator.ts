@@ -158,40 +158,62 @@ class PoliteScrollJackCoordinator {
   private getScrollJackTarget_(): number {
     const position = this.scroll_.getY();
 
-    const focusedRange = this.getFocusedRange_();
-
-    if (!focusedRange || this.isFillingView_(focusedRange)) {
-      if (!focusedRange) {
-      } else {
-      }
-      return position; // Do nothing
-    }
+    // const focusedRange = this.getFocusedRange_();
+    //
+    // if (!focusedRange || this.isFillingView_(focusedRange)) {
+    //   if (!focusedRange) {
+    //     console.log('No focused range');
+    //   } else {
+    //     console.log('Focused range is filling view');
+    //   }
+    //   return position; // Do nothing
+    // }
 
     const startRange = this.getStartFocusedRange_();
-
     const visibleRanges = this.getVisibleRanges_();
 
-    const startRangeIndex = visibleRanges.indexOf(startRange);
     const rangesAfterShowingTop =
-      this.rangesByStart_.filter((range) => this.isTopVisible_(range));
-    const rangesBefore = visibleRanges.slice(0, startRangeIndex);
+      this.rangesByStart_
+        .filter((range) => this.isTopVisible_(range))
+        .sort((a: NumericRange, b: NumericRange) => {
+          const aScore = a.getDistance();
+          const bScore = b.getDistance();
+          if (bScore !== aScore) {
+            return bScore - aScore;
+          } else {
+            return a.getMax() - b.getMax();
+          }
+        });
     const rangesBeforeShowingBottom =
-      rangesBefore.filter((range) => this.isBottomVisible_(range));
+      this.rangesByEnd_
+        .filter((range) => this.isBottomVisible_(range))
+        .sort((a: NumericRange, b: NumericRange) => {
+          const aScore = a.getDistance();
+          const bScore = b.getDistance();
+          if (bScore !== aScore) {
+            return bScore - aScore;
+          } else {
+            return a.getMax() - b.getMax();
+          }
+        });
 
     if (this.scroll_.isScrollingDown()) {
       if (
         this.startedWithFocusedRangeBottomVisible_() &&
         rangesAfterShowingTop.length > 0
       ) {
+        console.log('-- 1 --');
         return rangesAfterShowingTop[0].getMin();
       } else if (
         // this.getRangeViewportPercent_(startRange) < .5 &&
         this.getRangeSelfPercent_(startRange) < 1 &&
         rangesAfterShowingTop.length > 0
       ) {
+        console.log('-- 2 --');
         return rangesAfterShowingTop[0].getMin();
       } else {
         // Do nothing so we don't snap the bottom of the range out of view
+        console.log('-- 3 --');
         return position;
       }
     } else {
@@ -199,15 +221,18 @@ class PoliteScrollJackCoordinator {
         this.startedWithFocusedRangeTopVisible_() &&
         rangesBeforeShowingBottom.length > 0
       ) {
+        console.log('-- 5 --');
         return rangesBeforeShowingBottom[0].getMax() - this.getScrollContainerHeight_();
       } else if (
         // this.getRangeViewportPercent_(startRange) < .5 &&
         this.getRangeSelfPercent_(startRange) < 1 &&
         rangesBeforeShowingBottom.length > 0
       ) {
+        console.log('-- 6 --');
         return rangesBeforeShowingBottom[0].getMax() - this.getScrollContainerHeight_();
       } else {
         // Do nothing so we don't snap the bottom of the range out of view
+        console.log('-- 7 --');
         return position;
       }
     }
