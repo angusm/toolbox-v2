@@ -166,9 +166,9 @@ class PoliteScrollJackCoordinator {
 
 
       this.timeout_ = window.setTimeout(() => {
-        this.startPosition_ = null;
         const y = this.getScrollJackTarget_();
         this.smoothScrollService_.scrollToY(y);
+        this.startPosition_ = null;
       }, 250);
     });
   }
@@ -186,6 +186,8 @@ class PoliteScrollJackCoordinator {
       }
       return position; // Do nothing
     }
+
+    console.log('Start position', this.startPosition_);
 
     const startRange = this.getStartFocusedRange_();
     const rangesAfterShowingTop =
@@ -220,6 +222,12 @@ class PoliteScrollJackCoordinator {
 
       const targetRange = rangesAfterShowingTop[0];
 
+      console.log(
+        'Down',
+        this.startedWithFocusedRangeBottomVisible_(),
+        this.rangesToElements_.get(startRange)
+      );
+
       const ableToScrollPastStart =
         this.startedWithFocusedRangeBottomVisible_() &&
         rangesAfterShowingTop.length > 0;
@@ -233,6 +241,12 @@ class PoliteScrollJackCoordinator {
       }
     } else {
       const targetRange = rangesBeforeShowingBottom[0];
+
+      console.log(
+        'Up',
+        this.startedWithFocusedRangeTopVisible_(),
+        this.rangesToElements_.get(startRange)
+      );
 
       const ableToScrollPastStart =
         this.startedWithFocusedRangeTopVisible_() &&
@@ -276,7 +290,7 @@ class PoliteScrollJackCoordinator {
   }
 
   private getViewportRange_(position: number = null) {
-    const y = this.getScrollTop_();
+    const y = position !== null ? position : this.getScrollTop_();
     return new NumericRange(y, y + this.getScrollContainerHeight_());
   }
 
@@ -323,7 +337,8 @@ class PoliteScrollJackCoordinator {
   }
 
   private getFocusedRange_(position: number = null): NumericRange {
-    return this.getMostFocusedRange_(this.getVisibleRanges_(position));
+    return this.getMostFocusedRange_(
+      this.getVisibleRanges_(position), this.startPosition_);
   }
 
   private getStartFocusedRange_(): NumericRange {
