@@ -23,14 +23,9 @@ function getPreviousSiblingHeight(element: HTMLElement): number {
 }
 
 function getOffsetTopIgnoringSticky(element: HTMLElement): number {
-  if (!element) {
-    return 0;
-  }
-
   const position = getStyle(element, 'position');
   if (position !== 'sticky') {
-    return element.offsetTop +
-      getOffsetTopIgnoringSticky(<HTMLElement>element.offsetParent);
+    return element.offsetTop;
   } else {
     const previousSiblingHeight = getPreviousSiblingHeight(element);
     let previousParent = element.parentElement;

@@ -4,12 +4,11 @@ import {NumericRange} from "../../utils/math/numeric-range";
 import {SmoothScrollService} from "../smooth-scroll/smooth-scroll-service";
 import {DynamicDefaultMap} from "../../utils/map/dynamic-default";
 import {SCROLL_ELEMENT} from "../../utils/dom/position/scroll-element";
-import {getVisibleDistanceBetweenElementsIgnoringSticky} from "../../utils/dom/position/vertical/get-visible-distance-between-elements-ignoring-sticky";
 import {clear} from "../../utils/array/clear";
 import {spliceFirstInstance} from "../../utils/array/splice-first-instance";
 import {insert} from "../../utils/array/insert";
 import {max} from "../../utils/array/max";
-import {getOffsetTopIgnoringSticky} from "../../utils/dom/position/vertical/get-offset-top-ignoring-sticky";
+import {getOffsetTopFromRootIgnoringSticky} from "../..//utils/dom/position/vertical/get-offset-top-from-root-ignoring-sticky";
 
 
 // Handles nested scroll-jack coordinators
@@ -65,7 +64,7 @@ class PoliteScrollJackCoordinator {
     }
 
     this.calculatedElements_.delete(element);
-    const start = getOffsetTopIgnoringSticky(element);
+    const start = getOffsetTopFromRootIgnoringSticky(element);
 
     const end = start + element.offsetHeight;
     const range = new NumericRange(start, end);
@@ -174,7 +173,8 @@ class PoliteScrollJackCoordinator {
 
     const visibleRanges = this.getVisibleRanges_();
 
-    console.log(visibleRanges.map((r) => [r, this.rangesToElements_.get(r)]));
+    visibleRanges.forEach(
+      (r) => console.log(r.getMin(), this.rangesToElements_.get(r)));
 
     const startRangeIndex = visibleRanges.indexOf(startRange);
     const rangesAfterShowingTop =
