@@ -166,8 +166,8 @@ class PoliteScrollJackCoordinator {
 
 
       this.timeout_ = window.setTimeout(() => {
+        this.startPosition_ = null;
         const y = this.getScrollJackTarget_();
-        console.log('y', y);
         this.smoothScrollService_.scrollToY(y);
       }, 250);
     });
@@ -176,16 +176,16 @@ class PoliteScrollJackCoordinator {
   private getScrollJackTarget_(): number {
     const position = this.scroll_.getY();
 
-    // const focusedRange = this.getFocusedRange_();
-    //
-    // if (!focusedRange || this.isFillingView_(focusedRange)) {
-    //   if (!focusedRange) {
-    //     console.log('No focused range');
-    //   } else {
-    //     console.log('Focused range is filling view');
-    //   }
-    //   return position; // Do nothing
-    // }
+    const focusedRange = this.getFocusedRange_();
+
+    if (!focusedRange || this.isFillingView_(focusedRange)) {
+      if (!focusedRange) {
+        console.log('No focused range');
+      } else {
+        console.log('Focused range is filling view');
+      }
+      return position; // Do nothing
+    }
 
     const startRange = this.getStartFocusedRange_();
     const rangesAfterShowingTop =
@@ -214,34 +214,37 @@ class PoliteScrollJackCoordinator {
           }
         });
 
-    const scrolledDownOverall = (position - this.startPosition_) > 0;
     const lastScrollWasDown = this.lastScrollDelta_ > 0;
 
     if (lastScrollWasDown) {
-      if (
+
+      const targetRange = rangesAfterShowingTop[0];
+
+      const ableToScrollPastStart =
         this.startedWithFocusedRangeBottomVisible_() &&
-        rangesAfterShowingTop.length > 0
-      ) {
-        console.log('-- 1 --');
-        return rangesAfterShowingTop[0].getMin();
+        rangesAfterShowingTop.length > 0;
+      const scrollToTopOfStart = targetRange === startRange;
+
+      if (ableToScrollPastStart || scrollToTopOfStart) {
+        return targetRange.getMin();
       } else {
         // Do nothing so we don't snap the bottom of the range out of view
-        console.log('-- 3 --');
         return position;
       }
     } else {
-      if (
+      const targetRange = rangesBeforeShowingBottom[0];
+
+      const ableToScrollPastStart =
         this.startedWithFocusedRangeTopVisible_() &&
-        rangesBeforeShowingBottom.length > 0
-      ) {
-        console.log('-- 6 --');
+        rangesBeforeShowingBottom.length > 0;
+      const scrollToBottomOfStart = targetRange === startRange;
+
+      if (ableToScrollPastStart || scrollToBottomOfStart) {
         const rawTarget =
-          rangesBeforeShowingBottom[0].getMax() -
-          this.getScrollContainerHeight_();
+          targetRange.getMax() - this.getScrollContainerHeight_();
         return Math.max(0, rawTarget);
       } else {
         // Do nothing so we don't snap the bottom of the range out of view
-        console.log('-- 7 --');
         return position;
       }
     }
