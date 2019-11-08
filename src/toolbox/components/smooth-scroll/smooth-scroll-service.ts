@@ -194,7 +194,6 @@ class SmoothScrollService {
   }
 
   public scrollToY(y: number): void {
-    console.log('Scroll to', y);
     this.yTransition_ =
       new SmoothScrollTransition(
         new NumericRange(this.element_.scrollTop, y), this.generateTimeline_());

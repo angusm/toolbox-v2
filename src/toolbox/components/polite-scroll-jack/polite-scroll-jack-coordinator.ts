@@ -168,12 +168,14 @@ class PoliteScrollJackCoordinator {
   }
 
   private scrollJack_(): void {
-    this.smoothScrollService_.scrollToY(this.getScrollJackTarget_());
+    const y = this.getScrollJackTarget_();
+    this.smoothScrollService_.scrollToY(y);
     this.startPosition_ = null;
   }
 
   private getScrollJackTarget_(): number {
     const position = this.scroll_.getY();
+    console.log('Pos', this.startPosition_, position);
     const isDownFromStart = position > this.startPosition_;
 
     if (position === this.startPosition_) {
