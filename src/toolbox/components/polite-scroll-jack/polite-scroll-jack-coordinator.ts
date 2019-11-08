@@ -151,7 +151,9 @@ class PoliteScrollJackCoordinator {
 
       this.calculateRanges_(); // Setup cache values
 
-      this.smoothScrollService_.scrollToY(this.getScrollJackTarget_());
+      const y = this.getScrollJackTarget_();
+      console.log('y', y);
+      this.smoothScrollService_.scrollToY(y);
     });
   }
 
@@ -217,6 +219,10 @@ class PoliteScrollJackCoordinator {
         return position;
       }
     } else {
+      console.log(
+        this.startedWithFocusedRangeTopVisible_(),
+        this.getRangeSelfPercent_(startRange)
+      );
       if (
         this.startedWithFocusedRangeTopVisible_() &&
         rangesBeforeShowingBottom.length > 0
