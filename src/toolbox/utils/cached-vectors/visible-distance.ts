@@ -12,7 +12,7 @@ class VisibleDistance extends CachedElementVector<Vector2d> {
   }
 
   public getDistance(): Vector2d {
-    return this.getLastValue();
+    return this.getCurrentValue();
   }
 
   protected getValues(): number[] {

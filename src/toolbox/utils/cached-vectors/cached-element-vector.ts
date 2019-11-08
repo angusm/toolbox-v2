@@ -49,8 +49,12 @@ abstract class CachedElementVector<T extends Vector> {
     this.render();
   }
 
-  public getLastValue(): T {
+  public getCurrentValue(): T {
     return this.values.slice(-1)[0];
+  }
+
+  public getLastValue(): T {
+    return this.values.slice(-2, -1)[0];
   }
 
   protected getValues(): number[] {
@@ -94,7 +98,7 @@ abstract class CachedElementVector<T extends Vector> {
 
   public getDelta(): T {
     const values = this.getCurrentAndLastValue();
-    return <T>this.getVectorClass().subtract(values[0], values[1]);
+    return <T>this.getVectorClass().subtract(values[1], values[0]);
   }
 
   public hasChanged(): boolean {

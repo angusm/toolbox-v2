@@ -29,16 +29,13 @@ class PoliteScrollJackCoordinator {
   private readonly delay_: number;
 
   private lastScrollDelta_: number;
-  private scrollJackTimeout_: number;
   private lastScrollJackTime_: number;
   private smoothScrollService_: SmoothScrollService;
-  private startPosition_: number;
 
   constructor(scrollContainer: Element = null) {
     this.scrollContainer_ = scrollContainer;
 
     this.lastScrollDelta_ = 0;
-    this.scrollJackTimeout_ = null;
     this.lastScrollJackTime_ = 0;
     this.scroll_ = Scroll.getSingleton();
     this.elements_ = [];
@@ -49,7 +46,6 @@ class PoliteScrollJackCoordinator {
     this.calculatedElements_ = new Set();
     this.delay_ = 150;
     this.smoothScrollService_ = SmoothScrollService.getSingleton();
-    this.startPosition_ = null;
     this.runLoop_();
   }
 
@@ -156,32 +152,14 @@ class PoliteScrollJackCoordinator {
 
       this.calculateRanges_(); // Setup cache values
 
-      if (this.startPosition_ === null) {
-        this.startPosition_ =
-          this.scroll_.getY() - this.scroll_.getDelta().getY();
-      }
-
-      this.clearScrollJackTimeout_();
-      this.scrollJackTimeout_ =
-        window.setTimeout(() => this.scrollJack_(), this.delay_);
+      // this.smoothScrollService_.scrollToY(this.getScrollJackTarget_());
+      this.getScrollJackTarget_();
     });
-  }
-
-  private scrollJack_(): void {
-    const y = this.getScrollJackTarget_();
-    this.smoothScrollService_.scrollToY(y);
-    this.startPosition_ = null;
   }
 
   private getScrollJackTarget_(): number {
     const position = this.scroll_.getY();
-    console.log('Pos', this.startPosition_, position);
-    const isDownFromStart = position > this.startPosition_;
-
-    if (position === this.startPosition_) {
-      console.log('No position change');
-      return position; // Do nothing if we haven't moved.
-    }
+    const isDownFromStart = this.scroll_.isScrollingDown();
 
     const focusedRange = this.getFocusedRange_();
 
@@ -206,10 +184,6 @@ class PoliteScrollJackCoordinator {
     const rangesBefore = visibleRanges.slice(0, startRangeIndex);
     const rangesBeforeShowingBottom =
       rangesBefore.filter((range) => this.isBottomVisible_(range));
-
-    console.log(
-      visibleRanges.map(
-        (range) => [range, this.rangesToElements_.get(range).className]));
 
     if (isDownFromStart) {
       if (endedScrollingDown) {
@@ -331,7 +305,7 @@ class PoliteScrollJackCoordinator {
   }
 
   private getStartFocusedRange_(): NumericRange {
-    return this.getFocusedRange_(this.startPosition_);
+    return this.getFocusedRange_(this.scroll_.getLastValue().getY());
   }
 
   private isTopVisible_(range: NumericRange, position: number = null): boolean {
@@ -340,7 +314,7 @@ class PoliteScrollJackCoordinator {
 
   private startedWithFocusedRangeTopVisible_(): boolean {
     return this.isTopVisible_(
-      this.getStartFocusedRange_(), this.startPosition_);
+      this.getStartFocusedRange_(), this.scroll_.getLastValue().getY());
   }
 
   private isBottomVisible_(
@@ -352,16 +326,11 @@ class PoliteScrollJackCoordinator {
 
   private startedWithFocusedRangeBottomVisible_(): boolean {
     return this.isBottomVisible_(
-      this.getStartFocusedRange_(), this.startPosition_);
+      this.getStartFocusedRange_(), this.scroll_.getLastValue().getY());
   }
 
   isFillingView_(range: NumericRange, position: number = null): boolean {
     return range.containsRange(this.getViewportRange_(position));
-  }
-
-  private clearScrollJackTimeout_(): void {
-    window.clearTimeout(this.scrollJackTimeout_);
-    this.scrollJackTimeout_ = null;
   }
 
   public static getSingleton(

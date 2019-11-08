@@ -10,7 +10,7 @@ class Dimensions extends CachedElementVector<Dimensions2d> {
   }
 
   public getDimensions(): Dimensions2d {
-    return this.getLastValue();
+    return this.getCurrentValue();
   }
 
   protected getValues(): number[] {

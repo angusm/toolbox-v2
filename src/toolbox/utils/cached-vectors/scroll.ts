@@ -13,7 +13,7 @@ class Scroll extends CachedElementVector<Vector2d> {
   }
 
   public getPosition(): Vector2d {
-    return this.getLastValue();
+    return this.getCurrentValue();
   }
 
   public getX(): number {
@@ -47,8 +47,8 @@ class Scroll extends CachedElementVector<Vector2d> {
   public getScrollPercent(): Vector2d {
     const scrollableDimensions: number[] =
       Dimensions.getForElement(SCROLL_ELEMENT)
-        .getLastValue()
-        .subtract(Dimensions.getForElement().getLastValue())
+        .getCurrentValue()
+        .subtract(Dimensions.getForElement().getCurrentValue())
         .getValues();
     const scrollPositions: number[] = this.getValues();
     const zippedValues: number[][] = zip(scrollPositions, scrollableDimensions);
@@ -57,11 +57,11 @@ class Scroll extends CachedElementVector<Vector2d> {
   }
 
   public isScrollingDown(): boolean {
-    return this.getDelta().y < 0;
+    return this.getDelta().y > 0;
   }
 
   public isScrollingUp(): boolean {
-    return this.getDelta().y > 0;
+    return this.getDelta().y < 0;
   }
 
   public isScrollingRight(): boolean {
