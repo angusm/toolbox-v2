@@ -9,6 +9,7 @@ import {clear} from "../../utils/array/clear";
 import {spliceFirstInstance} from "../../utils/array/splice-first-instance";
 import {insert} from "../../utils/array/insert";
 import {max} from "../../utils/array/max";
+import {getOffsetTopIgnoringSticky} from "../../utils/dom/position/vertical/get-offset-top-ignoring-sticky";
 
 
 // Handles nested scroll-jack coordinators
@@ -64,9 +65,7 @@ class PoliteScrollJackCoordinator {
     }
 
     this.calculatedElements_.delete(element);
-    const start =
-      getVisibleDistanceBetweenElementsIgnoringSticky(
-        element, <HTMLElement>this.scrollContainer_);
+    const start = getOffsetTopIgnoringSticky(element);
 
     const end = start + element.offsetHeight;
     const range = new NumericRange(start, end);
