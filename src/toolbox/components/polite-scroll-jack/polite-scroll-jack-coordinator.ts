@@ -162,9 +162,7 @@ class PoliteScrollJackCoordinator {
 
     if (!focusedRange || this.isFillingView_(focusedRange)) {
       if (!focusedRange) {
-        console.log('No focused range');
       } else {
-        console.log('Focused range is filling view');
       }
       return position; // Do nothing
     }
@@ -172,9 +170,6 @@ class PoliteScrollJackCoordinator {
     const startRange = this.getStartFocusedRange_();
 
     const visibleRanges = this.getVisibleRanges_();
-
-    visibleRanges.forEach(
-      (r) => console.log(r.getMin(), this.rangesToElements_.get(r)));
 
     const startRangeIndex = visibleRanges.indexOf(startRange);
     const rangesAfterShowingTop =
@@ -188,18 +183,15 @@ class PoliteScrollJackCoordinator {
         this.startedWithFocusedRangeBottomVisible_() &&
         rangesAfterShowingTop.length > 0
       ) {
-        console.log('-- 1 --');
         return rangesAfterShowingTop[0].getMin();
       } else if (
         // this.getRangeViewportPercent_(startRange) < .5 &&
         this.getRangeSelfPercent_(startRange) < 1 &&
         rangesAfterShowingTop.length > 0
       ) {
-        console.log('-- 2 --');
         return rangesAfterShowingTop[0].getMin();
       } else {
         // Do nothing so we don't snap the bottom of the range out of view
-        console.log('-- 3 --');
         return position;
       }
     } else {
@@ -207,18 +199,15 @@ class PoliteScrollJackCoordinator {
         this.startedWithFocusedRangeTopVisible_() &&
         rangesBeforeShowingBottom.length > 0
       ) {
-        console.log('-- 5 --');
         return rangesBeforeShowingBottom[0].getMax() - this.getScrollContainerHeight_();
       } else if (
         // this.getRangeViewportPercent_(startRange) < .5 &&
         this.getRangeSelfPercent_(startRange) < 1 &&
         rangesBeforeShowingBottom.length > 0
       ) {
-        console.log('-- 6 --');
         return rangesBeforeShowingBottom[0].getMax() - this.getScrollContainerHeight_();
       } else {
         // Do nothing so we don't snap the bottom of the range out of view
-        console.log('-- 7 --');
         return position;
       }
     }
