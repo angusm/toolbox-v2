@@ -26,15 +26,14 @@ function getVisibleDistanceFromRoot_(
     if (isFixed(candidateElement)) {
       return y + candidateElement.offsetTop;
     } else {
-      y += getOffsetFn(candidateElement) -
-        candidateElement.scrollTop;
+      y += getOffsetFn(candidateElement) - candidateElement.scrollTop;
     }
 
     candidateElement = <HTMLElement>candidateElement.offsetParent;
   }
 
   const invertedScroll = Scroll.getSingleton().getPosition().invert();
-  return y + invertedScroll.y;
+  return y + invertedScroll.getY();
 }
 
 function getVisibleDistanceFromRoot(

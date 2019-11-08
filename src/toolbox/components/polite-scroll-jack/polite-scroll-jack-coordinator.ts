@@ -67,6 +67,7 @@ class PoliteScrollJackCoordinator {
     const start =
       getVisibleDistanceBetweenElementsIgnoringSticky(
         element, <HTMLElement>this.scrollContainer_);
+
     const end = start + element.offsetHeight;
     const range = new NumericRange(start, end);
     this.elementsToRanges_.set(element, range);
