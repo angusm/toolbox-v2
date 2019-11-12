@@ -193,7 +193,7 @@ class PoliteScrollJackCoordinator {
           const aScore = a.getDistance();
           const bScore = b.getDistance();
           if (bScore !== aScore) {
-            return bScore - aScore;
+            return aScore - bScore;
           } else {
             return a.getMin() - b.getMin();
           }
@@ -206,7 +206,7 @@ class PoliteScrollJackCoordinator {
           const aScore = a.getDistance();
           const bScore = b.getDistance();
           if (bScore !== aScore) {
-            return bScore - aScore;
+            return aScore - bScore;
           } else {
             return b.getMax() - a.getMax();
           }
