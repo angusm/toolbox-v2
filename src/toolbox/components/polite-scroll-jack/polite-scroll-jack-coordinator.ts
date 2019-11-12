@@ -13,7 +13,7 @@ import {getOffsetTopFromRootIgnoringSticky} from "../..//utils/dom/position/vert
 // Amount of viewport height that must be filled in order to trigger a scroll
 // past the starting visible section if the starting visible section had not
 // yet been fully revealed.
-const ENOUGH_LEG_RATIO = .4;
+const ENOUGH_LEG_RATIO = .35;
 
 // Handles nested scroll-jack coordinators
 class PoliteScrollJackCoordinator {
