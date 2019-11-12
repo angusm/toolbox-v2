@@ -182,14 +182,14 @@ class SmoothScrollService {
   public scrollToX(x: number): void {
     this.xTransition_ =
       new SmoothScrollTransition(
-        new NumericRange(this.element_.scrollLeft, x),
+        new NumericRange(this.element_.scrollLeft, Math.max(0, x)),
         this.generateTimeline_());
   }
 
   public scrollToY(y: number): void {
     this.yTransition_ =
       new SmoothScrollTransition(
-        new NumericRange(this.element_.scrollTop, y),
+        new NumericRange(this.element_.scrollTop, Math.max(0, y)),
         this.generateTimeline_());
   }
 

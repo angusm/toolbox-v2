@@ -9,8 +9,11 @@ import {spliceFirstInstance} from "../../utils/array/splice-first-instance";
 import {insert} from "../../utils/array/insert";
 import {max} from "../../utils/array/max";
 import {getOffsetTopFromRootIgnoringSticky} from "../..//utils/dom/position/vertical/get-offset-top-from-root-ignoring-sticky";
-import {RenderFunctionID} from "../../utils/render-function-id";
 
+// Amount of viewport height that must be filled in order to trigger a scroll
+// past the starting visible section if the starting visible section had not
+// yet been fully revealed.
+const ENOUGH_LEG_RATIO = .4;
 
 // Handles nested scroll-jack coordinators
 class PoliteScrollJackCoordinator {
@@ -179,15 +182,8 @@ class PoliteScrollJackCoordinator {
     const focusedRange = this.getFocusedRange_();
 
     if (!focusedRange || this.isFillingView_(focusedRange)) {
-      if (!focusedRange) {
-        console.log('No focused range');
-      } else {
-        console.log('Focused range is filling view');
-      }
       return position; // Do nothing
     }
-
-    console.log('Start position', this.startPosition_);
 
     const startRange = this.getStartFocusedRange_();
     const rangesAfterShowingTop =
@@ -219,47 +215,58 @@ class PoliteScrollJackCoordinator {
     const lastScrollWasDown = this.lastScrollDelta_ > 0;
 
     if (lastScrollWasDown) {
-
       const targetRange = rangesAfterShowingTop[0];
 
-      console.log(
-        'Down',
-        this.startedWithFocusedRangeBottomVisible_(),
-        this.rangesToElements_.get(startRange)
-      );
-
-      const ableToScrollPastStart =
+      const canScrollToNextSection =
         this.startedWithFocusedRangeBottomVisible_() &&
         rangesAfterShowingTop.length > 0;
-      const scrollToTopOfStart = targetRange === startRange;
+      const scrollToTopOfStart =
+        targetRange === startRange && this.startedWithFocusedRangeTopVisible_();
+      const isRangeFillingViewport =
+        targetRange.containsRange(this.getViewportRange_());
+      const isTargetRangeShowingEnoughLeg =
+        targetRange.getOverlap(this.getViewportRange_()).getDistance() >
+        this.getScrollContainerHeight_() * ENOUGH_LEG_RATIO;
 
-      if (ableToScrollPastStart || scrollToTopOfStart) {
+      if (
+        canScrollToNextSection ||
+        scrollToTopOfStart ||
+        isTargetRangeShowingEnoughLeg
+      ) {
         return targetRange.getMin();
-      } else {
+      } else if (isRangeFillingViewport) {
         // Do nothing so we don't snap the bottom of the range out of view
         return position;
+      } else {
+        return startRange.getMax() - this.getScrollContainerHeight_();
       }
+
     } else {
       const targetRange = rangesBeforeShowingBottom[0];
 
-      console.log(
-        'Up',
-        this.startedWithFocusedRangeTopVisible_(),
-        this.rangesToElements_.get(startRange)
-      );
-
-      const ableToScrollPastStart =
+      const canScrollToNextSection =
         this.startedWithFocusedRangeTopVisible_() &&
         rangesBeforeShowingBottom.length > 0;
-      const scrollToBottomOfStart = targetRange === startRange;
+      const scrollToBottomOfStart =
+        targetRange === startRange &&
+        this.startedWithFocusedRangeBottomVisible_();
+      const isRangeFillingViewport =
+        targetRange.containsRange(this.getViewportRange_());
+      const isTargetRangeShowingEnoughLeg =
+        targetRange.getOverlap(this.getViewportRange_()).getDistance() >
+        this.getScrollContainerHeight_() * ENOUGH_LEG_RATIO;
 
-      if (ableToScrollPastStart || scrollToBottomOfStart) {
-        const rawTarget =
-          targetRange.getMax() - this.getScrollContainerHeight_();
-        return Math.max(0, rawTarget);
-      } else {
+      if (
+        canScrollToNextSection ||
+        scrollToBottomOfStart ||
+        isTargetRangeShowingEnoughLeg
+      ) {
+        return targetRange.getMax() - this.getScrollContainerHeight_();
+      } else if (isRangeFillingViewport) {
         // Do nothing so we don't snap the bottom of the range out of view
         return position;
+      } else {
+        return startRange.getMin();
       }
     }
   }
