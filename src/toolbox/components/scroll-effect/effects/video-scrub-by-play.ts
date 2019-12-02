@@ -57,7 +57,7 @@ class VideoScrubByPlay implements IEffect {
   ): number {
     const actualRange =
       playableTime.getOverlap(new NumericRange(0, video.duration));
-    return actualRange.getPercentAsValue(percentage);
+    return actualRange !== null ? actualRange.getPercentAsValue(percentage) : 0;
   }
 
   private getReversePlayableTime_(video: HTMLMediaElement): NumericRange {
