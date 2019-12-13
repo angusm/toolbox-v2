@@ -43,8 +43,10 @@ class PhysicalSlide implements ITransition {
   private readonly carousels_: Set<ICarousel>;
   private readonly carouselListeners_:
     DynamicDefaultMap<ICarousel, Set<number>>;
+  private readonly resizeHandler_: () => void;
   private interactionStartTime_: DynamicDefaultMap<ICarousel, number>;
   private interactionStartPosition_: DynamicDefaultMap<ICarousel, Vector2d>;
+  private resizeTimeout_: number;
 
   constructor(
     {
@@ -65,6 +67,21 @@ class PhysicalSlide implements ITransition {
     this.interactionStartTime_ = DynamicDefaultMap.usingFunction(() => null);
     this.transitionTime_ = transitionTime;
     this.transitionTargets_ = new Map<ICarousel, TransitionTarget>();
+
+    this.resizeTimeout_ = null;
+    this.resizeHandler_ = () => {
+      window.clearTimeout(this.resizeTimeout_);
+      this.resizeTimeout_ = window.setTimeout(() => {
+        forEach(
+          this.carousels_.values(),
+          (carousel) => {
+            this.transition(carousel.getActiveSlide(), carousel, 0);
+          });
+      });
+    };
+
+    window.addEventListener('resize', this.resizeHandler_);
+
   }
 
   public init(activeSlide: HTMLElement, carousel: ICarousel): void {
@@ -352,6 +369,8 @@ class PhysicalSlide implements ITransition {
   }
 
   private destroy_(carousel: ICarousel) {
+    window.removeEventListener('resize', this.resizeHandler_);
+    window.clearTimeout(this.resizeTimeout_);
     forEach(
       this.carouselListeners_.get(carousel).values(),
       (uid: number) => eventHandler.removeListener(uid));
