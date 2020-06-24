@@ -4,6 +4,8 @@ import {Vector} from '../math/geometry/vector';
 import {renderLoop} from '../render-loop';
 import {ErrorService} from "../error/service";
 import {forEach} from '../iterable-iterator/for-each';
+import { map } from '../iterable-iterator/map';
+import {filter} from '../iterable-iterator/filter';
 
 const VALUE_LIMIT: number = 2;
 
@@ -128,16 +130,13 @@ abstract class CachedElementVector<T extends Vector> {
 
     // Clear cached values
     forEach(
-        caches.values(),
-        (submap) => {
-          forEach(
-              submap.keys(),
-              (submapKey) => {
-                if (submap.get(submapKey) === this) {
-                  submap.delete(submapKey);
-                }
-              });
-        });
+      caches.values(),
+      (submap) => {
+        filter(
+          submap.keys(),
+          (submapKey) => submap.get(submapKey) === this)
+        .forEach((submapKey) => submap.delete(submapKey));
+      });
   }
 }
 
