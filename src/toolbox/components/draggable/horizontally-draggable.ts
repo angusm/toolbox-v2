@@ -1,7 +1,6 @@
 import {Draggable} from "./draggable";
 import {IDraggableConstraint} from "./interfaces";
 import {DraggableFixedYConstraint} from "./constraints/fixed-y";
-import {cursor} from "../../utils/cached-vectors/cursor";
 import {ScrollLockService} from "../scroll-lock-service/scroll-lock-service";
 import {ZERO_VECTOR_2D} from "../../utils/math/geometry/zero-vector-2d";
 import {Vector2d} from "../../utils/math/geometry/vector-2d";
@@ -36,7 +35,7 @@ class HorizontallyDraggable extends Draggable {
       return;
     }
 
-    const delta = cursor.getClient().getPressedFrameDelta();
+    const delta = this.cursor_.getClient().getPressedFrameDelta();
     if (delta.getLength() === 0) {
       return;
     }

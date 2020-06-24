@@ -13,6 +13,8 @@ const caches: DynamicDefaultMap<any, InnerCache> =
       return MultiValueDynamicDefaultMap.usingFunction(
         (args: any[]) => new Class(...args));
     });
+const uses: DynamicDefaultMap<CachedElementVector<Vector>, Set<any>> =
+    DynamicDefaultMap.usingFunction(() => new Set());
 
 abstract class CachedElementVector<T extends Vector> {
   protected static VectorClass: typeof Vector = Vector;
@@ -105,8 +107,17 @@ abstract class CachedElementVector<T extends Vector> {
     return caches.get(this).get(args);
   }
 
-  public static getSingleton(): any {
-    return caches.get(this).get([null]);
+  public static getSingleton(use: any): any {
+    const instance = caches.get(this).get([null]);
+    uses.get(instance).add(use);
+    return instance;
+  }
+
+  public destroy(use: any): void {
+    uses.get(this).delete(use);
+    if (uses.size <= 0) {
+      caches.delete(this);
+    }
   }
 }
 

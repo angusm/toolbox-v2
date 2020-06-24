@@ -4,13 +4,14 @@ import {DragEnd} from './events/drag-end';
 import {DragStart} from './events/drag-start';
 import {EventType} from '../../utils/dom/event/event-type';
 import {addDomEventListener} from '../../utils/dom/event/add-dom-event-listener';
-import {cursor} from '../../utils/cached-vectors/cursor';
+import {Cursor} from '../../utils/cached-vectors/cursor';
 import {eventHandler} from '../../utils/event/event-handler';
 import {renderLoop} from '../../utils/render-loop';
 import {Vector2d} from "../../utils/math/geometry/vector-2d";
 import {DraggableSyncManager} from "./draggable-sync-manager";
 
 class Draggable implements IDraggable {
+  protected readonly cursor_: Cursor;
   private readonly element_: HTMLElement;
   private constraints_: IDraggableConstraint[];
 
@@ -23,6 +24,7 @@ class Draggable implements IDraggable {
     this.element_ = element;
     this.interacting_ = false;
     this.constraints_ = [...constraints];
+    this.cursor_ = Cursor.getSingleton(this);
     this.init_();
   }
 
@@ -67,7 +69,9 @@ class Draggable implements IDraggable {
     renderLoop.measure(() => {
       eventHandler.dispatchEvent(
         new DragEnd(
-          this, this.getDelta_(), cursor.getClient().getLastFrameVelocity()));
+          this,
+          this.getDelta_(),
+          this.cursor_.getClient().getLastFrameVelocity()));
     });
   }
 
@@ -97,11 +101,15 @@ class Draggable implements IDraggable {
   private getDelta_(): Vector2d {
     return this.constraints_.reduce(
       (delta, constraint) => constraint.constrain(this, delta),
-      cursor.getClient().getPressedFrameDelta());
+      this.cursor_.getClient().getPressedFrameDelta());
   }
 
   public getElement(): HTMLElement {
     return this.element_;
+  }
+
+  public destroy() {
+    this.cursor_.destroy(this);
   }
 }
 

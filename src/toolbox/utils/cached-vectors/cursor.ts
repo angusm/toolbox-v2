@@ -6,6 +6,8 @@ import {filterUntilFirst} from '../array/filter-until-first';
 import {frame} from '../frame';
 import {renderLoop} from '../render-loop';
 import {ZERO_VECTOR_2D} from "../math/geometry/zero-vector-2d";
+import {DynamicDefaultMap} from '../map/dynamic-default';
+import {removeDomEventListener} from '../dom/event/remove-dom-event-listener';
 
 const GESTURE_TIME_LIMIT: number = 1000; // Time limit in ms
 const POSITION_LIMIT: number = 100;
@@ -18,6 +20,8 @@ interface ICursorEvent {
   screenX: number;
   screenY: number;
 }
+
+const singletonUses: Set<any> = new Set();
 
 class CursorPosition {
   private readonly position_: Vector2d;
@@ -188,55 +192,59 @@ class CursorData {
 
 class Cursor {
   public static singleton: Cursor;
-  private frame: number;
-  private clientPosition: CursorData;
-  private pagePosition: CursorData;
-  private screenPosition: CursorData;
-  private pressed: boolean;
+  private frame_: number;
+  private clientPosition_: CursorData;
+  private pagePosition_: CursorData;
+  private screenPosition_: CursorData;
+  private pressed_: boolean;
+  private cursorDownHandler_: (event: MouseEvent|TouchEvent) => void;
+  private cursorUpHandler_: (event: MouseEvent|TouchEvent) => void;
+  private cursorMoveHandler_: (event: MouseEvent|TouchEvent) => void;
 
   constructor() {
-    this.clientPosition = new CursorData();
-    this.pagePosition = new CursorData();
-    this.screenPosition = new CursorData();
-    this.pressed = false;
-    this.frame = 0;
+    this.clientPosition_ = new CursorData();
+    this.pagePosition_ = new CursorData();
+    this.screenPosition_ = new CursorData();
+    this.pressed_ = false;
+    this.frame_ = 0;
+    this.cursorDownHandler_ =
+        (event: MouseEvent|TouchEvent) => this.updatePress_(event, true);
+    this.cursorUpHandler_ =
+        (event: MouseEvent|TouchEvent) => this.updatePress_(event, false);
+    this.cursorMoveHandler_ =
+        (event: MouseEvent|TouchEvent) => this.updatePosition_(event);
     this.init_();
   }
 
   private init_() {
-    addDomEventListener(
-      window, EventType.CURSOR_DOWN,
-      (event: MouseEvent|TouchEvent) => this.updatePress_(event, true));
-    addDomEventListener(
-      window, EventType.CURSOR_UP,
-      (event: MouseEvent|TouchEvent) => this.updatePress_(event, false));
-    addDomEventListener(
-      window, EventType.CURSOR_MOVE,
-      (event: MouseEvent|TouchEvent) => this.updatePosition_(event));
+    addDomEventListener(window, EventType.CURSOR_DOWN, this.cursorDownHandler_);
+    addDomEventListener(window, EventType.CURSOR_UP, this.cursorUpHandler_);
+    addDomEventListener(window, EventType.CURSOR_MOVE, this.cursorMoveHandler_);
   }
 
-  public static getSingleton(): Cursor {
+  public static getSingleton(use: any): Cursor {
+    singletonUses.add(use);
     return this.singleton = this.singleton || new this();
   }
 
   public isPressed(): boolean {
-    return this.pressed;
+    return this.pressed_;
   }
 
   public getClient(): CursorData {
-    return this.clientPosition;
+    return this.clientPosition_;
   }
 
   public getPage(): CursorData {
-    return this.pagePosition;
+    return this.pagePosition_;
   }
 
   public getScreen(): CursorData {
-    return this.screenPosition;
+    return this.screenPosition_;
   }
 
   private updatePress_(event: MouseEvent|TouchEvent, isPressed: boolean): void {
-    this.pressed = isPressed;
+    this.pressed_ = isPressed;
     this.updatePosition_(event);
   }
 
@@ -258,36 +266,59 @@ class Cursor {
 
   private endTouch_(): void {
     renderLoop.premeasure(() => {
-      this.pagePosition = this.duplicatePosition_(this.pagePosition);
-      this.clientPosition = this.duplicatePosition_(this.clientPosition);
-      this.screenPosition = this.duplicatePosition_(this.screenPosition);
+      this.pagePosition_ = this.duplicatePosition_(this.pagePosition_);
+      this.clientPosition_ = this.duplicatePosition_(this.clientPosition_);
+      this.screenPosition_ = this.duplicatePosition_(this.screenPosition_);
     });
   }
 
   private updatePositionFromEvent_(event: ICursorEvent): void {
     renderLoop.premeasure(() => {
-      this.pagePosition =
+      this.pagePosition_ =
         this.updatePositionWithXY_(
-          this.pagePosition, event.pageX, event.pageY);
+          this.pagePosition_, event.pageX, event.pageY);
 
-      this.clientPosition =
+      this.clientPosition_ =
         this.updatePositionWithXY_(
-          this.clientPosition, event.clientX, event.clientY);
+          this.clientPosition_, event.clientX, event.clientY);
 
-      this.screenPosition =
+      this.screenPosition_ =
         this.updatePositionWithXY_(
-          this.screenPosition, event.screenX, event.screenY);
+          this.screenPosition_, event.screenX, event.screenY);
     });
   }
 
-  duplicatePosition_(position: CursorData): CursorData {
+  private duplicatePosition_(position: CursorData): CursorData {
     return position.update(
       new CursorPosition(position.getPosition(), this.isPressed()));
   }
 
-  updatePositionWithXY_(position: CursorData, xValue: number, yValue: number) {
+  private updatePositionWithXY_(
+      position: CursorData, xValue: number, yValue: number
+  ): CursorData {
     return position.update(
       CursorPosition.fromXY(xValue, yValue, this.isPressed()));
+  }
+
+  public destroy(use: any): void {
+    if (this === Cursor.singleton) {
+      singletonUses.delete(use);
+      if (singletonUses.size <= 0) {
+        Cursor.singleton = null;
+        this.destroy_();
+      }
+    } else {
+      this.destroy_();
+    }
+  }
+
+  private destroy_(): void {
+    removeDomEventListener(
+        window, EventType.CURSOR_DOWN, this.cursorDownHandler_);
+    removeDomEventListener(
+        window, EventType.CURSOR_UP, this.cursorUpHandler_);
+    removeDomEventListener(
+        window, EventType.CURSOR_MOVE, this.cursorMoveHandler_);
   }
 }
 

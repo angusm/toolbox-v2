@@ -3,7 +3,7 @@ import {DragEnd}  from '../../draggable/events/drag-end';
 import {DragStart}  from '../../draggable/events/drag-start';
 import {Draggable}  from '../../draggable/draggable';
 import {Vector2d}  from '../../../utils/math/geometry/vector-2d';
-import {cursor}  from '../../../utils/cached-vectors/cursor';
+import {Cursor}  from '../../../utils/cached-vectors/cursor';
 import {eventHandler}  from '../../../utils/event/event-handler';
 import {getSign}  from '../../../utils/math/get-sign';
 import {getVisibleDistanceBetweenElementCenters}  from '../../../utils/dom/position/get-visible-distance-between-element-centers';
@@ -78,7 +78,8 @@ class Slide implements ITransition {
 
   private static endInteraction_(carousel: ICarousel): void {
     carousel.endInteraction(SLIDE_INTERACTION);
-    const gestureDistance = cursor.getClient().getPressedGestureDelta().x;
+    const gestureDistance =
+        Cursor.getSingleton(this).getClient().getPressedGestureDelta().x;
     if (Math.abs(gestureDistance) < GESTURE_MOVEMENT_THRESHOLD) {
       carousel.transitionToSlide(carousel.getActiveSlide());
     } else {
