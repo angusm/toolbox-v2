@@ -291,6 +291,4 @@ class Cursor {
   }
 }
 
-const cursor = Cursor.getSingleton();
-
-export {cursor};
+export {Cursor};
