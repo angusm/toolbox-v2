@@ -1,9 +1,10 @@
 import {DraggableConstraint} from './base';
 import {IDraggable} from "../interfaces";
 import {Dimensions as CachedDimensions} from "../../../utils/cached-vectors/dimensions";
-import {VisibleDistance as CachedVisibleDistance} from "../../../utils/cached-vectors/visible-distance";
 import {Vector2d} from "../../../utils/math/geometry/vector-2d";
 import {Dimensions2d} from "../../../utils/math/geometry/dimensions-2d";
+import { getAncestorDimensions } from 'src/toolbox/utils/dom/position/get-ancestor-dimensions';
+import {getVisibleDistanceBetweenElements} from '../../../utils/dom/position/get-visible-distance-between-elements';
 
 class ContainerConstraint extends DraggableConstraint {
   private constrainingDimensions_: CachedDimensions;
@@ -17,7 +18,7 @@ class ContainerConstraint extends DraggableConstraint {
 
   constrain(draggable: IDraggable, delta: Vector2d) {
     const draggableDimensions: Dimensions2d =
-      CachedDimensions.getForElement(draggable.getElement()).getDimensions();
+      getAncestorDimensions(draggable.getElement());
     const containerDimensions: Dimensions2d =
       this.constrainingDimensions_.getDimensions();
 
@@ -29,14 +30,17 @@ class ContainerConstraint extends DraggableConstraint {
       overlapDimensions.clamp(...positiveDimensions.asRanges()).invert();
 
     const currentDistance: Vector2d =
-      CachedVisibleDistance
-        .getForElement(draggable.getElement(), this.container_)
-        .getDistance();
+      getVisibleDistanceBetweenElements(
+          draggable.getElement(), this.container_);
 
     const clampedDistance: Vector2d =
       currentDistance.add(delta).clamp(...constrainedOverlap.asRanges());
 
     return clampedDistance.subtract(currentDistance);
+  }
+
+  destroy() {
+    this.constrainingDimensions_.destroy();
   }
 }
 

@@ -13,11 +13,13 @@ import {renderLoop} from "../../../utils/render-loop";
  */
 class RemoveTransformOnScrollDown implements IEffect {
   private readonly minimumScrollDistance_: number;
+  private scroll_: Scroll;
 
   /**
    * @param minimumScrollDistance Amount to scroll before running effect.
    */
   constructor(minimumScrollDistance: number = 0) {
+    this.scroll_ = Scroll.getSingleton(this);
     this.minimumScrollDistance_ = minimumScrollDistance;
   }
 
@@ -32,7 +34,7 @@ class RemoveTransformOnScrollDown implements IEffect {
   ): void {
     if (
       distance > this.minimumScrollDistance_ &&
-      Scroll.getSingleton().isScrollingDown()
+      this.scroll_.isScrollingDown()
     ) {
       renderLoop.anyMutate(() => setStyle(target, 'transform', 'none'));
     } else {
@@ -40,7 +42,9 @@ class RemoveTransformOnScrollDown implements IEffect {
     }
   }
 
-  destroy() {}
+  destroy() {
+    this.scroll_.destroy(this);
+  }
 }
 
 export {RemoveTransformOnScrollDown}

@@ -21,11 +21,13 @@ function applyScrollToScrollElement(
   }
 
   setToRun = true;
-
+  const scrollSingletonSymbol = Symbol();
+  const scrollSingleton = Scroll.getSingleton(scrollSingletonSymbol);
   const apply = () => {
-    setScroll(Scroll.getSingleton().getPosition().add(scrollToApply));
+    setScroll(scrollSingleton.getPosition().add(scrollToApply));
     scrollToApply = ZERO_VECTOR_2D;
     setToRun = false;
+    scrollSingleton.destroy(scrollSingletonSymbol);
   };
 
   if (applyImmediately) {

@@ -18,8 +18,8 @@ class WindowDimensions extends CachedElementVector<Dimensions2d> {
     return new WindowDimensions();
   }
 
-  public static getSingleton(): WindowDimensions {
-    return <WindowDimensions>CachedElementVector.getSingleton.bind(this)();
+  public static getSingleton(use: any): WindowDimensions {
+    return <WindowDimensions>CachedElementVector.getSingleton.bind(this)(use);
   }
 }
 

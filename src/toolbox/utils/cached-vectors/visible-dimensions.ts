@@ -17,8 +17,8 @@ class VisibleDimensions extends Dimensions {
     return <VisibleDimensions>Dimensions.getForElement(...args);
   }
 
-  public static getSingleton(): VisibleDimensions {
-    return <VisibleDimensions>Dimensions.getSingleton();
+  public static getSingleton(use: any): VisibleDimensions {
+    return <VisibleDimensions>Dimensions.getSingleton(use);
   }
 }
 

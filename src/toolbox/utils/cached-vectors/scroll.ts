@@ -68,8 +68,8 @@ class Scroll extends CachedElementVector<Vector2d> {
     return <Scroll>CachedElementVector.getForElement.bind(this)(...args);
   }
 
-  public static getSingleton(): Scroll {
-    return <Scroll>CachedElementVector.getSingleton.bind(this)();
+  public static getSingleton(use: any): Scroll {
+    return <Scroll>CachedElementVector.getSingleton.bind(this)(use);
   }
 
   protected renderLoopCleanup_(fn: () => void): void {

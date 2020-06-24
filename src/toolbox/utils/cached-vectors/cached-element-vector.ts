@@ -3,6 +3,7 @@ import {MultiValueDynamicDefaultMap} from '../map/multi-value-dynamic-default';
 import {Vector} from '../math/geometry/vector';
 import {renderLoop} from '../render-loop';
 import {ErrorService} from "../error/service";
+import {forEach} from '../iterable-iterator/for-each';
 
 const VALUE_LIMIT: number = 2;
 
@@ -22,6 +23,7 @@ abstract class CachedElementVector<T extends Vector> {
 
   protected element: HTMLElement;
   private values: T[];
+  private destroyed_: boolean;
 
   protected constructor(element: any = null, ...args: any[]) {
     const instanceByElement = caches.get(this.constructor);
@@ -34,9 +36,9 @@ abstract class CachedElementVector<T extends Vector> {
       }
     }
 
+    this.destroyed_ = false;
     this.element = element;
-    this.values =
-      <T[]>[new (<typeof CachedElementVector>this.constructor).VectorClass()];
+    this.values = <T[]>[this.getCurrentVector_()];
     this.init();
   }
 
@@ -69,6 +71,9 @@ abstract class CachedElementVector<T extends Vector> {
   }
 
   private render(): void {
+    if (this.destroyed_) {
+      return;
+    }
     this.renderLoopPremeasure_(() => {
       this.renderLoopCleanup_(() => this.render());
       this.measureValues();
@@ -113,11 +118,26 @@ abstract class CachedElementVector<T extends Vector> {
     return instance;
   }
 
-  public destroy(use: any): void {
-    uses.get(this).delete(use);
-    if (uses.size <= 0) {
-      caches.delete(this);
+  public destroy(use: any = false): void {
+    if (use !== false) {
+      uses.get(this).delete(use);
+      if (uses.size <= 0) {
+        caches.delete(this);
+      }
     }
+
+    // Clear cached values
+    forEach(
+        caches.values(),
+        (submap) => {
+          forEach(
+              submap.keys(),
+              (submapKey) => {
+                if (submap.get(submapKey) === this) {
+                  submap.delete(submapKey);
+                }
+              });
+        });
   }
 }
 

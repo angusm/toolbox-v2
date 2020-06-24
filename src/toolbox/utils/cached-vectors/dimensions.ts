@@ -21,8 +21,8 @@ class Dimensions extends CachedElementVector<Dimensions2d> {
     return <Dimensions>CachedElementVector.getForElement.bind(this)(...args);
   }
 
-  public static getSingleton(): Dimensions {
-    return <Dimensions>CachedElementVector.getSingleton.bind(this)();
+  public static getSingleton(use: any): Dimensions {
+    return <Dimensions>CachedElementVector.getSingleton.bind(this)(use);
   }
 }
 
