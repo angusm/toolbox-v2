@@ -53,7 +53,7 @@ class MultiValueMap<K, V> extends MapWrapper<K[], V> {
 
   public keys(): IterableIterator<K[]> {
     // Slice each key to ensure they cannot be modified outside of this class
-    return new MappedIterator(super.keys(), (key) => [...key]);
+    return new MappedIterator(super.keys(), (key) => key ? [...key] : []);
   }
 
   public set(keys: K[], value: V): this {

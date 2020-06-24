@@ -13,12 +13,12 @@ class VisibleDimensions extends Dimensions {
     return getVisibleDimensions(this.element, this.container_).getValues();
   }
 
-  public static getForElement(...args: any[]): VisibleDimensions {
-    return <VisibleDimensions>Dimensions.getForElement(...args);
+  public static getForElement(use: any, args: any[] = [null]): VisibleDimensions {
+    return <VisibleDimensions>Dimensions.getForElement(use, args);
   }
 
-  public static getSingleton(): VisibleDimensions {
-    return <VisibleDimensions>Dimensions.getSingleton();
+  public static getSingleton(use: any): VisibleDimensions {
+    return <VisibleDimensions>Dimensions.getSingleton(use);
   }
 }
 

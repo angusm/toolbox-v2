@@ -30,7 +30,9 @@ function getVisibleDistanceFromRoot_(element: HTMLElement): Vector2d {
     candidateElement = <HTMLElement>candidateElement.offsetParent;
   }
 
-  const invertedScroll = Scroll.getSingleton().getPosition().invert();
+  const scroll = Scroll.getSingleton(this);
+  const invertedScroll = scroll.getPosition().invert();
+  scroll.destroy(this);
   return new Vector2d(x + invertedScroll.x, y + invertedScroll.y);
 }
 

@@ -26,13 +26,14 @@ class ElementMask{
     fixedElement: HTMLElement, maskElement: HTMLElement, buffer: number = 0
   ) {
     this.fixedEl_ = fixedElement;
-    this.maskDimensions_ = Dimensions.getForElement(maskElement);
-    this.maskVisibleDimensions_ = VisibleDimensions.getForElement(maskElement);
-    this.maskPosition_ = VisibleDistance.getForElement(maskElement);
+    this.maskDimensions_ = Dimensions.getForElement(this, [maskElement]);
+    this.maskVisibleDimensions_ =
+        VisibleDimensions.getForElement(this, [maskElement]);
+    this.maskPosition_ = VisibleDistance.getForElement(this, [maskElement]);
     this.stopped_ = false;
     this.buffer_ = buffer;
-    this.windowDimensions_ = Dimensions.getSingleton();
-    this.windowScroll_ = Scroll.getSingleton();
+    this.windowDimensions_ = Dimensions.getSingleton(this);
+    this.windowScroll_ = Scroll.getSingleton(this);
     this.init_();
   }
 
@@ -97,6 +98,14 @@ class ElementMask{
         this.fixedEl_.style.visibility = 'hidden';
       }
     });
+  }
+
+  public destroy(): void {
+    this.windowDimensions_.destroy(this);
+    this.windowScroll_.destroy(this);
+    this.maskDimensions_.destroy(this);
+    this.maskVisibleDimensions_.destroy(this);
+    this.maskPosition_.destroy(this);
   }
 }
 
