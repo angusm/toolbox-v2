@@ -14,7 +14,7 @@ class Scroll extends CachedElementVector<Vector2d> {
     super(element);
     this.rootElementDimensions_ = Dimensions.getSingleton(this);
     this.scrollElementDimensions_ =
-        Dimensions.getForElement(this, SCROLL_ELEMENT);
+        Dimensions.getForElement(this, [SCROLL_ELEMENT]);
   }
 
   public getPosition(): Vector2d {

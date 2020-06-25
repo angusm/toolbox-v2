@@ -13,9 +13,9 @@ class WindowDimensions extends CachedElementVector<Dimensions2d> {
     return Dimensions2d.fromInnerWindow().getValues();
   }
 
-  public static getForElement(...args: any[]): WindowDimensions {
+  public static getForElement(use: any, args: any[]): WindowDimensions {
     ErrorService.throw('WindowDimensions should not be used with elements');
-    return new WindowDimensions();
+    return this.getSingleton(use);
   }
 
   public static getSingleton(use: any): WindowDimensions {
