@@ -6,8 +6,6 @@ import {Dimensions} from "../../utils/cached-vectors/dimensions";
 
 type TPositionFunction = (rv: StickyRunValue) => void;
 
-const windowDimensions = Dimensions.getSingleton();
-
 class StickyRunValue {
   public readonly target: HTMLElement;
   public readonly containerXOffset: number;
@@ -29,6 +27,7 @@ class StickyRunValue {
 class Sticky {
   private readonly container_: HTMLElement;
   private readonly target_: HTMLElement;
+  private readonly windowDimensions_: Dimensions;
   private destroyed_: boolean;
   private lastPositionFunction_: TPositionFunction;
 
@@ -45,6 +44,7 @@ class Sticky {
     this.target_ = target;
     this.lastPositionFunction_ = null;
     this.destroyed_ = false;
+    this.windowDimensions_ = Dimensions.getSingleton(this);
     this.init_();
   }
 
@@ -94,7 +94,7 @@ class Sticky {
     // Skip duplicating work
     if (
       this.lastPositionFunction_ === positionFunction &&
-      !windowDimensions.hasChanged()
+      !this.windowDimensions_.hasChanged()
     ) {
       return;
     }
@@ -127,6 +127,7 @@ class Sticky {
 
   public destroy() {
     this.destroyed_ = true;
+    this.windowDimensions_.destroy(this);
   }
 }
 

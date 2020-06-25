@@ -5,6 +5,7 @@ import {getAnchorsWithCommonSelector} from "../../utils/dom/anchor/get-anchors-w
 class DeepLinkByScroll {
   private getCurrentAnchor_: (getAnchorsFn: () => HTMLElement[]) => HTMLElement;
   private getAnchorsFn_: () => HTMLElement[];
+  private destroyed_: boolean;
   private readonly windowScroll_: Scroll;
 
   constructor(
@@ -13,7 +14,8 @@ class DeepLinkByScroll {
   ) {
     this.getCurrentAnchor_ = getCurrentAnchorFn;
     this.getAnchorsFn_ = getAnchorsFn;
-    this.windowScroll_ = Scroll.getSingleton();
+    this.windowScroll_ = Scroll.getSingleton(this);
+    this.destroyed_ = false;
     this.init_();
   }
 
@@ -41,6 +43,11 @@ class DeepLinkByScroll {
       renderLoop.mutate(
         () => history.replaceState(undefined, undefined, currentAnchorId));
     });
+  }
+
+  destroy() {
+    this.destroyed_ = true;
+    this.windowScroll_.destroy(this);
   }
 }
 

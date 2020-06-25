@@ -20,11 +20,17 @@ abstract class CachedElementVector<T extends Vector> {
   protected static VectorClass: typeof Vector = Vector;
   protected static VALUE_LIMIT: number = VALUE_LIMIT;
 
+  private readonly args_: any[];
+
   protected element: HTMLElement;
   private values: T[];
+  private destroyed_: boolean;
+  private destroyTimeout_: number;
 
   protected constructor(element: any = null, ...args: any[]) {
     const instanceByElement = caches.get(this.constructor);
+
+    this.args_ = [element, ...args];
 
     if (instanceByElement.has([element, ...args])) {
       if (element) {
@@ -34,9 +40,10 @@ abstract class CachedElementVector<T extends Vector> {
       }
     }
 
+    this.destroyTimeout_ = null;
+    this.destroyed_ = false;
     this.element = element;
-    this.values =
-      <T[]>[new (<typeof CachedElementVector>this.constructor).VectorClass()];
+    this.values = <T[]>[this.getCurrentVector_()];
     this.init();
   }
 
@@ -69,6 +76,9 @@ abstract class CachedElementVector<T extends Vector> {
   }
 
   private render(): void {
+    if (this.destroyed_) {
+      return;
+    }
     this.renderLoopPremeasure_(() => {
       this.renderLoopCleanup_(() => this.render());
       this.measureValues();
@@ -103,21 +113,27 @@ abstract class CachedElementVector<T extends Vector> {
     return !this.getVectorClass().areEqual(...this.getCurrentAndLastValue());
   }
 
-  public static getForElement(...args: any[]): any {
-    return caches.get(this).get(args);
-  }
-
-  public static getSingleton(use: any): any {
-    const instance = caches.get(this).get([null]);
+  public static getForElement(use: any, args: any[]): any {
+    const instance = caches.get(this).get(args);
     uses.get(instance).add(use);
     return instance;
   }
 
+  public static getSingleton(use: any): any {
+    return this.getForElement(use, [null]);
+  }
+
   public destroy(use: any): void {
     uses.get(this).delete(use);
-    if (uses.size <= 0) {
-      caches.delete(this);
-    }
+    clearTimeout(this.destroyTimeout_);
+    this.destroyTimeout_ = window.setTimeout(
+        () => {
+          if (uses.size <= 0) {
+            caches.get(this.constructor).delete(this.args_);
+            this.destroyed_ = true;
+          }
+        },
+        100);
   }
 }
 

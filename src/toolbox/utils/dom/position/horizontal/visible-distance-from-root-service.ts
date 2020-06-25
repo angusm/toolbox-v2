@@ -24,7 +24,10 @@ function getVisibleDistanceFromRoot_(element: HTMLElement): number {
     candidateElement = <HTMLElement>candidateElement.offsetParent;
   }
 
-  const invertedScroll = Scroll.getSingleton().getPosition().invert();
+
+  const scroll = Scroll.getSingleton(this);
+  const invertedScroll = scroll.getPosition().invert();
+  scroll.destroy(this);
   return x + invertedScroll.x;
 }
 

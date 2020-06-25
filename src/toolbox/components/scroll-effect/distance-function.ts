@@ -1,8 +1,8 @@
 import {getVisibleDistanceBetweenElementBottoms} from "../../utils/dom/position/vertical/get-visible-distance-between-element-bottoms";
 import {getVisibleDistanceBetweenElementCenters} from "../../utils/dom/position/vertical/get-visible-distance-between-element-centers";
-import {Scroll} from "../../utils/cached-vectors/scroll";
 import {negateNumericFunction} from "../../utils/functions/negate-numeric-function";
 import {getVisibleDistanceFromRoot} from "../../utils/dom/position/vertical/get-visible-distance-from-root";
+import {SCROLL_ELEMENT} from '../../utils/dom/position/scroll-element';
 
 /**
  * Collection of static functions that can be used to determine scrolled
@@ -44,7 +44,8 @@ class DistanceFunction {
    * Scroll values is retrieved from the Scroll cached vector which pulls values
    * once a frame during the renderLoop.premeasure step.
    */
-  public static DOCUMENT_SCROLL = () => Scroll.getSingleton().getPosition().y;
+  public static DOCUMENT_SCROLL =
+      () => window.pageYOffset || SCROLL_ELEMENT.scrollTop;
 }
 
 export {DistanceFunction}

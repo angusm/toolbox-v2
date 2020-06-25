@@ -7,9 +7,14 @@ import {SCROLL_ELEMENT} from "../dom/position/scroll-element";
 
 class Scroll extends CachedElementVector<Vector2d> {
   protected static VectorClass: typeof Vector2d = Vector2d;
+  private rootElementDimensions_: Dimensions;
+  private scrollElementDimensions_: Dimensions;
 
   constructor(element: HTMLElement = null) {
     super(element);
+    this.rootElementDimensions_ = Dimensions.getSingleton(this);
+    this.scrollElementDimensions_ =
+        Dimensions.getForElement(this, [SCROLL_ELEMENT]);
   }
 
   public getPosition(): Vector2d {
@@ -38,9 +43,9 @@ class Scroll extends CachedElementVector<Vector2d> {
 
   public getScrollPercent(): Vector2d {
     const scrollableDimensions: number[] =
-      Dimensions.getForElement(SCROLL_ELEMENT)
+      this.scrollElementDimensions_
         .getLastValue()
-        .subtract(Dimensions.getForElement().getLastValue())
+        .subtract(this.rootElementDimensions_.getLastValue())
         .getValues();
     const scrollPositions: number[] = this.getValues();
     const zippedValues: number[][] = zip(scrollPositions, scrollableDimensions);
@@ -64,12 +69,12 @@ class Scroll extends CachedElementVector<Vector2d> {
     return this.getDelta().x < 0;
   }
 
-  public static getForElement(...args: any[]): Scroll {
-    return <Scroll>CachedElementVector.getForElement.bind(this)(...args);
+  public static getForElement(use: any, args: any[]): Scroll {
+    return <Scroll>CachedElementVector.getForElement.bind(this)(use, args);
   }
 
-  public static getSingleton(): Scroll {
-    return <Scroll>CachedElementVector.getSingleton.bind(this)();
+  public static getSingleton(use: any): Scroll {
+    return <Scroll>CachedElementVector.getSingleton.bind(this)(use);
   }
 
   protected renderLoopCleanup_(fn: () => void): void {
@@ -78,6 +83,12 @@ class Scroll extends CachedElementVector<Vector2d> {
 
   protected renderLoopPremeasure_(fn: () => void): void {
     renderLoop.scrollPremeasure(fn);
+  }
+
+  destroy(use: any) {
+    super.destroy(use);
+    this.rootElementDimensions_.destroy(this);
+    this.scrollElementDimensions_.destroy(this);
   }
 }
 

@@ -23,6 +23,8 @@ import {getParentElements} from "../../utils/dom/position/get-parent-elements";
 import {contains} from "../../utils/array/contains";
 import {DynamicDefaultMap} from "../../utils/map/dynamic-default";
 
+// TODO: Add destroy function, don't instantiate any instances outside of a call.
+
 enum TargetPosition {
   BOTTOM,
   CENTER,
@@ -51,7 +53,7 @@ class PoliteScrollJackCoordinator {
     this.lastScrollDelta_ = 0;
     this.scrollJackTimeout_ = null;
     this.lastScrollJackTime_ = 0;
-    this.scroll_ = Scroll.getSingleton();
+    this.scroll_ = Scroll.getSingleton(this);
     this.runLoop_();
   }
 
@@ -144,6 +146,10 @@ class PoliteScrollJackCoordinator {
 
   public static getSingleton(): PoliteScrollJackCoordinator {
     return this.singleton_ = this.singleton_ || new this();
+  }
+
+  public destroy() {
+    this.scroll_.destroy(this);
   }
 }
 

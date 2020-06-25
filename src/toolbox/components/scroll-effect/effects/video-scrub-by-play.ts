@@ -39,7 +39,7 @@ class VideoScrubByPlay implements IEffect {
     this.wasPlayingForwards_ = true;
     this.playableTime_ = playableTime;
     this.activePercentages_ = activePercentages;
-    this.scroll_ = Scroll.getSingleton();
+    this.scroll_ = Scroll.getSingleton(this);
 
     this.render_();
   }
@@ -160,6 +160,7 @@ class VideoScrubByPlay implements IEffect {
 
   destroy() {
     this.destroyed_ = true;
+    this.scroll_.destroy(this);
   }
 }
 
