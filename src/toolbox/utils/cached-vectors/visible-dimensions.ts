@@ -13,7 +13,7 @@ class VisibleDimensions extends Dimensions {
     return getVisibleDimensions(this.element, this.container_).getValues();
   }
 
-  public static getForElement(use: any, args: any[] = null): VisibleDimensions {
+  public static getForElement(use: any, args: any[] = [null]): VisibleDimensions {
     return <VisibleDimensions>Dimensions.getForElement(use, args);
   }
 

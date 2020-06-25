@@ -3,7 +3,7 @@ import {MultiValueDynamicDefaultMap} from '../map/multi-value-dynamic-default';
 import {Vector} from '../math/geometry/vector';
 import {renderLoop} from '../render-loop';
 import {ErrorService} from "../error/service";
-import {NO_ARGS_SYMBOL} from './no-args-symbol';
+
 
 const VALUE_LIMIT: number = 2;
 
@@ -28,7 +28,7 @@ abstract class CachedElementVector<T extends Vector> {
   private destroyed_: boolean;
   private destroyTimeout_: number;
 
-  protected constructor(element: any = NO_ARGS_SYMBOL, ...args: any[]) {
+  protected constructor(element: any = null, ...args: any[]) {
     const instanceByElement = caches.get(this.constructor);
 
     this.args_ = [element, ...args];
@@ -43,7 +43,7 @@ abstract class CachedElementVector<T extends Vector> {
 
     this.destroyTimeout_ = null;
     this.destroyed_ = false;
-    this.element = element !== NO_ARGS_SYMBOL ? element : null;
+    this.element = element;
     this.values = <T[]>[this.getCurrentVector_()];
     this.init();
   }
@@ -114,9 +114,8 @@ abstract class CachedElementVector<T extends Vector> {
     return !this.getVectorClass().areEqual(...this.getCurrentAndLastValue());
   }
 
-  public static getForElement(use: any, args: any[] = null): any {
-    const mappedArgs = args !== null ? args : [NO_ARGS_SYMBOL];
-    const instance = caches.get(this).get(mappedArgs);
+  public static getForElement(use: any, args: any[] = [null]): any {
+    const instance = caches.get(this).get(args);
     uses.get(instance).add(use);
     return instance;
   }

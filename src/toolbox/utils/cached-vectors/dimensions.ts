@@ -17,7 +17,7 @@ class Dimensions extends CachedElementVector<Dimensions2d> {
     return getAncestorDimensions(this.element).getValues();
   }
 
-  public static getForElement(use: any, args: any[] = null): Dimensions {
+  public static getForElement(use: any, args: any[] = [null]): Dimensions {
     return <Dimensions>CachedElementVector.getForElement.bind(this)(use, args);
   }
 

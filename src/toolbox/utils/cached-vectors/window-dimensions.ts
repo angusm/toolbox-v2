@@ -13,7 +13,7 @@ class WindowDimensions extends CachedElementVector<Dimensions2d> {
     return Dimensions2d.fromInnerWindow().getValues();
   }
 
-  public static getForElement(use: any, args: any[] = null): WindowDimensions {
+  public static getForElement(use: any, args: any[] = [null]): WindowDimensions {
     if (args) {
       ErrorService.throw('WindowDimensions should not be used with elements');
     }
