@@ -5,6 +5,7 @@ import {renderLoop} from '../render-loop';
 import {ErrorService} from "../error/service";
 
 const VALUE_LIMIT: number = 2;
+const NO_ARGS_SYMBOL = Symbol();
 
 type InnerCache = MultiValueDynamicDefaultMap<any, any>;
 const caches: DynamicDefaultMap<any, InnerCache> =
@@ -114,7 +115,8 @@ abstract class CachedElementVector<T extends Vector> {
   }
 
   public static getForElement(use: any, args: any[] = null): any {
-    const instance = caches.get(this).get(args);
+    const mappedArgs = args !== null ? args : [NO_ARGS_SYMBOL];
+    const instance = caches.get(this).get(mappedArgs);
     uses.get(instance).add(use);
     return instance;
   }
