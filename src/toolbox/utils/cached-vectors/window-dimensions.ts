@@ -14,8 +14,11 @@ class WindowDimensions extends CachedElementVector<Dimensions2d> {
   }
 
   public static getForElement(use: any, args: any[]): WindowDimensions {
-    ErrorService.throw('WindowDimensions should not be used with elements');
-    return this.getSingleton(use);
+    if (args) {
+      ErrorService.throw('WindowDimensions should not be used with elements');
+    }
+    // Ignore args.
+    return <WindowDimensions>CachedElementVector.getForElement.bind(this)(use);
   }
 
   public static getSingleton(use: any): WindowDimensions {
