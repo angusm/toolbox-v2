@@ -69,8 +69,8 @@ class Scroll extends CachedElementVector<Vector2d> {
     return this.getDelta().x < 0;
   }
 
-  public static getForElement(...args: any[]): Scroll {
-    return <Scroll>CachedElementVector.getForElement.bind(this)(...args);
+  public static getForElement(use: any, args: any[]): Scroll {
+    return <Scroll>CachedElementVector.getForElement.bind(this)(use, args);
   }
 
   public static getSingleton(use: any): Scroll {

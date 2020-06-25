@@ -3,7 +3,6 @@ import {MultiValueDynamicDefaultMap} from '../map/multi-value-dynamic-default';
 import {Vector} from '../math/geometry/vector';
 import {renderLoop} from '../render-loop';
 import {ErrorService} from "../error/service";
-import {filter} from '../iterable-iterator/filter';
 
 const VALUE_LIMIT: number = 2;
 
