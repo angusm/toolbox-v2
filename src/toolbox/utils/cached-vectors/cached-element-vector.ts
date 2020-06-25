@@ -3,9 +3,9 @@ import {MultiValueDynamicDefaultMap} from '../map/multi-value-dynamic-default';
 import {Vector} from '../math/geometry/vector';
 import {renderLoop} from '../render-loop';
 import {ErrorService} from "../error/service";
+import {NO_ARGS_SYMBOL} from './no-args-symbol';
 
 const VALUE_LIMIT: number = 2;
-const NO_ARGS_SYMBOL = Symbol();
 
 type InnerCache = MultiValueDynamicDefaultMap<any, any>;
 const caches: DynamicDefaultMap<any, InnerCache> =
@@ -28,7 +28,7 @@ abstract class CachedElementVector<T extends Vector> {
   private destroyed_: boolean;
   private destroyTimeout_: number;
 
-  protected constructor(element: any = null, ...args: any[]) {
+  protected constructor(element: any = NO_ARGS_SYMBOL, ...args: any[]) {
     const instanceByElement = caches.get(this.constructor);
 
     this.args_ = [element, ...args];
@@ -43,7 +43,7 @@ abstract class CachedElementVector<T extends Vector> {
 
     this.destroyTimeout_ = null;
     this.destroyed_ = false;
-    this.element = element;
+    this.element = element !== NO_ARGS_SYMBOL ? element : null;
     this.values = <T[]>[this.getCurrentVector_()];
     this.init();
   }
