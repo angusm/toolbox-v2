@@ -113,14 +113,14 @@ abstract class CachedElementVector<T extends Vector> {
     return !this.getVectorClass().areEqual(...this.getCurrentAndLastValue());
   }
 
-  public static getForElement(use: any, args: any[]): any {
+  public static getForElement(use: any, args: any[] = null): any {
     const instance = caches.get(this).get(args);
     uses.get(instance).add(use);
     return instance;
   }
 
   public static getSingleton(use: any): any {
-    return this.getForElement(use, [null]);
+    return this.getForElement(use);
   }
 
   public destroy(use: any): void {
