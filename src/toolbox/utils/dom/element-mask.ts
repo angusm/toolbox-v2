@@ -26,9 +26,10 @@ class ElementMask{
     fixedElement: HTMLElement, maskElement: HTMLElement, buffer: number = 0
   ) {
     this.fixedEl_ = fixedElement;
-    this.maskDimensions_ = Dimensions.getForElement(maskElement);
-    this.maskVisibleDimensions_ = VisibleDimensions.getForElement(maskElement);
-    this.maskPosition_ = VisibleDistance.getForElement(maskElement);
+    this.maskDimensions_ = Dimensions.getForElement(this, [maskElement]);
+    this.maskVisibleDimensions_ =
+        VisibleDimensions.getForElement(this, [maskElement]);
+    this.maskPosition_ = VisibleDistance.getForElement(this, [maskElement]);
     this.stopped_ = false;
     this.buffer_ = buffer;
     this.windowDimensions_ = Dimensions.getSingleton(this);

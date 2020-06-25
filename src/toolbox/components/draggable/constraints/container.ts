@@ -12,7 +12,8 @@ class ContainerConstraint extends DraggableConstraint {
 
   constructor(container: HTMLElement) {
     super();
-    this.constrainingDimensions_ = CachedDimensions.getForElement(container);
+    this.constrainingDimensions_ =
+        CachedDimensions.getForElement(this, [container]);
     this.container_ = container;
   }
 
@@ -40,7 +41,7 @@ class ContainerConstraint extends DraggableConstraint {
   }
 
   destroy() {
-    this.constrainingDimensions_.destroy();
+    this.constrainingDimensions_.destroy(this);
   }
 }
 

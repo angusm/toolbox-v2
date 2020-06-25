@@ -3,8 +3,6 @@ import {MultiValueDynamicDefaultMap} from '../map/multi-value-dynamic-default';
 import {Vector} from '../math/geometry/vector';
 import {renderLoop} from '../render-loop';
 import {ErrorService} from "../error/service";
-import {forEach} from '../iterable-iterator/for-each';
-import { map } from '../iterable-iterator/map';
 import {filter} from '../iterable-iterator/filter';
 
 const VALUE_LIMIT: number = 2;
@@ -23,6 +21,8 @@ abstract class CachedElementVector<T extends Vector> {
   protected static VectorClass: typeof Vector = Vector;
   protected static VALUE_LIMIT: number = VALUE_LIMIT;
 
+  private readonly args_: any[];
+
   protected element: HTMLElement;
   private values: T[];
   private destroyed_: boolean;
@@ -30,6 +30,8 @@ abstract class CachedElementVector<T extends Vector> {
 
   protected constructor(element: any = null, ...args: any[]) {
     const instanceByElement = caches.get(this.constructor);
+
+    this.args_ = [element, ...args];
 
     if (instanceByElement.has([element, ...args])) {
       if (element) {
@@ -112,39 +114,27 @@ abstract class CachedElementVector<T extends Vector> {
     return !this.getVectorClass().areEqual(...this.getCurrentAndLastValue());
   }
 
-  public static getForElement(...args: any[]): any {
-    return caches.get(this).get(args);
-  }
-
-  public static getSingleton(use: any): any {
-    const instance = caches.get(this).get([null]);
+  public static getForElement(use: any, args: any[]): any {
+    const instance = caches.get(this).get(args);
     uses.get(instance).add(use);
     return instance;
   }
 
-  public destroy(use: any = false): void {
-    if (use !== false) {
-      uses.get(this).delete(use);
-      clearTimeout(this.destroyTimeout_);
-      this.destroyTimeout_ = window.setTimeout(
-          () => {
-            if (uses.size <= 0) {
-              caches.delete(this);
-              this.destroyed_ = true;
-            }
-          },
-          100);
-    }
+  public static getSingleton(use: any): any {
+    return this.getForElement(use, [null]);
+  }
 
-    // Clear cached values
-    forEach(
-      caches.values(),
-      (submap) => {
-        filter(
-          submap.keys(),
-          (submapKey) => submap.get(submapKey) === this)
-        .forEach((submapKey) => submap.delete(submapKey));
-      });
+  public destroy(use: any): void {
+    uses.get(this).delete(use);
+    clearTimeout(this.destroyTimeout_);
+    this.destroyTimeout_ = window.setTimeout(
+        () => {
+          if (uses.size <= 0) {
+            caches.get(this.constructor).delete(this.args_);
+            this.destroyed_ = true;
+          }
+        },
+        100);
   }
 }
 
