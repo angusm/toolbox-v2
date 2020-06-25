@@ -26,6 +26,7 @@ abstract class CachedElementVector<T extends Vector> {
   protected element: HTMLElement;
   private values: T[];
   private destroyed_: boolean;
+  private destroyTimeout_: number;
 
   protected constructor(element: any = null, ...args: any[]) {
     const instanceByElement = caches.get(this.constructor);
@@ -38,6 +39,7 @@ abstract class CachedElementVector<T extends Vector> {
       }
     }
 
+    this.destroyTimeout_ = null;
     this.destroyed_ = false;
     this.element = element;
     this.values = <T[]>[this.getCurrentVector_()];
@@ -123,9 +125,15 @@ abstract class CachedElementVector<T extends Vector> {
   public destroy(use: any = false): void {
     if (use !== false) {
       uses.get(this).delete(use);
-      if (uses.size <= 0) {
-        caches.delete(this);
-      }
+      clearTimeout(this.destroyTimeout_);
+      this.destroyTimeout_ = window.setTimeout(
+          () => {
+            if (uses.size <= 0) {
+              caches.delete(this);
+              this.destroyed_ = true;
+            }
+          },
+          100);
     }
 
     // Clear cached values
