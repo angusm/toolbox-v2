@@ -6,7 +6,6 @@ import {filterUntilFirst} from '../array/filter-until-first';
 import {frame} from '../frame';
 import {renderLoop} from '../render-loop';
 import {ZERO_VECTOR_2D} from "../math/geometry/zero-vector-2d";
-import {DynamicDefaultMap} from '../map/dynamic-default';
 import {removeDomEventListener} from '../dom/event/remove-dom-event-listener';
 
 const GESTURE_TIME_LIMIT: number = 1000; // Time limit in ms
@@ -197,9 +196,9 @@ class Cursor {
   private pagePosition_: CursorData;
   private screenPosition_: CursorData;
   private pressed_: boolean;
-  private cursorDownHandler_: (event: MouseEvent|TouchEvent) => void;
-  private cursorUpHandler_: (event: MouseEvent|TouchEvent) => void;
-  private cursorMoveHandler_: (event: MouseEvent|TouchEvent) => void;
+  private readonly cursorDownHandler_: (event: MouseEvent|TouchEvent) => void;
+  private readonly cursorUpHandler_: (event: MouseEvent|TouchEvent) => void;
+  private readonly cursorMoveHandler_: (event: MouseEvent|TouchEvent) => void;
 
   constructor() {
     this.clientPosition_ = new CursorData();
