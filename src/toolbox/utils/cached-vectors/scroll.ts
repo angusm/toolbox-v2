@@ -85,7 +85,7 @@ class Scroll extends CachedElementVector<Vector2d> {
     renderLoop.scrollPremeasure(fn);
   }
 
-  destroy(use: any) {
+  public destroy(use: any) {
     super.destroy(use);
     this.rootElementDimensions_.destroy(this);
     this.scrollElementDimensions_.destroy(this);
