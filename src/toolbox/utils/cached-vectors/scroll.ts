@@ -4,15 +4,16 @@ import {Dimensions} from "./dimensions";
 import {zip} from "../array/zip";
 import {renderLoop} from "../render-loop";
 import {SCROLL_ELEMENT} from "../dom/position/scroll-element";
+import { WindowDimensions } from './window-dimensions';
 
 class Scroll extends CachedElementVector<Vector2d> {
   protected static VectorClass: typeof Vector2d = Vector2d;
-  private rootElementDimensions_: Dimensions;
+  private windowDimensions_: WindowDimensions;
   private scrollElementDimensions_: Dimensions;
 
   constructor(element: HTMLElement = null) {
     super(element);
-    this.rootElementDimensions_ = Dimensions.getSingleton(this);
+    this.windowDimensions_ = WindowDimensions.getSingleton(this);
     this.scrollElementDimensions_ =
         Dimensions.getForElement(this, [SCROLL_ELEMENT]);
   }
@@ -45,7 +46,7 @@ class Scroll extends CachedElementVector<Vector2d> {
     const scrollableDimensions: number[] =
       this.scrollElementDimensions_
         .getLastValue()
-        .subtract(this.rootElementDimensions_.getLastValue())
+        .subtract(this.windowDimensions_.getLastValue())
         .getValues();
     const scrollPositions: number[] = this.getValues();
     const zippedValues: number[][] = zip(scrollPositions, scrollableDimensions);
@@ -87,7 +88,7 @@ class Scroll extends CachedElementVector<Vector2d> {
 
   public destroy(use: any) {
     super.destroy(use);
-    this.rootElementDimensions_.destroy(this);
+    this.windowDimensions_.destroy(this);
     this.scrollElementDimensions_.destroy(this);
   }
 }

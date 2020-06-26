@@ -134,7 +134,7 @@ abstract class CachedElementVector<T extends Vector> {
             this.destroyed_ = true;
           }
         },
-        100);
+        1000);
   }
 }
 

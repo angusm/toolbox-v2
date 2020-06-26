@@ -10,6 +10,7 @@ import {Scroll} from '../cached-vectors/scroll';
 import {VisibleDimensions} from '../cached-vectors/visible-dimensions';
 import {VisibleDistance} from '../cached-vectors/visible-distance';
 import {renderLoop} from '../render-loop';
+import {WindowDimensions} from '../cached-vectors/window-dimensions';
 
 
 class ElementMask{
@@ -19,7 +20,7 @@ class ElementMask{
   private maskPosition_: VisibleDistance;
   private stopped_: boolean;
   private buffer_: number;
-  private readonly windowDimensions_: Dimensions;
+  private readonly windowDimensions_: WindowDimensions;
   private readonly windowScroll_: Scroll;
 
   constructor(
@@ -32,7 +33,7 @@ class ElementMask{
     this.maskPosition_ = VisibleDistance.getForElement(this, [maskElement]);
     this.stopped_ = false;
     this.buffer_ = buffer;
-    this.windowDimensions_ = Dimensions.getSingleton(this);
+    this.windowDimensions_ = WindowDimensions.getSingleton(this);
     this.windowScroll_ = Scroll.getSingleton(this);
     this.init_();
   }
@@ -67,7 +68,7 @@ class ElementMask{
   }
 
   private getWindowDimensionRanges_(): NumericRange[] {
-    return this.windowDimensions_.getDimensions()
+    return this.windowDimensions_.getLastValue()
       .asRanges()
       .map((range) => range.expand(this.buffer_));
   }

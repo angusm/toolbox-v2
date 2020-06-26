@@ -2,7 +2,7 @@ import {NumericRange} from "../../utils/math/numeric-range";
 import {getVisibleYPosition} from "../../utils/dom/position/vertical/get-visible-y-position";
 import {renderLoop} from "../../utils/render-loop";
 import {getOffsetFromAncestor} from "../../utils/dom/position/get-offset-from-ancestor";
-import {Dimensions} from "../../utils/cached-vectors/dimensions";
+import { WindowDimensions } from "../../utils/cached-vectors/window-dimensions";
 
 type TPositionFunction = (rv: StickyRunValue) => void;
 
@@ -27,7 +27,7 @@ class StickyRunValue {
 class Sticky {
   private readonly container_: HTMLElement;
   private readonly target_: HTMLElement;
-  private readonly windowDimensions_: Dimensions;
+  private readonly windowDimensions_: WindowDimensions;
   private destroyed_: boolean;
   private lastPositionFunction_: TPositionFunction;
 
@@ -44,7 +44,7 @@ class Sticky {
     this.target_ = target;
     this.lastPositionFunction_ = null;
     this.destroyed_ = false;
-    this.windowDimensions_ = Dimensions.getSingleton(this);
+    this.windowDimensions_ = WindowDimensions.getSingleton(this);
     this.init_();
   }
 
