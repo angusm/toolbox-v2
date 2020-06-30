@@ -190,7 +190,7 @@ class CursorData {
 }
 
 class Cursor {
-  public static singleton: Cursor;
+  public static singleton: Cursor = null;
   private frame_: number;
   private clientPosition_: CursorData;
   private pagePosition_: CursorData;
@@ -223,7 +223,7 @@ class Cursor {
 
   public static getSingleton(use: any): Cursor {
     singletonUses.add(use);
-    if (!Cursor.singleton) {
+    if (Cursor.singleton === null) {
       Cursor.singleton = new Cursor();
     }
     return Cursor.singleton;
