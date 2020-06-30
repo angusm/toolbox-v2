@@ -15,9 +15,9 @@ interface ICursorEvent {
 }
 
 const singletonUses: Set<any> = new Set();
+let singleton: Cursor = null;
 
 class Cursor {
-  public static singleton: Cursor = null;
   private frame_: number;
   private clientPosition_: CursorData;
   private pagePosition_: CursorData;
@@ -50,10 +50,10 @@ class Cursor {
 
   public static getSingleton(use: any): Cursor {
     singletonUses.add(use);
-    if (Cursor.singleton === null) {
-      Cursor.singleton = new Cursor();
+    if (singleton === null) {
+      singleton = new Cursor();
     }
-    return Cursor.singleton;
+    return singleton;
   }
 
   public isPressed(): boolean {
@@ -130,10 +130,10 @@ class Cursor {
   }
 
   public destroy(use: any): void {
-    if (this === Cursor.singleton) {
+    if (this === singleton) {
       singletonUses.delete(use);
       if (singletonUses.size <= 0) {
-        Cursor.singleton = null;
+        singleton = null;
         this.destroy_();
       }
     } else {
