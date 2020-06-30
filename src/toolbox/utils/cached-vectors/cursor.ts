@@ -223,7 +223,10 @@ class Cursor {
 
   public static getSingleton(use: any): Cursor {
     singletonUses.add(use);
-    return this.singleton = this.singleton || new this();
+    if (!Cursor.singleton) {
+      Cursor.singleton = new Cursor();
+    }
+    return Cursor.singleton;
   }
 
   public isPressed(): boolean {
