@@ -74,7 +74,6 @@ type RenderFunctionMap = Map<RenderFunctionID, RenderFunction>;
 class DestroyableRenderLoop {
   private readonly rl_: RenderLoop;
   private readonly ids_: Set<RenderFunctionID>;
-  private destroyed_: boolean;
 
   constructor(renderLoop: RenderLoop) {
     this.rl_ = renderLoop;
@@ -152,7 +151,6 @@ class DestroyableRenderLoop {
   public destroy(): void {
     this.ids_.forEach((id) => this.rl_.clear(id));
     this.ids_.clear();
-    this.destroyed_ = true;
   }
 }
 
