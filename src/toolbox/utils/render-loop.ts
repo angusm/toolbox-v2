@@ -68,6 +68,94 @@ const SCROLL_STEP_ORDER: Array<symbol> = [
 
 type RenderFunctionMap = Map<RenderFunctionID, RenderFunction>;
 
+/**
+ * Wrapper of RenderLoop that allows for easy destruction.
+ */
+class DestroyableRenderLoop {
+  private readonly rl_: RenderLoop;
+  private readonly ids_: Set<RenderFunctionID>;
+  private destroyed_: boolean;
+
+  constructor(renderLoop: RenderLoop) {
+    this.rl_ = renderLoop;
+    this.ids_ = new Set();
+  }
+
+  private wrapFunction_(
+      rlFunction: (fn: RenderFunction) => RenderFunctionID,
+      fn: RenderFunction
+  ): RenderFunctionID {
+    const id = rlFunction.bind(this.rl_)(() => {
+      this.ids_.delete(id);
+      fn();
+    });
+    this.ids_.add(id);
+    return id;
+  }
+
+  public framecount(fn: RenderFunction): RenderFunctionID {
+    return this.wrapFunction_(this.rl_.framecount, fn);
+  }
+
+  public premeasure(fn: RenderFunction): RenderFunctionID {
+    return this.wrapFunction_(this.rl_.premeasure, fn);
+  }
+
+  public measure(fn: RenderFunction): RenderFunctionID {
+    return this.wrapFunction_(this.rl_.measure, fn);
+  }
+
+  public physics(fn: RenderFunction): RenderFunctionID {
+    return this.wrapFunction_(this.rl_.physics, fn);
+  }
+
+  public mutate(fn: RenderFunction): RenderFunctionID {
+    return this.wrapFunction_(this.rl_.mutate, fn);
+  }
+
+  public cleanup(fn: RenderFunction): RenderFunctionID {
+    return this.wrapFunction_(this.rl_.cleanup, fn);
+  }
+
+  public scrollPremeasure(fn: RenderFunction): RenderFunctionID {
+    return this.wrapFunction_(this.rl_.scrollPremeasure, fn);
+  }
+
+  public scrollMeasure(fn: RenderFunction): RenderFunctionID {
+    return this.wrapFunction_(this.rl_.scrollMeasure, fn);
+  }
+
+  public scrollMutate(fn: RenderFunction): RenderFunctionID {
+    return this.wrapFunction_(this.rl_.scrollMutate, fn);
+  }
+
+  public scrollCleanup(fn: RenderFunction): RenderFunctionID {
+    return this.wrapFunction_(this.rl_.scrollCleanup, fn);
+  }
+
+  public anyPremeasure(fn: RenderFunction): RenderFunctionID {
+    return this.wrapFunction_(this.rl_.anyPremeasure, fn);
+  }
+
+  public anyMeasure(fn: RenderFunction): RenderFunctionID {
+    return this.wrapFunction_(this.rl_.anyMeasure, fn);
+  }
+
+  public anyMutate(fn: RenderFunction): RenderFunctionID {
+    return this.wrapFunction_(this.rl_.anyMutate, fn);
+  }
+
+  public anyCleanup(fn: RenderFunction): RenderFunctionID {
+    return this.wrapFunction_(this.rl_.anyCleanup, fn);
+  }
+
+  public destroy(): void {
+    this.ids_.forEach((id) => this.rl_.clear(id));
+    this.ids_.clear();
+    this.destroyed_ = true;
+  }
+}
+
 class RenderLoop {
   private static singleton_: RenderLoop = null;
   private static msPerFrame_: number = 1000 / 60; // Browsers target 60fps
@@ -260,15 +348,19 @@ class RenderLoop {
     return RenderLoop.singleton_ = RenderLoop.singleton_ || new this();
   }
 
-  public getFps() {
+  public getDestroyableInstance() {
+    return new DestroyableRenderLoop(this);
+  }
+
+  public getFps(): number {
     return 60;
   }
 
-  public getTargetFrameLength() {
+  public getTargetFrameLength(): number {
     return RenderLoop.msPerFrame_;
   }
 
-  public getMsPerFrame() {
+  public getMsPerFrame(): number {
     return RenderLoop.msPerFrame_;
   }
 
