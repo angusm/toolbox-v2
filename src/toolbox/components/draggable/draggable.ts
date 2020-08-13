@@ -41,14 +41,6 @@ class Draggable implements IDraggable {
     const endInteraction =  () => this.endInteraction_();
     endEventTypes.forEach(
       (eventType) => addDomEventListener(window, eventType, endInteraction));
-    addDomEventListener(
-      this.element_,
-      EventType.MOUSEOUT,
-      (event) => {
-        if (event.target === this.element_) {
-          this.endInteraction_();
-        }
-      });
   }
 
   protected startInteraction_(): void {

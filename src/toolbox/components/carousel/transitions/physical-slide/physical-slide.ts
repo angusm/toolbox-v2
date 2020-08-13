@@ -9,7 +9,7 @@ import {translate2d} from '../../../../utils/dom/position/translate-2d';
 import {ICarousel, ITransition} from '../../interfaces';
 import {DynamicDefaultMap} from '../../../../utils/map/dynamic-default';
 import {getSign} from '../../../../utils/math/get-sign';
-import {IPhysicalSlideConfig} from '.././i-physical-slide-config';
+import {IPhysicalSlideConfig} from '../i-physical-slide-config';
 import {MatrixService} from '../../../../utils/dom/position/matrix-service';
 import {getVisibleDistanceFromRoot} from '../../../../utils/dom/position/horizontal/get-visible-distance-from-root';
 import {wrapIndex} from '../../../../utils/array/wrap-index';
