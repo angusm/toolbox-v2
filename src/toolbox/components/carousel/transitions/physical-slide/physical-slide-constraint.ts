@@ -16,11 +16,19 @@ class PhysicalSlideConstraint extends DraggableConstraint {
   }
 
   constrain(draggable: IDraggable, delta: Vector2d): Vector2d {
+    // Allow for centering the last slide
+    const halfContainerWidth = this.container_.offsetWidth / 2;
+    const widthOfAllSlides = sumOffsetWidthsFromArray(this.slides_);
+    const widthOfLastSlide = this.slides_.slice(-1)[0].offsetWidth;
+    const halfWidthOfLastSlide = widthOfLastSlide / 2;
+    const halfWidthOfFirstSlide = this.slides_[0].offsetWidth / 2;
+
     const min =
-      this.container_.offsetWidth - sumOffsetWidthsFromArray(this.slides_);
+      halfContainerWidth - widthOfAllSlides + halfWidthOfLastSlide;
+    const max = halfContainerWidth - halfWidthOfFirstSlide;
     const currentX = Vector2d.fromElementTransform(draggable.getElement()).x;
     const finalX = currentX + delta.getX();
-    const clampedFinalX = new NumericRange(min, 0).clamp(finalX);
+    const clampedFinalX = new NumericRange(min, max).clamp(finalX);
     const deltaX = clampedFinalX - currentX;
 
     return new Vector2d(deltaX, delta.getY());
