@@ -67,14 +67,15 @@ class NumericRange implements IRange<number>{
     return this.max_;
   }
 
-  public getValueAsPercent(value: number): number {
-    return new NumericRange(0, 1)
-        .clamp((value - this.min_) / (this.max_ - this.min_));
+  public getValueAsPercent(value: number, clamp: boolean = true): number {
+    const raw = (value - this.min_) / (this.max_ - this.min_);
+    return clamp ? new NumericRange(0, 1).clamp(raw) : raw;
   }
 
-  public getPercentAsValue(percent: number): number {
-    return this.min_ + (this.max_ - this.min_) *
-      new NumericRange(0, 1).clamp(percent);
+  public getPercentAsValue(percent: number, clamp: boolean = true): number {
+    const finalPercent =
+        clamp ? new NumericRange(0, 1).clamp(percent) : percent;
+    return this.min_ + (this.max_ - this.min_) * finalPercent;
   }
 
   public getPercentAsInt(percent: number): number {
