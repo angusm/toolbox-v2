@@ -1,6 +1,3 @@
-console.warn(
-  'Array split() function has not been thoroughly tested. Use at your own risk.');
-
 function split<T>(
   values: T[],
   splitValue: T,
