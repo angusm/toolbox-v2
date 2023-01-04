@@ -23,7 +23,7 @@
     "karma-mocha": "^2.0.1",
     "karma-sinon": "^1.0.5",
     "karma-typescript": "^4.0.0",
-    "karma-typescript-es6-transform": "^4.0.0",
+    "karma-typescript-es6-transform": "^5.5.3",
     "mocha": "^6.1.4",
     "sinon": "^7.3.2",
     "ts-node": "^8.1.0",
